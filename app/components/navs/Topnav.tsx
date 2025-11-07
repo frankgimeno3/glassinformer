@@ -3,9 +3,7 @@ import { FC, useState } from 'react';
 import BasicButton from '../buttons/BasicButton';
 import { useRouter } from 'next/navigation';
 
-interface TopnavProps {
-
-}
+interface TopnavProps {}
 
 const Topnav: FC<TopnavProps> = ({ }) => {
     const router = useRouter()
@@ -19,12 +17,12 @@ const Topnav: FC<TopnavProps> = ({ }) => {
                 {
                     isLogged ?
                         <div className='flex flex-row items-center gap-5 text-xs'>
-                            <BasicButton textContent='Login' urlRedirection='/public/auth/login' />
-                            <BasicButton textContent='Sign Up' urlRedirection='/public/auth/signup' />
+                            <BasicButton textContent='Login' urlRedirection='/auth/login' />
+                            <BasicButton textContent='Sign Up' urlRedirection='/auth/signup' />
                         </div>
                         :
                         <div className='flex flex-row items-center' onClick={logout}>
-                            <BasicButton textContent='Login' urlRedirection='/public/auth/login' />
+                            <BasicButton textContent='Log out' urlRedirection='/' />
                         </div>
                 }
             </div>
@@ -32,11 +30,11 @@ const Topnav: FC<TopnavProps> = ({ }) => {
                 <button className='flex-1  bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm'
                     onClick={() => { router.push('/') }}>Home</button>
                 <button className='flex-1  bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm'
-                    onClick={() => { router.push('/public/directory') }}>Directory</button>
+                    onClick={() => { router.push('/directory') }}>Directory</button>
                 <button className='flex-1  bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm'
-                    onClick={() => { router.push('/public/publications') }}>Publications</button>
+                    onClick={() => { router.push('/publications') }}>Publications</button>
                 <button className='flex-1  bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm'
-                    onClick={() => { router.push('/public/mediakit') }}>Mediakit</button>
+                    onClick={() => { router.push('/mediakit') }}>Mediakit</button>
             </div>
         </nav>
     );
