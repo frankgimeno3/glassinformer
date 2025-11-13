@@ -1,5 +1,5 @@
 "use client"
-import BasicButton from '@/app/components/buttons/BasicButton';
+import BasicButton from '@/app/general_components/buttons/BasicButton';
 import React, { FC } from 'react';
 
 interface LoginProps {
