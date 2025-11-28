@@ -30,8 +30,6 @@ const Topnav: FC<TopnavProps> = ({ }) => {
                 <button className='flex-1  bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm'
                     onClick={() => { router.push('/') }}>Home</button>
                 <button className='flex-1  bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm'
-                    onClick={() => { router.push('/directory') }}>Directory</button>
-                <button className='flex-1  bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm'
                     onClick={() => { router.push('/publications') }}>Publications</button>
                 <button className='flex-1  bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm'
                     onClick={() => { router.push('/mediakit') }}>Mediakit</button>

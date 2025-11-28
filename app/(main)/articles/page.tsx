@@ -6,7 +6,10 @@ interface ArticlesProps {
 
 const Articles: FC<ArticlesProps> = ({ }) => {
   return (
-    <div>Articles</div>
+    <div>
+      
+
+    </div>
   );
 };
 

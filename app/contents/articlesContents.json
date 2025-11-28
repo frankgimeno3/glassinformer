@@ -4,7 +4,7 @@
         "articleTitle": "Título del artículo 1",
         "articleSubtitle": "Título del artículo 1",
         "article_main_image_url": "url de la imagen",
-        "article tags array": [
+        "article_tags_array": [
             "tag1",
             "tag2",
             "tag3",
@@ -17,12 +17,13 @@
             "id_content_4",
             "id_content_5"
         ]
-    },{
+    },
+    {
         "id_article": "article_25_000000002",
         "articleTitle": "Título del artículo 2",
         "articleSubtitle": "Título del artículo 2",
         "article_main_image_url": "url de la imagen",
-        "article tags array": [
+"article_tags_array": [
             "tag1",
             "tag2",
             "tag3",
@@ -35,12 +36,13 @@
             "id_content_9",
             "id_content_10"
         ]
-    },{
+    },
+    {
         "id_article": "article_25_000000003",
         "articleTitle": "Título del artículo 3",
         "articleSubtitle": "Título del artículo 3",
         "article_main_image_url": "url de la imagen",
-        "article tags array": [
+"article_tags_array": [
             "tag1",
             "tag2",
             "tag3",
@@ -53,12 +55,13 @@
             "id_content_14",
             "id_content_15"
         ]
-    },{
+    },
+    {
         "id_article": "article_25_000000004",
         "articleTitle": "Título del artículo 4",
         "articleSubtitle": "Título del artículo 4",
         "article_main_image_url": "url de la imagen",
-        "article tags array": [
+"article_tags_array": [
             "tag5",
             "tag6",
             "tag7",
@@ -71,12 +74,13 @@
             "id_content_19",
             "id_content_20"
         ]
-    },{
+    },
+    {
         "id_article": "article_25_000000005",
         "articleTitle": "Título del artículo 5",
         "articleSubtitle": "Título del artículo 5",
         "article_main_image_url": "url de la imagen",
-        "article tags array": [
+"article_tags_array": [
             "tag5",
             "tag6",
             "tag7",
@@ -89,12 +93,13 @@
             "id_content_24",
             "id_content_25"
         ]
-    },{
+    },
+    {
         "id_article": "article_25_000000006",
         "articleTitle": "Título del artículo 6",
         "articleSubtitle": "Título del artículo 6",
         "article_main_image_url": "url de la imagen",
-        "article tags array": [
+"article_tags_array": [
             "tag1",
             "tag2",
             "tag5",
@@ -107,12 +112,13 @@
             "id_content_29",
             "id_content_30"
         ]
-    },{
+    },
+    {
         "id_article": "article_25_000000007",
         "articleTitle": "Título del artículo 7",
         "articleSubtitle": "Título del artículo 7",
-        "article_main_image_url": "url de la imagen",
-        "article tags array": [
+        "article_main_image_url": "www.google.es",
+"article_tags_array": [
             "tag9",
             "tag10",
             "tag11",
