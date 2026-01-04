@@ -13,7 +13,7 @@ const Topnav: FC<TopnavProps> = ({ }) => {
     return (
         <nav className='flex flex-col shadow-xl  border-b'>
             <div className='flex flex-row items-center bg-white shadow-lg p-6 justify-between text-gray-600 px-12'>
-                <p>Logo</p>
+                <p className='text-3xl font-bold'>Glassinformer</p>
                 {
                     isLogged ?
                         <div className='flex flex-row items-center gap-5 text-xs'>
