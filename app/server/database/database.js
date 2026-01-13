@@ -21,56 +21,80 @@ class Database {
 
 
     constructor() {
+        // Don't validate or initialize during build time
+        // Validation will happen when connect() is called
+        this.#sequelize = null;
+    }
+
+    #validateAndInitialize() {
+        // If already initialized, return
+        if (this.#sequelize) {
+            return;
+        }
+
         // Validate required environment variables
         const requiredEnvVars = ['DATABASE_NAME', 'DATABASE_USER', 'DATABASE_PASSWORD', 'DATABASE_HOST', 'DATABASE_PORT'];
         const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
         
-        if (missingVars.length > 0) {
+        // During Next.js build, environment variables may not be available
+        // Use placeholder values during build, validation will happen on connect()
+        const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' || 
+                            process.env.NEXT_PHASE === 'phase-development-build' ||
+                            missingVars.length === requiredEnvVars.length; // All vars missing = likely build phase
+        
+        if (missingVars.length > 0 && !isBuildPhase) {
             throw new Error(`Missing required database environment variables: ${missingVars.join(', ')}`);
         }
 
-        const host = process.env.DATABASE_HOST;
-        const port = process.env.DATABASE_PORT;
-        const databaseName = process.env.DATABASE_NAME;
-        const user = process.env.DATABASE_USER;
+        // Use actual values or placeholders for build
+        const host = process.env.DATABASE_HOST || 'localhost';
+        const port = process.env.DATABASE_PORT || '5432';
+        const databaseName = process.env.DATABASE_NAME || 'build_placeholder';
+        const user = process.env.DATABASE_USER || 'build_user';
 
-        // Log connection details (without sensitive data)
-        console.log(`[Database] Initializing connection to: ${host}:${port}/${databaseName} (user: ${user})`);
-        console.log(`[Database] Runtime: ${typeof process !== 'undefined' ? 'Node.js' : 'Unknown'}`);
+        // Log connection details (without sensitive data) only if not in build phase
+        if (!isBuildPhase) {
+            console.log(`[Database] Initializing connection to: ${host}:${port}/${databaseName} (user: ${user})`);
+            console.log(`[Database] Runtime: ${typeof process !== 'undefined' ? 'Node.js' : 'Unknown'}`);
+        } else {
+            console.warn('[Database] Build phase detected - using placeholder values. Database will be initialized at runtime.');
+        }
         
         const dialectOptions = {};
         
-        // Configure SSL - always enable for RDS connections
-        if (sslCA) {
-            // Use certificate if available
-            dialectOptions.ssl = {
-                require: true,
-                ca: sslCA.toString(),
-                rejectUnauthorized: process.env.NODE_ENV !== 'development',
-            };
-            console.log(`[Database] SSL enabled with certificate from ${caPath}`);
-        } else {
-            // Enable SSL without certificate (for RDS compatibility)
-            dialectOptions.ssl = {
-                require: true,
-                rejectUnauthorized: false,
-            };
-            console.log(`[Database] SSL enabled without certificate (rejectUnauthorized: false)`);
+        // Configure SSL - always enable for RDS connections (skip during build)
+        if (!isBuildPhase) {
+            if (sslCA) {
+                // Use certificate if available
+                dialectOptions.ssl = {
+                    require: true,
+                    ca: sslCA.toString(),
+                    rejectUnauthorized: process.env.NODE_ENV !== 'development',
+                };
+                console.log(`[Database] SSL enabled with certificate from ${caPath}`);
+            } else {
+                // Enable SSL without certificate (for RDS compatibility)
+                dialectOptions.ssl = {
+                    require: true,
+                    rejectUnauthorized: false,
+                };
+                console.log(`[Database] SSL enabled without certificate (rejectUnauthorized: false)`);
+            }
         }
 
         this.#sequelize = new Sequelize(
             databaseName,
             user,
-            process.env.DATABASE_PASSWORD,
+            process.env.DATABASE_PASSWORD || 'build_placeholder',
             {
-                logging: process.env.NODE_ENV === 'development' ? this.log : false,
+                logging: false, // Disable logging during build
                 host: host,
                 port: parseInt(port, 10),
                 dialect: 'postgres',
                 dialectModule: pg,
                 dialectOptions,
                 pool: {
-                    max: 5,
+                    max: isBuildPhase ? 0 : 5, // No pool during build
                     min: 0,
                     acquire: 30000,
                     idle: 10000
@@ -92,10 +116,32 @@ class Database {
     }
 
     getSequelize() {
+        // Lazy initialization - only initialize when actually needed
+        if (!this.#sequelize) {
+            this.#validateAndInitialize();
+        }
         return this.#sequelize;
     }
 
     async connect() {
+        // Validate environment variables before connecting
+        const requiredEnvVars = ['DATABASE_NAME', 'DATABASE_USER', 'DATABASE_PASSWORD', 'DATABASE_HOST', 'DATABASE_PORT'];
+        const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+        
+        if (missingVars.length > 0) {
+            throw new Error(`Missing required database environment variables: ${missingVars.join(', ')}`);
+        }
+        
+        // Re-initialize with actual values if we were in build phase
+        if (this.#sequelize && (!process.env.DATABASE_HOST || (this.#sequelize.config && this.#sequelize.config.database === 'build_placeholder'))) {
+            this.#sequelize = null; // Reset to force re-initialization with real values
+        }
+        
+        // Ensure database is initialized before connecting
+        if (!this.#sequelize) {
+            this.#validateAndInitialize();
+        }
+        
         const startTime = Date.now();
         try {
             console.log(`[Database] Attempting connection to ${process.env.DATABASE_HOST}:${process.env.DATABASE_PORT}...`);
@@ -112,6 +158,10 @@ class Database {
     }
 
     async sync() {
+        // Ensure database is initialized before syncing
+        if (!this.#sequelize) {
+            this.#validateAndInitialize();
+        }
         // sync() without options will create tables if they don't exist
         // but won't alter or drop existing tables
         await this.#sequelize.sync()
