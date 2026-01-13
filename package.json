@@ -1,5 +1,5 @@
 {
-  "name": "glassinformer",
+  "name": "glassinformer_panel",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,18 +9,27 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@aws-amplify/core": "^6.15.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.962.0",
+    "aws-amplify": "^6.15.9",
+    "aws-jwt-verify": "^5.1.1",
+    "axios": "^1.13.2",
+    "joi": "^18.0.2",
+    "next": "^16.1.1",
+    "pg": "^8.16.3",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "next": "16.0.1"
+    "sequelize": "^6.37.7"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
+    "baseline-browser-mapping": "^2.9.11",
     "eslint": "^9",
-    "eslint-config-next": "16.0.1"
+    "eslint-config-next": "16.0.5",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
