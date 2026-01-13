@@ -1,18 +1,51 @@
 import ArticleModel from "./ArticleModel.js";
 // Ensure models are initialized by importing models.js
 import "../../database/models.js";
+import { readFileSync } from "fs";
+import { join } from "path";
+
+// Helper function to get fallback data from JSON
+function getFallbackArticles() {
+    try {
+        // Try to read from the expected location
+        const jsonPath = join(process.cwd(), 'app', 'contents', 'articlesContents.json');
+        const fileContent = readFileSync(jsonPath, 'utf-8');
+        const articles = JSON.parse(fileContent);
+        
+        // Ensure all articles have required fields and add missing ones
+        return articles.map(article => ({
+            id_article: article.id_article,
+            articleTitle: article.articleTitle,
+            articleSubtitle: article.articleSubtitle || '',
+            article_main_image_url: article.article_main_image_url || '',
+            company: article.company || '',
+            date: article.date || new Date().toISOString().split('T')[0],
+            article_tags_array: article.article_tags_array || [],
+            contents_array: article.contents_array || []
+        }));
+    } catch (error) {
+        console.error('Error reading fallback articles from JSON:', error);
+        return [];
+    }
+}
 
 export async function getAllArticles() {
     try {
         // Check if model is initialized
         if (!ArticleModel.sequelize) {
-            console.warn('ArticleModel not initialized, returning empty array');
-            return [];
+            console.warn('ArticleModel not initialized, using fallback data from JSON');
+            return getFallbackArticles();
         }
 
         const articles = await ArticleModel.findAll({
             order: [['date', 'DESC']]
         });
+        
+        // If database is empty, use fallback data
+        if (!articles || articles.length === 0) {
+            console.warn('Database is empty, using fallback data from JSON');
+            return getFallbackArticles();
+        }
         
         // Transform database format to API format
         return articles.map(article => ({
@@ -31,7 +64,7 @@ export async function getAllArticles() {
         console.error('Error message:', error.message);
         
         // If it's a connection error, table doesn't exist, or model not initialized, 
-        // return empty array instead of throwing to prevent frontend crashes
+        // use fallback data from JSON instead of returning empty array
         if (error.name === 'SequelizeConnectionError' || 
             error.name === 'SequelizeDatabaseError' ||
             error.name === 'SequelizeConnectionRefusedError' ||
@@ -40,8 +73,8 @@ export async function getAllArticles() {
             (error.message?.includes('relation') && error.message?.includes('does not exist')) ||
             error.message?.includes('not initialized') ||
             error.message?.includes('Model not found')) {
-            console.warn('Database connection issue, returning empty array');
-            return [];
+            console.warn('Database connection issue, using fallback data from JSON');
+            return getFallbackArticles();
         }
         // For other errors, still throw to maintain error visibility
         throw error;

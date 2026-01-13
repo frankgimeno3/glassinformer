@@ -17,7 +17,7 @@ export const GET = createEndpoint(async (request) => {
     const id = getIdFromRequest(request);
     const article = await getArticleById(id);
     return NextResponse.json(article);
-}, null, true);
+}, null, false);
 
 export const PUT = createEndpoint(async (request, body) => {
     const id = getIdFromRequest(request);

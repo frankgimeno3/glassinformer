@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 export const GET = createEndpoint(async () => {
     const articles = await getAllArticles();
     return NextResponse.json(articles);
-}, null, true);
+}, null, false);
 
 export const POST = createEndpoint(async (request, body) => {
     const article = await createArticle(body);

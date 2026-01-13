@@ -1,4 +1,4 @@
-import apiClient from "../apiClient.js";
+import apiClient from "../app/apiClient.js";
 
 export class PublicationService{
     static async getAllPublications(){

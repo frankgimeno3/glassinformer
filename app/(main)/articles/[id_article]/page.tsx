@@ -1,33 +1,73 @@
 'use client';
 
 import { useRouter, useParams } from 'next/navigation';
-import React from 'react'; 
+import React, { useEffect, useState } from 'react'; 
 
-import articles from "@/app/contents/articlesContents.json";
-import contents from "@/app/contents/contentsContents.json";
-
-import { articleInterface } from '@/app/contents/interfaces';
+import { ArticleService } from "@/service/ArticleService";
+import { ContentService } from "@/service/ContentService";
  
 const Article = () => {
   const router = useRouter();
   const params = useParams();
 
   const ArticleId = params?.id_article as string;
+  const [selectedArticle, setSelectedArticle] = useState<any>(null);
+  const [contents, setContents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const selectedArticle = articles.find(
-    (a: articleInterface) => a.id_article === ArticleId
-  );
+  useEffect(() => {
+    const fetchArticleData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  if (!selectedArticle) {
+        // Fetch article
+        const article = await ArticleService.getArticleById(ArticleId);
+        setSelectedArticle(article);
+
+        // Fetch all contents to have them available for rendering
+        const allContents = await ContentService.getAllContents();
+        setContents(Array.isArray(allContents) ? allContents : []);
+      } catch (err: any) {
+        console.error("Error fetching article data:", err);
+        setError(err?.message || "Error loading article");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (ArticleId) {
+      fetchArticleData();
+    }
+  }, [ArticleId]);
+
+  if (loading) {
     return (
-      <p className="text-red-500">
-        The article you are looking for doesn't exist.
-      </p>
+      <div className="flex flex-col h-full min-h-screen text-gray-600 px-6 py-10 gap-6 items-center justify-center">
+        <p className="text-lg">Cargando artículo...</p>
+      </div>
+    );
+  }
+
+  if (error || !selectedArticle) {
+    return (
+      <div className="flex flex-col h-full min-h-screen text-gray-600 px-6 py-10 gap-6 items-center justify-center">
+        <p className="text-red-500 text-lg">
+          {error || "The article you are looking for doesn't exist."}
+        </p>
+        <button
+          onClick={() => router.push("/articles")}
+          className="mt-4 px-4 py-2 bg-blue-950 text-white rounded-xl"
+        >
+          Volver a artículos
+        </button>
+      </div>
     );
   }
 
   const renderContent = (contentId: string) => {
-    const contentData = contents.find(c => c.content_id === contentId);
+    const contentData = contents.find((c: any) => c.content_id === contentId);
 
     if (!contentData) {
       return (
@@ -105,7 +145,7 @@ const Article = () => {
       />
 
       <div className="flex flex-wrap gap-2 mt-4">
-        {selectedArticle.article_tags_array.map(tag => (
+        {(selectedArticle.article_tags_array || []).map((tag: string) => (
           <span 
             key={tag}
             className="px-3 py-1 bg-gray-200 rounded-full text-sm cursor-pointer hover:bg-gray-200/50"
@@ -117,7 +157,7 @@ const Article = () => {
       </div>
 
       <div className="mt-8 flex flex-col gap-6">
-        {selectedArticle.contents_array.map(contentId => (
+        {(selectedArticle.contents_array || []).map((contentId: string) => (
           <div 
             key={contentId} 
             className="p-6 bg-gray-100 rounded-md shadow flex flex-col gap-4"
