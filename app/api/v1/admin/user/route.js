@@ -1,6 +1,6 @@
-import {createEndpoint} from "../../../../../server/createEndpoint.js";
+import {createEndpoint} from "../../../../server/createEndpoint.js";
 import {NextResponse} from "next/server";
-import {createUser, getAllUsers, updateUser} from "../../../../../server/features/user/UserSerivce.js";
+import {createUser, getAllUsers, updateUser} from "../../../../server/features/user/UserSerivce.js";
 import Joi from "joi";
 
 export const GET = createEndpoint(async () => {

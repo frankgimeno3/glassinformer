@@ -22,9 +22,10 @@ const nextConfig: NextConfig = {
         ],
     },
     // Experimental features for better performance
-    experimental: {
-        optimizeCss: true,
-    },
+    // Note: optimizeCss disabled due to LightningCSS native module issues on Vercel
+    // experimental: {
+    //     optimizeCss: true,
+    // },
     // Headers for caching
     async headers() {
         return [

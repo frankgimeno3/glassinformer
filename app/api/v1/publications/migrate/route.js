@@ -1,7 +1,7 @@
-import { createEndpoint } from "../../../../../server/createEndpoint.js";
+import { createEndpoint } from "../../../../server/createEndpoint.js";
 import { NextResponse } from "next/server";
-import Database from "../../../../../server/database/database.js";
-import "../../../../../server/database/models.js";
+import Database from "../../../../server/database/database.js";
+import "../../../../server/database/models.js";
 
 // Ensure Node.js runtime (not Edge) for database connections
 export const runtime = "nodejs";

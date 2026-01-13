@@ -1,4 +1,4 @@
-import {COGNITO} from "../../../env.js";
+import {COGNITO} from "../../../../env.js";
 import {
     AdminListGroupsForUserCommand,
     CognitoIdentityProviderClient

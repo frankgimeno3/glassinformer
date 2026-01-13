@@ -20,7 +20,7 @@ export async function POST(request) {
       return new Response("Missing token(s)", { status: 400 });
     }
 
-    const authenticationService = await import("../../../server/features/authentication/AuthenticationService.js");
+    const authenticationService = await import("../../server/features/authentication/AuthenticationService.js");
     const verifyIdToken = authenticationService.verifyIdToken;
     const verifyAccessToken = authenticationService.verifyAccessToken;
 

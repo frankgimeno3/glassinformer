@@ -1,5 +1,5 @@
 import {CognitoJwtVerifier} from "aws-jwt-verify";
-import {COGNITO} from "../../../env.js";
+import {COGNITO} from "../../../../env.js";
 
 let idVerifier = null;
 let accessVerifier = null;

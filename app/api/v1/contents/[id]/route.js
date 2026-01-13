@@ -1,6 +1,6 @@
-import {createEndpoint} from "../../../../../server/createEndpoint.js";
+import {createEndpoint} from "../../../../server/createEndpoint.js";
 import {NextResponse} from "next/server";
-import {getContentById, updateContent, deleteContent} from "../../../../../server/features/content/ContentService.js";
+import {getContentById, updateContent, deleteContent} from "../../../../server/features/content/ContentService.js";
 import Joi from "joi";
 
 function getIdFromRequest(request) {

@@ -1,7 +1,7 @@
-import {createEndpoint} from "../../../../server/createEndpoint.js";
+import {createEndpoint} from "../../../server/createEndpoint.js";
 import Joi from "joi";
-import {TimeLogTypeEnum} from "../../../../server/features/timeLog/TimeLogTypeEnum.js";
-import {createTimeLog} from "../../../../server/features/timeLog/TimeLogService.js";
+import {TimeLogTypeEnum} from "../../../server/features/timeLog/TimeLogTypeEnum.js";
+import {createTimeLog} from "../../../server/features/timeLog/TimeLogService.js";
 import {NextResponse} from "next/server";
 
 export const POST = createEndpoint(async (request, body)=>{

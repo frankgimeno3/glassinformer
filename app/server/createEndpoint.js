@@ -1,4 +1,4 @@
-import {COGNITO} from "../env.js";
+import {COGNITO} from "../../env.js";
 import {fetchNewTokens, verifyAccessToken, verifyIdToken} from "./features/authentication/AuthenticationService.js";
 import {NextResponse} from "next/server.js";
 import {getUserRoles} from "./features/authorization/AuthorizationService.js";

@@ -1,10 +1,10 @@
-import {createEndpoint} from "../../../../../server/createEndpoint.js";
-import {TimeLogTypeEnum} from "../../../../../server/features/timeLog/TimeLogTypeEnum.js";
+import {createEndpoint} from "../../../../server/createEndpoint.js";
+import {TimeLogTypeEnum} from "../../../../server/features/timeLog/TimeLogTypeEnum.js";
 import {NextResponse} from "next/server";
 import Joi from "joi";
 import {
     createModification
-} from "../../../../../server/features/modification/ModificationService.js";
+} from "../../../../server/features/modification/ModificationService.js";
 
 export const POST = createEndpoint(async (request, body) => {
     const {logId, newType, newDate, comment} = body;

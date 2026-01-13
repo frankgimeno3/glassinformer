@@ -1,6 +1,6 @@
-import Database from "./server/database/database.js";
+import Database from "./app/server/database/database.js";
 
-import './server/database/models.js';
+import './app/server/database/models.js';
 
 const database = Database.getInstance();
 

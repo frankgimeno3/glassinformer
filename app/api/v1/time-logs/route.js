@@ -1,6 +1,6 @@
-import {createEndpoint} from "../../../../server/createEndpoint.js";
+import {createEndpoint} from "../../../server/createEndpoint.js";
 import Joi from "joi";
-import {getUserTimeLogs} from "../../../../server/features/timeLog/TimeLogService.js";
+import {getUserTimeLogs} from "../../../server/features/timeLog/TimeLogService.js";
 import {NextResponse} from "next/server.js";
 
 export const GET = createEndpoint(async (request, body) => {
