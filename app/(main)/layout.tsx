@@ -29,8 +29,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <div className="flex flex-col ">
-          <Topnav />
-          <div className="flex flex-col p-12 bg-gray-100 min-h-screen text-gray-600">
+          <div className="fixed top-0 left-0 right-0 z-50">
+            <Topnav />
+          </div>
+          <div className="flex flex-col px-12 bg-gray-100 min-h-screen text-gray-600 pt-40">
           {children}
           </div>
         </div>

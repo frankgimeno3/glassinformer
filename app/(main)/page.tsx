@@ -39,22 +39,26 @@ export default function Home() {
     fetchArticles();
   }, []);
 
+  const validArticles = allArticles.filter((a: any) => a && a.id_article && a.articleTitle);
+
   return (
-    <div className="flex flex-col">
-      <p>Criterio de búsqueda actual</p>
-      <div className="flex flex-wrap">
+    <div className="min-h-screen bg-white">
+
+      {/* Contenido principal */}
+      <main className="max-w-7xl mx-auto pt-12 px-4 sm:px-6 lg:px-8 pb-16">
         {loading ? (
-          <div className="text-center py-10">
-            <p className="text-gray-500">Cargando artículos...</p>
+          <div className="text-center py-20">
+            <div className="inline-block animate-pulse">
+              <p className="text-gray-400 text-lg font-serif">Cargando artículos...</p>
+            </div>
           </div>
-        ) : allArticles.filter((a: any) => a && a.id_article && a.articleTitle).length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 w-full">
-            <p className="text-gray-500 text-lg">No hay artículos disponibles</p>
+        ) : validArticles.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <p className="text-gray-400 text-xl font-serif">No hay artículos disponibles</p>
           </div>
         ) : (
-          allArticles
-            .filter((a: any) => a && a.id_article && a.articleTitle)
-            .map((a: any, index: number) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+            {validArticles.map((a: any, index: number) => (
               <ArticleMiniature
                 key={a.id_article || index}
                 id_article={a.id_article || ""}
@@ -63,9 +67,10 @@ export default function Home() {
                 date={a.date || ""}
                 imageUrl={a.article_main_image_url || ""}
               />
-            ))
+            ))}
+          </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
