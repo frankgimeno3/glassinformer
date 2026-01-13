@@ -1,11 +1,12 @@
 import { FC } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface ArticleMiniatureProps {
   id_article: string;
   titulo: string;
   company?: string;
+  id_company?: string;
   date?: string;
   imageUrl?: string;
   // Legacy props for backward compatibility
@@ -17,27 +18,24 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
   id_article,
   titulo,
   company,
+  id_company,
   date,
   imageUrl,
   contenidoTitulo,
   contenidoSubtitulo,
 }) => {
-  const router = useRouter();
-
   // Support both new and legacy prop formats
   const title = titulo || contenidoTitulo || "";
   const subtitle = contenidoSubtitulo || "";
   const image = imageUrl || "/file.svg";
+  
+  // Generate company ID from company name if id_company is not provided
+  const companyId = id_company || (company ? encodeURIComponent(company.toLowerCase().replace(/\s+/g, '-')) : '');
 
   return (
-    <article
-      className="group flex flex-col bg-white border border-gray-200 hover:border-gray-300 cursor-pointer transition-all duration-300 ease-in-out overflow-hidden"
-      onClick={() => {
-        router.push(`/articles/${id_article}`);
-      }}
-    >
-      {/* Imagen */}
-      <div className="relative w-full h-48 md:h-56 overflow-hidden bg-gray-100">
+    <article className="group flex flex-col bg-white border border-gray-200 hover:border-gray-300 transition-all duration-300 ease-in-out overflow-hidden">
+      {/* Imagen - Link al artículo */}
+      <Link href={`/articles/${id_article}`} className="relative w-full h-48 md:h-56 overflow-hidden bg-gray-100 block">
         <Image
           src={image}
           alt={title || "Image not available"}
@@ -46,7 +44,7 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           unoptimized
         />
-      </div>
+      </Link>
 
       {/* Contenido */}
       <div className="flex flex-col p-6 space-y-3">
@@ -54,7 +52,13 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
         {(company || date) && (
           <div className="flex items-center gap-3 text-xs text-gray-500 uppercase tracking-wider font-sans">
             {company && (
-              <span className="font-medium">{company}</span>
+              <Link 
+                href={`/directory/companies/${companyId}`}
+                className="font-medium hover:text-blue-600 transition-colors cursor-pointer"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {company}
+              </Link>
             )}
             {company && date && (
               <span className="text-gray-300">•</span>
@@ -77,11 +81,14 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
           </p>
         )}
 
-        {/* Indicador de lectura */}
+        {/* Indicador de lectura - Link al artículo */}
         <div className="pt-2 border-t border-gray-100">
-          <span className="text-xs text-gray-400 font-sans uppercase tracking-wider group-hover:text-gray-600 transition-colors">
+          <Link 
+            href={`/articles/${id_article}`}
+            className="text-xs text-gray-400 font-sans uppercase tracking-wider group-hover:text-gray-600 transition-colors inline-block"
+          >
             Leer más →
-          </span>
+          </Link>
         </div>
       </div>
     </article>

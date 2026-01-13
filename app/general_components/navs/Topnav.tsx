@@ -12,7 +12,7 @@ const Topnav: FC<TopnavProps> = ({ }) => {
     return (
         <nav className='flex flex-col shadow-xl  border-b'>
                 <header className="flex flex-row bg-white  justify-between border-b border-gray-200 py-8 px-4 w-full px-4 sm:px-6 lg:px-12">
-                    <div className="flex flex-col ">
+                    <Link href="/" className="flex flex-col hover:opacity-80 transition-opacity">
                         <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 tracking-tight mb-2">
                             GlassInformer
                         </h1>
@@ -24,10 +24,11 @@ const Topnav: FC<TopnavProps> = ({ }) => {
                                 day: 'numeric'
                             })}
                         </p>
-                    </div>
+                    </Link>
                     {
                         isLogged ?
                             <div className='flex flex-row items-center gap-5 text-sm text-gray-500 uppercase tracking-wider font-sans'>
+                                <BasicButton textContent='Mediakit' urlRedirection='/directory' />
                                 <BasicButton textContent='Login' urlRedirection='/auth/login' />
                                 <BasicButton textContent='Sign Up' urlRedirection='/auth/signup' />
                             </div>
@@ -37,17 +38,6 @@ const Topnav: FC<TopnavProps> = ({ }) => {
                             </div>
                     }
                 </header>
-            <div className='flex flex-row  text-sm text-gray-500 uppercase tracking-wider font-sans text-white bg-white '>
-                <Link href='/' className='flex-1  bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
-                    Home
-                </Link>
-                <Link href='/publications' className='flex-1  bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
-                    Publications
-                </Link>
-                <Link href='/mediakit' className='flex-1  bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
-                    Mediakit
-                </Link>
-            </div>
         </nav>
     );
 };
