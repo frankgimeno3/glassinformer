@@ -94,7 +94,7 @@ class Database {
                 dialectModule: pg,
                 dialectOptions,
                 pool: {
-                    max: isBuildPhase ? 0 : 5, // No pool during build
+                    max: isBuildPhase ? 1 : 5, // Minimal pool during build
                     min: 0,
                     acquire: 30000,
                     idle: 10000
