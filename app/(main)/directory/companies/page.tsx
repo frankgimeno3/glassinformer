@@ -22,3 +22,4 @@ const CompaniesPage: FC<CompaniesPageProps> = ({ }) => {
 
 export default CompaniesPage;
 
+

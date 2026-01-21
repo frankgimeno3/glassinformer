@@ -10,8 +10,8 @@ const Topnav: FC<TopnavProps> = ({ }) => {
     const logout = () => { console.log("logout") }
 
     return (
-        <nav className='flex flex-col shadow-xl  border-b'>
-                <header className="flex flex-row bg-white  justify-between border-b border-gray-200 py-8 px-4 w-full px-4 sm:px-6 lg:px-12">
+        <nav className='flex flex-col shadow-xl bg-white border-b'>
+                <header className="flex flex-row  justify-between border-b border-gray-200 py-8 px-4 w-full px-4 sm:px-6 lg:px-12">
                     <Link href="/" className="flex flex-col hover:opacity-80 transition-opacity">
                         <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 tracking-tight mb-2">
                             GlassInformer

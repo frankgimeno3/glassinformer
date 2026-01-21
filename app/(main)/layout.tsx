@@ -31,10 +31,8 @@ export default function RootLayout({
       >
         <div className="flex flex-col ">
           <div className="fixed top-0 left-0 right-0 z-50">
-            {/* Nav de banners */}
             <nav className="bg-gray-100 w-full">
               <div className="h-16 md:h-20 flex items-center justify-center">
-                {/* Espacio para banners - puedes agregar contenido aquí */}
               </div>
             </nav>
             <Topnav />
@@ -52,7 +50,7 @@ export default function RootLayout({
                     Publications
                   </Link>
                   <Link href='/directory' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
-                    Mediakit
+                    Directory
                   </Link>
                 </div>
                 {children}

@@ -13,3 +13,4 @@ const BannerCol: FC<BannerColProps> = ({ }) => {
 
 export default BannerCol;
 
+
