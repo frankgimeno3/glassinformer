@@ -1,0 +1,102 @@
+[
+    {
+        "id_fair": "fair-26-0001",
+        "event_name": "GlassTech Europe 2025",
+        "country": "Germany",
+        "main_description": "Europe's premier glass industry trade show featuring innovations in architectural glass, manufacturing technologies, and sustainable solutions.",
+        "region": "europe",
+        "start_date": "2025-06-15",
+        "end_date": "2025-06-18",
+        "location": "Düsseldorf, Germany"
+    },
+    {
+        "id_fair": "fair-26-0002",
+        "event_name": "Asia Glass Expo 2025",
+        "country": "China",
+        "main_description": "Asia's largest glass industry exhibition showcasing smart manufacturing, automation technologies, and regional market opportunities.",
+        "region": "asia",
+        "start_date": "2025-07-10",
+        "end_date": "2025-07-13",
+        "location": "Shanghai, China"
+    },
+    {
+        "id_fair": "fair-26-0003",
+        "event_name": "Global Glass Innovation Awards 2025",
+        "country": "United Kingdom",
+        "main_description": "International awards ceremony recognizing excellence in glass technology, design, and sustainability across multiple categories.",
+        "region": "global",
+        "start_date": "2025-08-20",
+        "end_date": "2025-08-20",
+        "location": "London, United Kingdom"
+    },
+    {
+        "id_fair": "fair-26-0004",
+        "event_name": "China Glass 2025",
+        "country": "China",
+        "main_description": "China's premier glass industry trade show featuring high-tech applications, manufacturing capabilities, and domestic market expansion.",
+        "region": "china",
+        "start_date": "2025-09-05",
+        "end_date": "2025-09-08",
+        "location": "Beijing, China"
+    },
+    {
+        "id_fair": "fair-26-0005",
+        "event_name": "North American Glass Conference 2025",
+        "country": "United States",
+        "main_description": "Industry conference focusing on sustainability, circular economy initiatives, and environmental best practices in glass manufacturing.",
+        "region": "north america",
+        "start_date": "2025-10-12",
+        "end_date": "2025-10-14",
+        "location": "Chicago, United States"
+    },
+    {
+        "id_fair": "fair-26-0006",
+        "event_name": "Latin America Glass Summit 2025",
+        "country": "Brazil",
+        "main_description": "Regional summit exploring market growth opportunities, investment strategies, and expansion plans for the Latin American glass industry.",
+        "region": "latin america",
+        "start_date": "2025-11-08",
+        "end_date": "2025-11-10",
+        "location": "São Paulo, Brazil"
+    },
+    {
+        "id_fair": "fair-26-0007",
+        "event_name": "African Glass Industry Forum 2025",
+        "country": "South Africa",
+        "main_description": "First major industry gathering focused on developing local manufacturing capabilities and building regional capacity in Africa.",
+        "region": "africa",
+        "start_date": "2025-12-03",
+        "end_date": "2025-12-05",
+        "location": "Cape Town, South Africa"
+    },
+    {
+        "id_fair": "fair-26-0008",
+        "event_name": "Oceania Glass Expo 2025",
+        "country": "Australia",
+        "main_description": "Regional exhibition showcasing glass products, technologies, and solutions for the Australian and New Zealand markets.",
+        "region": "oceania",
+        "start_date": "2026-01-15",
+        "end_date": "2026-01-17",
+        "location": "Sydney, Australia"
+    },
+    {
+        "id_fair": "fair-26-0009",
+        "event_name": "International Glass Technology Forum",
+        "country": "France",
+        "main_description": "Global forum bringing together researchers, manufacturers, and industry leaders to discuss the future of glass technology.",
+        "region": "global",
+        "start_date": "2026-02-20",
+        "end_date": "2026-02-22",
+        "location": "Paris, France"
+    },
+    {
+        "id_fair": "fair-26-0010",
+        "event_name": "Smart Glass Innovation Summit",
+        "country": "Japan",
+        "main_description": "Specialized summit focusing on smart glass technologies, electrochromic systems, and intelligent building solutions.",
+        "region": "asia",
+        "start_date": "2026-03-10",
+        "end_date": "2026-03-12",
+        "location": "Tokyo, Japan"
+    }
+]

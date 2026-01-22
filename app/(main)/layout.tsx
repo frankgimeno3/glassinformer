@@ -52,6 +52,9 @@ export default function RootLayout({
                   <Link href='/directory' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
                     Directory
                   </Link>
+                  <Link href='/events' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
+                    Events
+                  </Link>
                 </div>
                 {children}
               </div>

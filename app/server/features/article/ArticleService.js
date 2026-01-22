@@ -21,7 +21,12 @@ function getFallbackArticles() {
             company: article.company || '',
             date: article.date || new Date().toISOString().split('T')[0],
             article_tags_array: article.article_tags_array || [],
-            contents_array: article.contents_array || []
+            contents_array: article.contents_array || [],
+            isEventNews: article.isEventNews || false,
+            article_countries_array: article.article_countries_array || [],
+            article_region: article.article_region || '',
+            author: article.author || '',
+            contents: article.contents || []
         }));
     } catch (error) {
         console.error('Error reading fallback articles from JSON:', error);

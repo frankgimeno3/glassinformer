@@ -1,0 +1,51 @@
+[
+    {
+        "id_company": "comp-26-0001",
+        "company_name": "GlassTech Solutions",
+        "country": "United States",
+        "main_description": "Leading manufacturer of architectural and automotive glass with a focus on sustainable production methods and innovative technologies.",
+        "region": "north america"
+    },
+    {
+        "id_company": "comp-26-0002",
+        "company_name": "EuroGlass Industries",
+        "country": "Germany",
+        "main_description": "European leader in high-performance glass products for construction and industrial applications, with over 50 years of experience.",
+        "region": "europe"
+    },
+    {
+        "id_company": "comp-26-0003",
+        "company_name": "AsiaGlass Manufacturing",
+        "country": "China",
+        "main_description": "One of Asia's largest glass producers, specializing in flat glass, automotive glass, and specialty glass products for electronics.",
+        "region": "china"
+    },
+    {
+        "id_company": "comp-26-0004",
+        "company_name": "Pacific Glass Works",
+        "country": "Australia",
+        "main_description": "Oceania's premier glass manufacturer, providing custom glass solutions for architectural and residential projects across the region.",
+        "region": "oceania"
+    },
+    {
+        "id_company": "comp-26-0005",
+        "company_name": "LatinGlass Corp",
+        "country": "Brazil",
+        "main_description": "Major glass producer serving Latin American markets with a comprehensive range of flat glass, container glass, and specialty products.",
+        "region": "latin america"
+    },
+    {
+        "id_company": "comp-26-0006",
+        "company_name": "African Glass Industries",
+        "country": "South Africa",
+        "main_description": "Leading glass manufacturer in Africa, focusing on container glass and architectural products for the growing regional market.",
+        "region": "africa"
+    },
+    {
+        "id_company": "comp-26-0007",
+        "company_name": "Global Glass Innovations",
+        "country": "United Kingdom",
+        "main_description": "International glass technology company developing cutting-edge solutions for smart glass, energy-efficient glazing, and advanced coatings.",
+        "region": "global"
+    }
+]

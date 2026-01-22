@@ -23,7 +23,7 @@
         "articleTitle": "Título del artículo 2",
         "articleSubtitle": "Título del artículo 2",
         "article_main_image_url": "url de la imagen",
-"article_tags_array": [
+        "article_tags_array": [
             "tag1",
             "tag2",
             "tag3",
@@ -42,7 +42,7 @@
         "articleTitle": "Título del artículo 3",
         "articleSubtitle": "Título del artículo 3",
         "article_main_image_url": "url de la imagen",
-"article_tags_array": [
+        "article_tags_array": [
             "tag1",
             "tag2",
             "tag3",
@@ -61,7 +61,7 @@
         "articleTitle": "Título del artículo 4",
         "articleSubtitle": "Título del artículo 4",
         "article_main_image_url": "url de la imagen",
-"article_tags_array": [
+        "article_tags_array": [
             "tag5",
             "tag6",
             "tag7",
@@ -80,7 +80,7 @@
         "articleTitle": "Título del artículo 5",
         "articleSubtitle": "Título del artículo 5",
         "article_main_image_url": "url de la imagen",
-"article_tags_array": [
+        "article_tags_array": [
             "tag5",
             "tag6",
             "tag7",
@@ -99,7 +99,7 @@
         "articleTitle": "Título del artículo 6",
         "articleSubtitle": "Título del artículo 6",
         "article_main_image_url": "url de la imagen",
-"article_tags_array": [
+        "article_tags_array": [
             "tag1",
             "tag2",
             "tag5",
@@ -118,7 +118,7 @@
         "articleTitle": "Título del artículo 7",
         "articleSubtitle": "Título del artículo 7",
         "article_main_image_url": "www.google.es",
-"article_tags_array": [
+        "article_tags_array": [
             "tag9",
             "tag10",
             "tag11",
