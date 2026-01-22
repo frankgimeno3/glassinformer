@@ -21,13 +21,15 @@ interface Event {
 
 const IndustryEvents: FC<IndustryEventsProps> = () => {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'news' | 'calendar'>('news');
+  const [activeTab, setActiveTab] = useState<'news' | 'calendar'>('calendar');
   const [eventNews, setEventNews] = useState<any[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [calendarInitialized, setCalendarInitialized] = useState(false);
+  const [viewMode, setViewMode] = useState<'months' | 'day'>('months');
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
   useEffect(() => {
     fetchEventNews();
@@ -130,6 +132,43 @@ const IndustryEvents: FC<IndustryEventsProps> = () => {
     return dateStr >= startDateStr && dateStr <= endDateStr;
   };
 
+  const getEventDayNumber = (event: Event, date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+    const startDateStr = event.start_date.split('T')[0];
+    const endDateStr = event.end_date.split('T')[0];
+    
+    if (dateStr < startDateStr || dateStr > endDateStr) return null;
+    
+    const startDate = new Date(startDateStr);
+    const currentDate = new Date(dateStr);
+    const diffTime = currentDate.getTime() - startDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    
+    const endDate = new Date(endDateStr);
+    const totalDays = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    
+    return { current: diffDays, total: totalDays };
+  };
+
+  const handleDayClick = (date: Date) => {
+    setSelectedDay(date);
+    setViewMode('day');
+  };
+
+  const navigateDay = (direction: 'prev' | 'next') => {
+    if (!selectedDay) return;
+    const newDate = new Date(selectedDay);
+    if (direction === 'prev') {
+      newDate.setDate(newDate.getDate() - 1);
+    } else {
+      newDate.setDate(newDate.getDate() + 1);
+    }
+    setSelectedDay(newDate);
+  };
+
   const renderCalendar = () => {
     // Show two months: current and next
     const month1 = new Date(currentMonth);
@@ -198,7 +237,8 @@ const IndustryEvents: FC<IndustryEventsProps> = () => {
                 return (
                   <div
                     key={dayIndex}
-                    className={`aspect-square border rounded p-1 text-xs flex flex-col relative ${
+                    onClick={() => handleDayClick(date)}
+                    className={`aspect-square border rounded p-1 text-xs flex flex-col relative cursor-pointer transition-all hover:shadow-md ${
                       isSelected
                         ? 'bg-blue-900 border-blue-900 text-white'
                         : hasEvents
@@ -275,16 +315,6 @@ const IndustryEvents: FC<IndustryEventsProps> = () => {
       {/* Tabs */}
       <div className="flex gap-4 border-b border-gray-200 mb-8">
         <button
-          onClick={() => setActiveTab('news')}
-          className={`px-6 py-3 font-medium transition-colors ${
-            activeTab === 'news'
-              ? 'border-b-2 border-blue-600 text-blue-600'
-              : 'text-gray-600 hover:text-gray-900'
-          }`}
-        >
-          Event News
-        </button>
-        <button
           onClick={() => setActiveTab('calendar')}
           className={`px-6 py-3 font-medium transition-colors ${
             activeTab === 'calendar'
@@ -293,6 +323,16 @@ const IndustryEvents: FC<IndustryEventsProps> = () => {
           }`}
         >
           Events Calendar
+        </button>
+        <button
+          onClick={() => setActiveTab('news')}
+          className={`px-6 py-3 font-medium transition-colors ${
+            activeTab === 'news'
+              ? 'border-b-2 border-blue-600 text-blue-600'
+              : 'text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          Event News
         </button>
       </div>
 
@@ -344,65 +384,177 @@ const IndustryEvents: FC<IndustryEventsProps> = () => {
       )}
 
       {activeTab === 'calendar' && (
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Calendar on the left */}
-          <div className="lg:w-2/3">
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              {renderCalendar()}
-            </div>
-          </div>
+        <>
+          {viewMode === 'months' ? (
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* Calendar on the left */}
+              <div className="lg:w-2/3">
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                  {renderCalendar()}
+                </div>
+              </div>
 
-          {/* Events List on the right */}
-          <div className="lg:w-1/3">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Upcoming Events</h2>
-            <div className="space-y-4">
-              {events.length === 0 ? (
-                <p className="text-gray-500">No events available</p>
-              ) : (
-                events
-                  .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
-                  .map((event) => {
-                    const isSelected = isEventSelected(event.id_fair);
-                    return (
-                      <div
-                        key={event.id_fair}
-                        onClick={() => setSelectedEventId(event.id_fair)}
-                        className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                          isSelected
-                            ? 'bg-blue-900 border-blue-900 text-white shadow-lg'
-                            : 'border-gray-200 hover:shadow-md'
-                        }`}
-                      >
-                        <h3 className={`font-semibold text-lg mb-2 ${isSelected ? 'text-white' : 'text-gray-900'}`}>
-                          {event.event_name}
-                        </h3>
-                        <p className={`text-sm mb-2 ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
-                          {event.main_description}
-                        </p>
-                        <div className={`text-xs space-y-1 ${isSelected ? 'text-blue-200' : 'text-gray-500'}`}>
-                          <div>
-                            <span className="font-medium">Location: </span>
-                            {event.location}
+              {/* Events List on the right */}
+              <div className="lg:w-1/3">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Upcoming Events</h2>
+                <div className="space-y-4">
+                  {events.length === 0 ? (
+                    <p className="text-gray-500">No events available</p>
+                  ) : (
+                    events
+                      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
+                      .map((event) => {
+                        const isSelected = isEventSelected(event.id_fair);
+                        return (
+                          <div
+                            key={event.id_fair}
+                            onClick={() => setSelectedEventId(event.id_fair)}
+                            className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                              isSelected
+                                ? 'bg-blue-900 border-blue-900 text-white shadow-lg'
+                                : 'border-gray-200 hover:shadow-md'
+                            }`}
+                          >
+                            <h3 
+                              className={`font-semibold text-lg mb-2 transition-colors ${
+                                isSelected ? 'text-white' : 'text-gray-900'
+                              }`}
+                              onMouseEnter={(e) => {
+                                if (!isSelected) e.currentTarget.style.color = '#2563eb';
+                              }}
+                              onMouseLeave={(e) => {
+                                if (!isSelected) e.currentTarget.style.color = '#111827';
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/events/${event.id_fair}`);
+                              }}
+                            >
+                              {event.event_name}
+                            </h3>
+                            <p className={`text-sm mb-2 ${isSelected ? 'text-blue-100' : 'text-gray-600'}`}>
+                              {event.main_description}
+                            </p>
+                            <div className={`text-xs space-y-1 ${isSelected ? 'text-blue-200' : 'text-gray-500'}`}>
+                              <div>
+                                <span className="font-medium">Location: </span>
+                                {event.location}
+                              </div>
+                              <div>
+                                <span className="font-medium">Date: </span>
+                                {new Date(event.start_date).toLocaleDateString()}
+                                {event.start_date !== event.end_date && (
+                                  <> - {new Date(event.end_date).toLocaleDateString()}</>
+                                )}
+                              </div>
+                              <div>
+                                <span className="font-medium">Region: </span>
+                                {event.region}
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <span className="font-medium">Date: </span>
-                            {new Date(event.start_date).toLocaleDateString()}
-                            {event.start_date !== event.end_date && (
-                              <> - {new Date(event.end_date).toLocaleDateString()}</>
-                            )}
-                          </div>
-                          <div>
-                            <span className="font-medium">Region: </span>
-                            {event.region}
-                          </div>
-                        </div>
+                        );
+                      })
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col">
+              {/* Back button */}
+              <button
+                onClick={() => {
+                  setViewMode('months');
+                  setSelectedDay(null);
+                }}
+                className="mb-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm self-start"
+              >
+                ← Back to Calendar
+              </button>
+
+              {/* Day view */}
+              {selectedDay && (
+                <div className="bg-white border border-gray-200 rounded-lg p-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <button
+                      onClick={() => navigateDay('prev')}
+                      className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+                    >
+                      ← Previous Day
+                    </button>
+                    <div className="text-center">
+                      <div className="text-4xl font-bold text-gray-900">
+                        {selectedDay.getDate()}
                       </div>
-                    );
-                  })
+                      <div className="text-xl text-gray-600 capitalize">
+                        {selectedDay.toLocaleDateString('en-US', { weekday: 'long' })}
+                      </div>
+                      <div className="text-lg text-gray-500 capitalize">
+                        {selectedDay.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => navigateDay('next')}
+                      className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+                    >
+                      Next Day →
+                    </button>
+                  </div>
+
+                  {/* Events list for the day */}
+                  <div className="mt-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Events</h3>
+                    {getEventsForDate(selectedDay).length === 0 ? (
+                      <p className="text-gray-500">No events scheduled for this day</p>
+                    ) : (
+                      <div className="space-y-4">
+                        {getEventsForDate(selectedDay).map((event) => {
+                          const dayInfo = getEventDayNumber(event, selectedDay);
+                          return (
+                            <div
+                              key={event.id_fair}
+                              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                            >
+                              <h4
+                                className="font-semibold text-lg text-gray-900 mb-2 cursor-pointer hover:text-blue-600 transition-colors"
+                                onClick={() => router.push(`/events/${event.id_fair}`)}
+                              >
+                                {event.event_name}
+                                {dayInfo && (
+                                  <span className="ml-2 text-sm text-gray-500">
+                                    ({dayInfo.current}/{dayInfo.total})
+                                  </span>
+                                )}
+                              </h4>
+                              <p className="text-sm text-gray-600 mb-2">{event.main_description}</p>
+                              <div className="text-xs text-gray-500 space-y-1">
+                                <div>
+                                  <span className="font-medium">Location: </span>
+                                  {event.location}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Date: </span>
+                                  {new Date(event.start_date).toLocaleDateString()}
+                                  {event.start_date !== event.end_date && (
+                                    <> - {new Date(event.end_date).toLocaleDateString()}</>
+                                  )}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Region: </span>
+                                  {event.region}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
-          </div>
-        </div>
+          )}
+        </>
       )}
     </div>
   );
