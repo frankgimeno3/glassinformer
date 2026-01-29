@@ -1,0 +1,282 @@
+[
+    {
+        "id_product": "prod-26-000001",
+        "product_name": "Architectural Float Glass",
+        "product_description": "High-quality float glass for architectural applications, offering exceptional clarity and durability for modern building facades.",
+        "tagsArray": ["architectural", "float glass", "construction", "building"],
+        "id_company": "comp-26-0001",
+        "company_name": "GlassTech Solutions"
+    },
+    {
+        "id_product": "prod-26-000002",
+        "product_name": "Automotive Windshield Glass",
+        "product_description": "Premium automotive windshield glass with advanced safety features and superior optical quality for vehicle manufacturers.",
+        "tagsArray": ["automotive", "windshield", "safety", "vehicles"],
+        "id_company": "comp-26-0001",
+        "company_name": "GlassTech Solutions"
+    },
+    {
+        "id_product": "prod-26-000003",
+        "product_name": "Energy-Efficient Low-E Glass",
+        "product_description": "Low-emissivity glass designed to reduce energy consumption in buildings by minimizing heat transfer while maintaining natural light.",
+        "tagsArray": ["energy-efficient", "low-e", "sustainable", "insulation"],
+        "id_company": "comp-26-0001",
+        "company_name": "GlassTech Solutions"
+    },
+    {
+        "id_product": "prod-26-000004",
+        "product_name": "Tempered Safety Glass",
+        "product_description": "Heat-treated tempered glass that shatters into small, safe fragments, ideal for safety-critical applications.",
+        "tagsArray": ["tempered", "safety", "durable", "security"],
+        "id_company": "comp-26-0001",
+        "company_name": "GlassTech Solutions"
+    },
+    {
+        "id_product": "prod-26-000005",
+        "product_name": "Laminated Security Glass",
+        "product_description": "Multi-layer laminated glass providing enhanced security and sound insulation for high-end architectural projects.",
+        "tagsArray": ["laminated", "security", "soundproof", "premium"],
+        "id_company": "comp-26-0001",
+        "company_name": "GlassTech Solutions"
+    },
+    {
+        "id_product": "prod-26-000006",
+        "product_name": "High-Performance Facade Glass",
+        "product_description": "Advanced facade glass system engineered for European construction standards, combining aesthetics with performance.",
+        "tagsArray": ["facade", "high-performance", "construction", "europe"],
+        "id_company": "comp-26-0002",
+        "company_name": "EuroGlass Industries"
+    },
+    {
+        "id_product": "prod-26-000007",
+        "product_name": "Industrial Glass Panels",
+        "product_description": "Heavy-duty glass panels designed for industrial applications, offering exceptional strength and resistance to harsh environments.",
+        "tagsArray": ["industrial", "panels", "durable", "heavy-duty"],
+        "id_company": "comp-26-0002",
+        "company_name": "EuroGlass Industries"
+    },
+    {
+        "id_product": "prod-26-000008",
+        "product_name": "Fire-Resistant Glass",
+        "product_description": "Specialized fire-resistant glass meeting European safety standards, providing protection and transparency in critical applications.",
+        "tagsArray": ["fire-resistant", "safety", "certified", "protection"],
+        "id_company": "comp-26-0002",
+        "company_name": "EuroGlass Industries"
+    },
+    {
+        "id_product": "prod-26-000009",
+        "product_name": "Acoustic Glass Solutions",
+        "product_description": "Sound-dampening glass systems designed to reduce noise transmission in urban and commercial buildings.",
+        "tagsArray": ["acoustic", "soundproof", "urban", "commercial"],
+        "id_company": "comp-26-0002",
+        "company_name": "EuroGlass Industries"
+    },
+    {
+        "id_product": "prod-26-000010",
+        "product_name": "Custom Architectural Glazing",
+        "product_description": "Bespoke glazing solutions tailored to specific architectural requirements, combining form and function.",
+        "tagsArray": ["custom", "architectural", "bespoke", "design"],
+        "id_company": "comp-26-0002",
+        "company_name": "EuroGlass Industries"
+    },
+    {
+        "id_product": "prod-26-000011",
+        "product_name": "Flat Glass Sheets",
+        "product_description": "Standard flat glass sheets in various thicknesses for general construction and manufacturing applications.",
+        "tagsArray": ["flat glass", "standard", "construction", "manufacturing"],
+        "id_company": "comp-26-0003",
+        "company_name": "AsiaGlass Manufacturing"
+    },
+    {
+        "id_product": "prod-26-000012",
+        "product_name": "Automotive Side Windows",
+        "product_description": "Precision-engineered side window glass for automotive applications, meeting international quality standards.",
+        "tagsArray": ["automotive", "side windows", "precision", "quality"],
+        "id_company": "comp-26-0003",
+        "company_name": "AsiaGlass Manufacturing"
+    },
+    {
+        "id_product": "prod-26-000013",
+        "product_name": "Electronics Display Glass",
+        "product_description": "Ultra-thin glass substrates for electronic displays, smartphones, and touchscreen devices with exceptional clarity.",
+        "tagsArray": ["electronics", "display", "smartphones", "touchscreen"],
+        "id_company": "comp-26-0003",
+        "company_name": "AsiaGlass Manufacturing"
+    },
+    {
+        "id_product": "prod-26-000014",
+        "product_name": "Container Glass Bottles",
+        "product_description": "High-quality glass containers for food, beverage, and pharmaceutical industries with excellent barrier properties.",
+        "tagsArray": ["container", "bottles", "food", "beverage"],
+        "id_company": "comp-26-0003",
+        "company_name": "AsiaGlass Manufacturing"
+    },
+    {
+        "id_product": "prod-26-000015",
+        "product_name": "Specialty Coated Glass",
+        "product_description": "Advanced coated glass products with anti-reflective, anti-glare, and UV protection properties for specialized applications.",
+        "tagsArray": ["coated", "anti-reflective", "UV protection", "specialty"],
+        "id_company": "comp-26-0003",
+        "company_name": "AsiaGlass Manufacturing"
+    },
+    {
+        "id_product": "prod-26-000016",
+        "product_name": "Residential Window Glass",
+        "product_description": "Premium window glass solutions for residential projects, offering excellent thermal insulation and natural light transmission.",
+        "tagsArray": ["residential", "windows", "insulation", "thermal"],
+        "id_company": "comp-26-0004",
+        "company_name": "Pacific Glass Works"
+    },
+    {
+        "id_product": "prod-26-000017",
+        "product_name": "Custom Architectural Panels",
+        "product_description": "Tailored architectural glass panels designed to meet specific project requirements in Oceania's diverse climate conditions.",
+        "tagsArray": ["custom", "architectural", "panels", "climate"],
+        "id_company": "comp-26-0004",
+        "company_name": "Pacific Glass Works"
+    },
+    {
+        "id_product": "prod-26-000018",
+        "product_name": "Decorative Glass Solutions",
+        "product_description": "Aesthetic glass products featuring patterns, textures, and colors for interior and exterior design applications.",
+        "tagsArray": ["decorative", "patterns", "textures", "design"],
+        "id_company": "comp-26-0004",
+        "company_name": "Pacific Glass Works"
+    },
+    {
+        "id_product": "prod-26-000019",
+        "product_name": "Marine-Grade Glass",
+        "product_description": "Specialized glass products designed to withstand harsh marine environments with superior corrosion resistance.",
+        "tagsArray": ["marine", "corrosion-resistant", "durable", "specialized"],
+        "id_company": "comp-26-0004",
+        "company_name": "Pacific Glass Works"
+    },
+    {
+        "id_product": "prod-26-000020",
+        "product_name": "Solar Control Glass",
+        "product_description": "Advanced solar control glass reducing heat gain while maintaining natural daylight, ideal for Oceania's sunny climate.",
+        "tagsArray": ["solar control", "heat reduction", "daylight", "energy"],
+        "id_company": "comp-26-0004",
+        "company_name": "Pacific Glass Works"
+    },
+    {
+        "id_product": "prod-26-000021",
+        "product_name": "Flat Glass for Construction",
+        "product_description": "Standard and custom flat glass products for Latin American construction markets, available in various sizes and thicknesses.",
+        "tagsArray": ["flat glass", "construction", "custom", "standard"],
+        "id_company": "comp-26-0005",
+        "company_name": "LatinGlass Corp"
+    },
+    {
+        "id_product": "prod-26-000022",
+        "product_name": "Container Glass Jars",
+        "product_description": "Food-grade glass containers and jars for the Latin American food processing and packaging industries.",
+        "tagsArray": ["container", "jars", "food-grade", "packaging"],
+        "id_company": "comp-26-0005",
+        "company_name": "LatinGlass Corp"
+    },
+    {
+        "id_product": "prod-26-000023",
+        "product_name": "Specialty Colored Glass",
+        "product_description": "Custom colored glass products for decorative and functional applications in architectural and design projects.",
+        "tagsArray": ["colored", "decorative", "custom", "architectural"],
+        "id_company": "comp-26-0005",
+        "company_name": "LatinGlass Corp"
+    },
+    {
+        "id_product": "prod-26-000024",
+        "product_name": "Insulated Glass Units",
+        "product_description": "Double and triple-pane insulated glass units providing superior thermal performance for energy-efficient buildings.",
+        "tagsArray": ["insulated", "thermal", "energy-efficient", "double-pane"],
+        "id_company": "comp-26-0005",
+        "company_name": "LatinGlass Corp"
+    },
+    {
+        "id_product": "prod-26-000025",
+        "product_name": "Mirror Glass Products",
+        "product_description": "High-quality mirror glass for residential, commercial, and decorative applications with excellent reflectivity.",
+        "tagsArray": ["mirror", "reflective", "decorative", "commercial"],
+        "id_company": "comp-26-0005",
+        "company_name": "LatinGlass Corp"
+    },
+    {
+        "id_product": "prod-26-000026",
+        "product_name": "Container Glass for Beverages",
+        "product_description": "Premium glass containers for beverage packaging, designed to preserve taste and quality in African markets.",
+        "tagsArray": ["container", "beverages", "packaging", "premium"],
+        "id_company": "comp-26-0006",
+        "company_name": "African Glass Industries"
+    },
+    {
+        "id_product": "prod-26-000027",
+        "product_name": "Architectural Glass Systems",
+        "product_description": "Comprehensive architectural glass systems for commercial and residential buildings across the African continent.",
+        "tagsArray": ["architectural", "systems", "commercial", "residential"],
+        "id_company": "comp-26-0006",
+        "company_name": "African Glass Industries"
+    },
+    {
+        "id_product": "prod-26-000028",
+        "product_name": "Standard Float Glass",
+        "product_description": "High-quality float glass in standard sizes for general construction and manufacturing applications in regional markets.",
+        "tagsArray": ["float glass", "standard", "construction", "manufacturing"],
+        "id_company": "comp-26-0006",
+        "company_name": "African Glass Industries"
+    },
+    {
+        "id_product": "prod-26-000029",
+        "product_name": "Tinted Glass Panels",
+        "product_description": "Solar control tinted glass panels reducing heat and glare while maintaining visibility and aesthetic appeal.",
+        "tagsArray": ["tinted", "solar control", "heat reduction", "aesthetic"],
+        "id_company": "comp-26-0006",
+        "company_name": "African Glass Industries"
+    },
+    {
+        "id_product": "prod-26-000030",
+        "product_name": "Safety Glass Solutions",
+        "product_description": "Tempered and laminated safety glass products meeting international safety standards for various applications.",
+        "tagsArray": ["safety", "tempered", "laminated", "certified"],
+        "id_company": "comp-26-0006",
+        "company_name": "African Glass Industries"
+    },
+    {
+        "id_product": "prod-26-000031",
+        "product_name": "Smart Glass Technology",
+        "product_description": "Electrochromic smart glass that can change transparency on demand, offering privacy and energy efficiency.",
+        "tagsArray": ["smart glass", "electrochromic", "privacy", "energy-efficient"],
+        "id_company": "comp-26-0007",
+        "company_name": "Global Glass Innovations"
+    },
+    {
+        "id_product": "prod-26-000032",
+        "product_name": "Energy-Efficient Glazing Systems",
+        "product_description": "Advanced glazing systems with triple-pane technology and gas fills for maximum thermal performance.",
+        "tagsArray": ["energy-efficient", "glazing", "triple-pane", "thermal"],
+        "id_company": "comp-26-0007",
+        "company_name": "Global Glass Innovations"
+    },
+    {
+        "id_product": "prod-26-000033",
+        "product_name": "Advanced Coating Glass",
+        "product_description": "Next-generation coated glass with self-cleaning, anti-bacterial, and photocatalytic properties for modern applications.",
+        "tagsArray": ["coated", "self-cleaning", "anti-bacterial", "advanced"],
+        "id_company": "comp-26-0007",
+        "company_name": "Global Glass Innovations"
+    },
+    {
+        "id_product": "prod-26-000034",
+        "product_name": "Interactive Display Glass",
+        "product_description": "Touch-enabled interactive glass displays for retail, hospitality, and corporate environments with seamless integration.",
+        "tagsArray": ["interactive", "display", "touch-enabled", "retail"],
+        "id_company": "comp-26-0007",
+        "company_name": "Global Glass Innovations"
+    },
+    {
+        "id_product": "prod-26-000035",
+        "product_name": "Photovoltaic Glass Panels",
+        "product_description": "Building-integrated photovoltaic glass panels that generate solar energy while providing transparency and insulation.",
+        "tagsArray": ["photovoltaic", "solar", "BIPV", "renewable energy"],
+        "id_company": "comp-26-0007",
+        "company_name": "Global Glass Innovations"
+    }
+]

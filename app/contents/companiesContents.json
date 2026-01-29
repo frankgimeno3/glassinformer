@@ -4,48 +4,55 @@
         "company_name": "GlassTech Solutions",
         "country": "United States",
         "main_description": "Leading manufacturer of architectural and automotive glass with a focus on sustainable production methods and innovative technologies.",
-        "region": "north america"
+        "region": "north america",
+        "productsArray": ["prod-26-000001", "prod-26-000002", "prod-26-000003", "prod-26-000004", "prod-26-000005"]
     },
     {
         "id_company": "comp-26-0002",
         "company_name": "EuroGlass Industries",
         "country": "Germany",
         "main_description": "European leader in high-performance glass products for construction and industrial applications, with over 50 years of experience.",
-        "region": "europe"
+        "region": "europe",
+        "productsArray": ["prod-26-000006", "prod-26-000007", "prod-26-000008", "prod-26-000009", "prod-26-000010"]
     },
     {
         "id_company": "comp-26-0003",
         "company_name": "AsiaGlass Manufacturing",
         "country": "China",
         "main_description": "One of Asia's largest glass producers, specializing in flat glass, automotive glass, and specialty glass products for electronics.",
-        "region": "china"
+        "region": "china",
+        "productsArray": ["prod-26-000011", "prod-26-000012", "prod-26-000013", "prod-26-000014", "prod-26-000015"]
     },
     {
         "id_company": "comp-26-0004",
         "company_name": "Pacific Glass Works",
         "country": "Australia",
         "main_description": "Oceania's premier glass manufacturer, providing custom glass solutions for architectural and residential projects across the region.",
-        "region": "oceania"
+        "region": "oceania",
+        "productsArray": ["prod-26-000016", "prod-26-000017", "prod-26-000018", "prod-26-000019", "prod-26-000020"]
     },
     {
         "id_company": "comp-26-0005",
         "company_name": "LatinGlass Corp",
         "country": "Brazil",
         "main_description": "Major glass producer serving Latin American markets with a comprehensive range of flat glass, container glass, and specialty products.",
-        "region": "latin america"
+        "region": "latin america",
+        "productsArray": ["prod-26-000021", "prod-26-000022", "prod-26-000023", "prod-26-000024", "prod-26-000025"]
     },
     {
         "id_company": "comp-26-0006",
         "company_name": "African Glass Industries",
         "country": "South Africa",
         "main_description": "Leading glass manufacturer in Africa, focusing on container glass and architectural products for the growing regional market.",
-        "region": "africa"
+        "region": "africa",
+        "productsArray": ["prod-26-000026", "prod-26-000027", "prod-26-000028", "prod-26-000029", "prod-26-000030"]
     },
     {
         "id_company": "comp-26-0007",
         "company_name": "Global Glass Innovations",
         "country": "United Kingdom",
         "main_description": "International glass technology company developing cutting-edge solutions for smart glass, energy-efficient glazing, and advanced coatings.",
-        "region": "global"
+        "region": "global",
+        "productsArray": ["prod-26-000031", "prod-26-000032", "prod-26-000033", "prod-26-000034", "prod-26-000035"]
     }
 ]
