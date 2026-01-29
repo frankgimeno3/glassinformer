@@ -87,7 +87,7 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
             href={`/articles/${id_article}`}
             className="text-xs text-gray-400 font-sans uppercase tracking-wider group-hover:text-gray-600 transition-colors inline-block"
           >
-            Leer más →
+            Read more →
           </Link>
         </div>
       </div>

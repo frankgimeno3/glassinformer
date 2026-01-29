@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import ArticleMiniature from "./main_components/ArticleMiniature";
 import MidBanner from "../general_components/banners/MidBanner";
 import { ArticleService } from "@/service/ArticleService";
+import MainNews from "./main_components/MainNews";
 
 export default function Home() {
   const [allArticles, setAllArticles] = useState<any[]>([]);
@@ -60,7 +61,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-
+      <MainNews />
       {/* Contenido principal */}
       <main className="max-w-7xl mx-auto pt-12 px-4 sm:px-6 lg:px-8 pb-16">
         {loading ? (
