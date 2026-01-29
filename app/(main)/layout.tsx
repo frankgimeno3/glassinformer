@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import Topnav from "../general_components/navs/Topnav";
+import TopBanner from "../general_components/banners/TopBanner";
+import RightBanner from "../general_components/banners/RightBanner";
 import Link from "next/link";
  
 const geistSans = Geist({
@@ -31,10 +33,9 @@ export default function RootLayout({
       >
         <div className="flex flex-col ">
           <div className="fixed top-0 left-0 right-0 z-50">
-            <nav className="bg-gray-100 w-full">
-              <div className="h-16 md:h-20 flex items-center justify-center">
-              </div>
-            </nav>
+            <div className="bg-gray-100 w-full">
+              <TopBanner />
+            </div>
             <Topnav />
           </div>
           <div className="flex flex-row  bg-gray-100 min-h-screen text-gray-600 pt-48">
@@ -61,7 +62,7 @@ export default function RootLayout({
             </div>
             {/* Sidebar de banners - 3/10 en desktop/tablet, oculto en móvil */}
             <div className="hidden md:block w-[20%] flex-shrink-0 pl-6 bg-white">
-              {/* Espacio para banners laterales - puedes agregar contenido aquí */}
+              <RightBanner />
             </div>
           </div>
         </div>

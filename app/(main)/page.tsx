@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import ArticleMiniature from "./main_components/ArticleMiniature";
+import MidBanner from "../general_components/banners/MidBanner";
 import { ArticleService } from "@/service/ArticleService";
 
 export default function Home() {
@@ -41,6 +42,22 @@ export default function Home() {
 
   const validArticles = allArticles.filter((a: any) => a && a.id_article && a.articleTitle);
 
+  const gridItems = useMemo(() => {
+    const items: Array<
+      | { type: "banner" }
+      | { type: "article"; article: any; index: number }
+    > = [];
+    for (let i = 0; i < validArticles.length; i += 3) {
+      items.push({ type: "banner" });
+      const chunk = validArticles.slice(i, i + 3);
+      chunk.forEach((a: any, j: number) =>
+        items.push({ type: "article", article: a, index: i + j })
+      );
+      items.push({ type: "banner" });
+    }
+    return items;
+  }, [validArticles]);
+
   return (
     <div className="min-h-screen bg-white">
 
@@ -58,16 +75,22 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
-            {validArticles.map((a: any, index: number) => (
-              <ArticleMiniature
-                key={a.id_article || index}
-                id_article={a.id_article || ""}
-                titulo={a.articleTitle || ""}
-                company={a.company || ""}
-                date={a.date || ""}
-                imageUrl={a.article_main_image_url || ""}
-              />
-            ))}
+            {gridItems.map((item, idx) =>
+              item.type === "banner" ? (
+                <div key={`mid-banner-${idx}`} className="col-span-1 md:col-span-2 lg:col-span-3">
+                  <MidBanner />
+                </div>
+              ) : (
+                <ArticleMiniature
+                  key={item.article.id_article || item.index}
+                  id_article={item.article.id_article || ""}
+                  titulo={item.article.articleTitle || ""}
+                  company={item.article.company || ""}
+                  date={item.article.date || ""}
+                  imageUrl={item.article.article_main_image_url || ""}
+                />
+              )
+            )}
           </div>
         )}
       </main>
