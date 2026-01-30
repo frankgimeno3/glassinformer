@@ -12,12 +12,12 @@ const Login: FC<LoginProps> = ({ }) => {
             <form // onSubmit={handleLogin}
                 className="flex flex-col gap-4 bg-gray-900 p-8 rounded shadow-md w-full max-w-md" >
                 <h2 className="text-2xl text-white font-semibold mb-4 text-center">
-                    Ingrese email y contraseña
+                    Enter your email and password
                 </h2>
 
                 <input
                     type="text"
-                    placeholder="Introduzca su email"
+                    placeholder="Enter your email"
                     // value={employeeNumber}
                     // onChange={(e) => setEmployeeNumber(e.target.value)}
                     className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400"
@@ -27,7 +27,7 @@ const Login: FC<LoginProps> = ({ }) => {
                 <div className="relative">
                     <input
                         // type={showPassword ? 'text' : 'password'}
-                        placeholder="Introduzca su contraseña"
+                        placeholder="Enter your password"
                         // value={password}
                         // onChange={(e) => setPassword(e.target.value)}
                         className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400 w-full pr-10"
@@ -53,7 +53,7 @@ const Login: FC<LoginProps> = ({ }) => {
                                 </svg>
                             )} */}
                     </button>
-                   
+
                 </div>
 
                 {/* {error && (
@@ -67,18 +67,19 @@ const Login: FC<LoginProps> = ({ }) => {
                     type="submit"
                     className="bg-white text-black py-2 rounded hover:bg-gray-300 transition cursor-pointer"
                 >
-                    Identificarse
+                    Log in
                 </button>
 
                 <p className='text-xs text-white'>
-                    Si no recuerda su contraseña, puede crear una nueva aquí:  <a className=' font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer'>
-                        He olvidado mi contraseña
-                        </a>
+                    If you forgot your password, you can create a new one here:
+                    <a href='/auth/forgot' className=' font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer'>
+                        I forgot my password
+                    </a>
                 </p>
             </form>
             <div className='flex flex-col py-5 text-gray-500 text-center text-sm'>
-                <p className='text-xs pb-1'>No tiene cuenta?</p>
-                <BasicButton textContent='Crear una cuenta  ' urlRedirection='/auth/signup'/>
+                <p className='text-xs pb-1'> Don't have an account?</p>
+                <BasicButton textContent='Create an account  ' urlRedirection='/auth/signup' />
             </div>
         </div>
     );
