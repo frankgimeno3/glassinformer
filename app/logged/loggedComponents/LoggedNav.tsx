@@ -64,8 +64,7 @@ const LoggedNav: FC<LoggedNavProps> = ({ }) => {
                         isLogged ?
                             <div className='flex flex-row items-center gap-5 text-sm text-gray-500 uppercase tracking-wider font-sans'>
                                 <BasicButton textContent='Mediakit' urlRedirection='/logged/mediakit' />
-                                <BasicButton textContent='My Suscriptions' urlRedirection='/logged/subscriptions' />
-                                <BasicButton textContent='My Company' urlRedirection='/logged/companies' />
+                                <BasicButton textContent='My Companies' urlRedirection='/logged/companies' />
                                 <BasicButton textContent='My Profile' urlRedirection='/logged/profile' />
                                 <BasicButton textContent='Settings' urlRedirection='/logged/settings' />
                                 <BasicButton textContent='Logout' urlRedirection='/' />

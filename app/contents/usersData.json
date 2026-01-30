@@ -9,7 +9,9 @@
             { "from": "2022", "to": "Present", "company name": "GlassTech Solutions", "position": "CEO", "description": "Leading the company's strategic direction and sustainable glass initiatives." }
         ],
         "userMainImageSrc": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
-        "userDescription": "Executive with over 15 years in the glass industry. Passionate about sustainable manufacturing and innovation in architectural and automotive glass."
+        "userDescription": "Executive with over 15 years in the glass industry. Passionate about sustainable manufacturing and innovation in architectural and automotive glass.",
+        "interestedTopics": ["Architectural glass", "Automotive glass", "Smart glass", "Energy-efficient glazing", "Float glass", "Tempered glass", "Glass coatings", "Glass machinery", "Glass components", "Flat glass"],
+        "DoNotShow": ["Glass recycling", "Decorative glass"]
     },
     {
         "id_user": "user-002",
