@@ -1,0 +1,51 @@
+"use client";
+
+import { memo } from "react";
+
+interface PublicationFlipbookProps {
+  title: string;
+}
+
+const PAGE_OFFSET = "0.25rem";
+
+const PublicationFlipbook = memo<PublicationFlipbookProps>(({ title }) => {
+  return (
+    <div
+      className="mx-auto w-full relative aspect-[3/4] overflow-visible group/flipbook"
+      style={{ perspective: "1200px" }}
+    >
+      {/* Páginas de atrás (se ven al pasar la portada) */}
+ 
+            <div
+        className="absolute top-0 left-1 h-full w-full rounded-xs bg-gray-100 border border-gray-200 z-3"
+      />
+            <div
+          className="absolute top-0 left-2 h-full w-full rounded-xs bg-gray-100 border border-gray-200 z-2"
+      />
+            <div
+        className="absolute top-0 left-3 h-full w-full rounded-xs bg-gray-100 border border-gray-200 z-1"
+      />
+       
+
+      {/* Portada: gira desde el borde izquierdo al hacer hover */}
+      <div
+        className="absolute top-0 left-0 w-full h-full rounded-r-xs z-10 transition-transform duration-[600ms] ease-[cubic-bezier(0.25,0.46,0.45,0.94)] origin-left group-hover/flipbook:rotate-y-[-24deg]"
+        style={{ transformStyle: "preserve-3d" }}
+      >
+        <div
+          className="w-full h-full bg-black flex items-center justify-center text-white text-base sm:text-lg px-2 rounded-r-xs shadow-lg"
+          style={{
+            backfaceVisibility: "hidden",
+            boxShadow: "2px 2px 12px rgba(0,0,0,0.2)",
+          }}
+        >
+          {title}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+PublicationFlipbook.displayName = "PublicationFlipbook";
+
+export default PublicationFlipbook;

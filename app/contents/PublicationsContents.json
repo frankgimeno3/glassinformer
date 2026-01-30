@@ -1,38 +1,98 @@
 [
   {
+    "number": 213,
     "title": "Glassinformer 213",
     "description": "Glassinformer is a digital magazine about the glass industry.",
     "url": "https://flipbook.vidrioperfil.es/vidrio_es_213.html",
-    "year": 2024
+    "year": 2024,
+    "publicationDate": "2024-03-15"
   },
   {
+    "number": 212,
     "title": "Glassinformer 212",
     "description": "Glassinformer is a digital magazine about the glass industry.",
     "url": "https://glassinformer.com",
-    "year": 2024
+    "year": 2024,
+    "publicationDate": "2024-02-10"
   },
   {
+    "number": 211,
     "title": "Glassinformer 211",
     "description": "Glassinformer is a digital magazine about the glass industry.",
     "url": "https://glassinformer.com",
-    "year": 2024
+    "year": 2024,
+    "publicationDate": "2024-01-08"
   },
   {
+    "number": 210,
     "title": "Glassinformer 210",
     "description": "Glassinformer is a digital magazine about the glass industry.",
     "url": "https://glassinformer.com",
-    "year": 2023
+    "year": 2023,
+    "publicationDate": "2023-12-05"
   },
   {
+    "number": 209,
     "title": "Glassinformer 209",
     "description": "Glassinformer is a digital magazine about the glass industry.",
     "url": "https://glassinformer.com",
-    "year": 2023
+    "year": 2023,
+    "publicationDate": "2023-11-12"
   },
   {
+    "number": 208,
     "title": "Glassinformer 208",
     "description": "Glassinformer is a digital magazine about the glass industry.",
     "url": "https://glassinformer.com",
-    "year": 2023
+    "year": 2023,
+    "publicationDate": "2023-10-20"
+  },
+  {
+    "number": 207,
+    "title": "Glassinformer 207",
+    "description": "Glassinformer is a digital magazine about the glass industry.",
+    "url": "https://glassinformer.com",
+    "year": 2023,
+    "publicationDate": "2023-09-15"
+  },
+  {
+    "number": 206,
+    "title": "Glassinformer 206",
+    "description": "Glassinformer is a digital magazine about the glass industry.",
+    "url": "https://glassinformer.com",
+    "year": 2023,
+    "publicationDate": "2023-08-10"
+  },
+  {
+    "number": 205,
+    "title": "Glassinformer 205",
+    "description": "Glassinformer is a digital magazine about the glass industry.",
+    "url": "https://glassinformer.com",
+    "year": 2023,
+    "publicationDate": "2023-07-05"
+  },
+  {
+    "number": 204,
+    "title": "Glassinformer 204",
+    "description": "Glassinformer is a digital magazine about the glass industry.",
+    "url": "https://glassinformer.com",
+    "year": 2023,
+    "publicationDate": "2023-06-01"
+  },
+  {
+    "number": 203,
+    "title": "Glassinformer 203",
+    "description": "Glassinformer is a digital magazine about the glass industry.",
+    "url": "https://glassinformer.com",
+    "year": 2023,
+    "publicationDate": "2023-05-12"
+  },
+  {
+    "number": 202,
+    "title": "Glassinformer 202",
+    "description": "Glassinformer is a digital magazine about the glass industry.",
+    "url": "https://glassinformer.com",
+    "year": 2023,
+    "publicationDate": "2023-04-18"
   }
 ]
