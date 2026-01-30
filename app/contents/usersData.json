@@ -1,0 +1,114 @@
+[
+    {
+        "id_user": "user-001",
+        "userName": "James",
+        "userSurnames": "Mitchell",
+        "userCurrentCompany": { "id_company": "comp-26-0001", "userPosition": "CEO" },
+        "experienceArray": [
+            { "from": "2018", "to": "2022", "company name": "EuroGlass Industries", "position": "Regional Director", "description": "Led sales and operations for Northern Europe." },
+            { "from": "2022", "to": "Present", "company name": "GlassTech Solutions", "position": "CEO", "description": "Leading the company's strategic direction and sustainable glass initiatives." }
+        ],
+        "userMainImageSrc": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+        "userDescription": "Executive with over 15 years in the glass industry. Passionate about sustainable manufacturing and innovation in architectural and automotive glass."
+    },
+    {
+        "id_user": "user-002",
+        "userName": "Sarah",
+        "userSurnames": "Chen",
+        "userCurrentCompany": { "id_company": "comp-26-0001", "userPosition": "CTO" },
+        "experienceArray": [
+            { "from": "2015", "to": "2020", "company name": "Global Glass Innovations", "position": "Lead Engineer", "description": "Developed smart glass and coating technologies." },
+            { "from": "2020", "to": "Present", "company name": "GlassTech Solutions", "position": "CTO", "description": "Driving R&D and technology strategy." }
+        ],
+        "userMainImageSrc": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
+        "userDescription": "Technology leader focused on glass innovation, energy-efficient glazing, and advanced coatings. PhD in Materials Science."
+    },
+    {
+        "id_user": "user-003",
+        "userName": "Michael",
+        "userSurnames": "Weber",
+        "userCurrentCompany": { "id_company": "comp-26-0002", "userPosition": "sales" },
+        "experienceArray": [
+            { "from": "2019", "to": "Present", "company name": "EuroGlass Industries", "position": "sales", "description": "B2B sales for construction and industrial glass in DACH region." }
+        ],
+        "userMainImageSrc": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+        "userDescription": "Sales professional with expertise in high-performance glass for construction and industrial applications."
+    },
+    {
+        "id_user": "user-004",
+        "userName": "Elena",
+        "userSurnames": "Rodriguez",
+        "userCurrentCompany": { "id_company": "comp-26-0002", "userPosition": "accounting" },
+        "experienceArray": [
+            { "from": "2017", "to": "Present", "company name": "EuroGlass Industries", "position": "accounting", "description": "Financial reporting and cost control for European operations." }
+        ],
+        "userMainImageSrc": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
+        "userDescription": "Certified accountant with experience in manufacturing and international finance."
+    },
+    {
+        "id_user": "user-005",
+        "userName": "Wei",
+        "userSurnames": "Zhang",
+        "userCurrentCompany": { "id_company": "comp-26-0003", "userPosition": "CEO" },
+        "experienceArray": [
+            { "from": "2010", "to": "Present", "company name": "AsiaGlass Manufacturing", "position": "CEO", "description": "Founded and scaled one of Asia's largest glass producers." }
+        ],
+        "userMainImageSrc": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
+        "userDescription": "Entrepreneur and industry veteran in flat glass, automotive glass, and specialty electronics glass."
+    },
+    {
+        "id_user": "user-006",
+        "userName": "Yuki",
+        "userSurnames": "Tanaka",
+        "userCurrentCompany": { "id_company": "comp-26-0003", "userPosition": "sales" },
+        "experienceArray": [
+            { "from": "2021", "to": "Present", "company name": "AsiaGlass Manufacturing", "position": "sales", "description": "Sales and client relations for electronics and automotive segments." }
+        ],
+        "userMainImageSrc": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop",
+        "userDescription": "Sales specialist in specialty glass for electronics and automotive markets across Asia."
+    },
+    {
+        "id_user": "user-007",
+        "userName": "David",
+        "userSurnames": "Thompson",
+        "userCurrentCompany": { "id_company": "comp-26-0004", "userPosition": "CTO" },
+        "experienceArray": [
+            { "from": "2016", "to": "Present", "company name": "Pacific Glass Works", "position": "CTO", "description": "Overseeing technical development and custom glass solutions for Oceania." }
+        ],
+        "userMainImageSrc": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop",
+        "userDescription": "Engineer and technology leader with focus on architectural and residential glass solutions."
+    },
+    {
+        "id_user": "user-008",
+        "userName": "Carmen",
+        "userSurnames": "Silva",
+        "userCurrentCompany": { "id_company": "comp-26-0005", "userPosition": "accounting" },
+        "experienceArray": [
+            { "from": "2018", "to": "Present", "company name": "LatinGlass Corp", "position": "accounting", "description": "Financial operations for Latin American glass production." }
+        ],
+        "userMainImageSrc": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop",
+        "userDescription": "Finance professional with experience in manufacturing and regional markets."
+    },
+    {
+        "id_user": "user-009",
+        "userName": "Thabo",
+        "userSurnames": "Mbeki",
+        "userCurrentCompany": { "id_company": "comp-26-0006", "userPosition": "sales" },
+        "experienceArray": [
+            { "from": "2019", "to": "Present", "company name": "African Glass Industries", "position": "sales", "description": "Business development for container and architectural glass in Africa." }
+        ],
+        "userMainImageSrc": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop",
+        "userDescription": "Sales and business development professional focused on African glass markets."
+    },
+    {
+        "id_user": "user-010",
+        "userName": "Emma",
+        "userSurnames": "Wilson",
+        "userCurrentCompany": { "id_company": "comp-26-0007", "userPosition": "CEO" },
+        "experienceArray": [
+            { "from": "2012", "to": "Present", "company name": "Global Glass Innovations", "position": "CEO", "description": "Leading international glass technology and smart glass development." }
+        ],
+        "userMainImageSrc": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop",
+        "userDescription": "CEO of an international glass technology company. Expert in smart glass, energy-efficient glazing, and advanced coatings."
+    }
+]

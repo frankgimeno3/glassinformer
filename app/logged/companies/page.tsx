@@ -1,12 +1,80 @@
-import React, { FC } from 'react';
+"use client";
 
-interface MyCompaniesProps {
-  
+import React, { FC, useMemo } from "react";
+import Link from "next/link";
+import { DEFAULT_USER_ID } from "../constants";
+import companiesContents from "../../contents/companiesContents.json";
+
+interface UserInCompany {
+  id_user: string;
+  userPosition: string;
+  userRole: string;
 }
 
-const MyCompanies: FC<MyCompaniesProps> = ({ }) => {
+interface CompanyItem {
+  id_company: string;
+  company_name: string;
+  main_description: string;
+  userArray?: UserInCompany[];
+}
+
+const MyCompanies: FC = () => {
+  const companies = companiesContents as CompanyItem[];
+  const myCompanies = useMemo(
+    () =>
+      companies.filter(
+        (c) =>
+          Array.isArray(c.userArray) &&
+          c.userArray.some((u) => u.id_user === DEFAULT_USER_ID)
+      ),
+    [companies]
+  );
+
   return (
-    <div>MyCompanies</div>
+    <div className="p-6">
+      <h1 className="text-2xl font-serif font-bold text-gray-900 mb-6 uppercase tracking-wider">
+        My Company
+      </h1>
+
+      {myCompanies.length > 0 ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {myCompanies.map((company) => (
+            <Link
+              key={company.id_company}
+              href={`/logged/companies/${company.id_company}`}
+              className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow block"
+            >
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                {company.company_name}
+              </h2>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                {company.main_description}
+              </p>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-8 text-center max-w-lg mx-auto">
+          <p className="text-gray-600 mb-6">
+            You still don&apos;t appear as an employee of any company.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/logged/companies/create"
+              className="px-4 py-2 rounded-lg bg-blue-950 hover:bg-blue-950/90 text-white text-center uppercase tracking-wider"
+            >
+              Create company
+            </Link>
+            <Link
+              href="/logged/companies/join"
+              className="px-4 py-2 rounded-lg border border-blue-950 text-blue-950 hover:bg-blue-950/10 text-center uppercase tracking-wider"
+            >
+              Join company
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
