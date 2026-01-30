@@ -31,11 +31,11 @@ const MyCompanies: FC = () => {
   );
 
   return (
-    <div className="p-6">
+    <div className="p-12 bg-white min-h-screen">
       <h1 className="text-2xl font-serif font-bold text-gray-900 mb-6 uppercase tracking-wider">
-        My Company
+        Companies in which you are an employee
       </h1>
-
+ 
       {myCompanies.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
           {myCompanies.map((company) => (

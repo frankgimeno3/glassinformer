@@ -45,16 +45,16 @@ export default function RootLayout({
               <div className="flex flex-col">
                 {/* Navegación */}
                 <div className='flex flex-row text-sm text-gray-500 uppercase tracking-wider font-sans text-white bg-white mb-4'>
-                  <Link href='/' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
+                  <Link href='/logged/' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
                     Home
                   </Link>
-                  <Link href='/publications' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
+                  <Link href='/logged/publications' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
                     Publications
                   </Link>
-                  <Link href='/directory' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
+                  <Link href='/logged/directory' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
                     Directory
                   </Link>
-                  <Link href='/events' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
+                  <Link href='/logged/events' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
                     Events
                   </Link>
                 </div>

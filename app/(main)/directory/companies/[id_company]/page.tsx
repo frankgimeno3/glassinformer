@@ -99,12 +99,18 @@ const CompanyProfile: FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
-        <button
-          onClick={() => router.push("/directory")}
-          className="mb-6 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm"
-        >
-          ← Back to Directory
-        </button>
+        <div className="flex flex-col gap-2">
+          <Link href={"/logged/companies"}
+            className=" px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm w-50"
+          >
+            ← Back to my companies
+          </Link>
+          <Link href={"/directory"}
+            className="mb-6 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm w-50"
+          >
+            ← Back to Directory
+          </Link>
+        </div>
 
         <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-8">
           {company.company_name}
