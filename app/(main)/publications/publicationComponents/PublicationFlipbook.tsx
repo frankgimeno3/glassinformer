@@ -4,11 +4,12 @@ import { memo } from "react";
 
 interface PublicationFlipbookProps {
   title: string;
+  imageUrl?: string;
 }
 
 const PAGE_OFFSET = "0.25rem";
 
-const PublicationFlipbook = memo<PublicationFlipbookProps>(({ title }) => {
+const PublicationFlipbook = memo<PublicationFlipbookProps>(({ title, imageUrl }) => {
   return (
     <div
       className="mx-auto w-full relative aspect-[3/4] overflow-visible group/flipbook"
@@ -33,13 +34,20 @@ const PublicationFlipbook = memo<PublicationFlipbookProps>(({ title }) => {
         style={{ transformStyle: "preserve-3d" }}
       >
         <div
-          className="w-full h-full bg-black flex items-center justify-center text-white text-base sm:text-lg px-2 rounded-r-xs shadow-lg"
+          className="w-full h-full flex items-center justify-center text-base sm:text-lg px-2 rounded-r-xs shadow-lg overflow-hidden bg-gray-900"
           style={{
             backfaceVisibility: "hidden",
             boxShadow: "2px 2px 12px rgba(0,0,0,0.2)",
+            ...(imageUrl
+              ? {
+                  backgroundImage: `url(${imageUrl})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }
+              : {}),
           }}
         >
-          {title}
+          {imageUrl ? null : <span className="text-white">{title}</span>}
         </div>
       </div>
     </div>

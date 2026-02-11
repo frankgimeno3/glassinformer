@@ -1,13 +1,13 @@
 "use client";
 
-import { FC, useState, useMemo } from "react";
-import publicationsData from "@/app/contents/PublicationsContents.json";
+import { FC, useState, useMemo, useEffect } from "react";
 import PublicationFilter, {
   type PublicationFilterState,
 } from "./publicationComponents/PublicationFilter";
 import PublicationCard, {
   type Publication,
 } from "./publicationComponents/PublicationCard";
+import { PublicationService } from "@/service/PublicationService";
 
 interface PublicationsProps {}
 
@@ -20,11 +20,55 @@ const DEFAULT_FILTER: PublicationFilterState = {
   dateTo: "",
 };
 
+function normalizePublication(raw: any): Publication | null {
+  if (!raw) return null;
+  const num =
+    raw.number ??
+    raw.number_publication ??
+    raw.número;
+  const numValue = num !== undefined && num !== null ? Number(num) : NaN;
+  const publicationDate =
+    raw.date ?? raw.publicationDate ?? raw.publication_date ?? "";
+  if (!publicationDate && !raw.redirectionLink) return null;
+  const dateForYear = publicationDate ? new Date(publicationDate) : new Date();
+  return {
+    id: raw.id_publication ?? undefined,
+    number: Number.isNaN(numValue) ? 0 : numValue,
+    title: raw.revista ?? raw.title ?? "",
+    description: raw.description ?? "",
+    redirection_link: raw.redirection_link ?? raw.redirectionLink ?? "",
+    year: dateForYear.getFullYear(),
+    publicationDate,
+    publicationMainImageUrl: raw.publication_main_image_url ?? "",
+  };
+}
+
 const Publications: FC<PublicationsProps> = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<PublicationFilterState>(DEFAULT_FILTER);
+  const [publications, setPublications] = useState<Publication[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const typedData = publicationsData as Publication[];
+  useEffect(() => {
+    const fetchPublications = async () => {
+      try {
+        const data = await PublicationService.getAllPublications();
+        const list = Array.isArray(data) ? data : [];
+        const valid = list
+          .map(normalizePublication)
+          .filter((p): p is Publication => p !== null);
+        setPublications(valid);
+      } catch (error) {
+        console.error("Error fetching publications:", error);
+        setPublications([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPublications();
+  }, []);
+
+  const typedData = publications;
 
   const availableNumbers = useMemo(() => {
     const nums = [...new Set(typedData.map((p) => p.number))].sort((a, b) => b - a);
@@ -119,12 +163,22 @@ const Publications: FC<PublicationsProps> = () => {
         availableYears={availableYears}
       />
 
+      {loading ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500">Cargando publicaciones...</p>
+        </div>
+      ) : filteredPublications.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 w-full">
+          <p className="text-gray-500 text-lg">No se encontraron publicaciones</p>
+        </div>
+      ) : (
+      <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-[1600px] mx-auto justify-items-center">
-        {currentPublications.map((item) => {
+        {currentPublications.map((item, index) => {
           if ("type" in item && item.type === "separator") {
             return (
               <div
-                key={`separator-${item.year}`}
+                key={`separator-${item.year}-${index}`}
                 className="col-span-full text-center my-6"
               >
                 <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 border-b-2 border-gray-300 pb-4 inline-block px-8">
@@ -136,7 +190,7 @@ const Publications: FC<PublicationsProps> = () => {
           const publication = item as Publication;
           return (
             <div
-              key={`${publication.number}-${publication.publicationDate}`}
+              key={publication.id ?? `pub-${index}`}
               className="w-full flex justify-center min-w-0"
             >
               <PublicationCard publication={publication} />
@@ -172,6 +226,8 @@ const Publications: FC<PublicationsProps> = () => {
           Siguiente
         </button>
       </div>
+      </>
+      )}
     </div>
   );
 };
