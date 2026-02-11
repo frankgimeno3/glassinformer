@@ -66,6 +66,17 @@ const Article = () => {
     );
   }
 
+  const renderHtml = (html: string | undefined) => {
+    if (html == null || html === "") return null;
+    const str = typeof html === "string" ? html : String(html);
+    return (
+      <div
+        className="article-body max-w-4xl"
+        dangerouslySetInnerHTML={{ __html: str }}
+      />
+    );
+  };
+
   const renderContent = (contentId: string) => {
     const contentData = contents.find((c: any) => c.content_id === contentId);
 
@@ -79,53 +90,53 @@ const Article = () => {
 
     const { content_type, content_content } = contentData;
 
-     if (content_type === "just_text") {
+    if (content_type === "just_text") {
       return (
-        <div className="w-full flex justify-center">
-          <p className="text-center max-w-2xl">{content_content.center}</p>
+        <div className="w-full flex justify-start">
+          {renderHtml(content_content?.center)}
         </div>
       );
     }
 
-     if (content_type === "just_image") {
+    if (content_type === "just_image") {
       return (
-        <div className="w-full flex justify-center">
-          <img 
-            src={content_content.center} 
+        <div className="w-full flex justify-start">
+          <img
+            src={content_content?.center}
             alt="content image"
-            className="max-w-md w-full"
+            className="w-full max-w-4xl rounded-lg object-contain"
           />
         </div>
       );
     }
 
-     if (content_type === "text_image") {
+    if (content_type === "text_image") {
       return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-          <p>{content_content.left}</p>
-          <img 
-            src={content_content.right}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+          <div className="min-w-0">{renderHtml(content_content?.left)}</div>
+          <img
+            src={content_content?.right}
             alt="content image"
-            className="w-full rounded-md"
+            className="w-full max-w-2xl rounded-lg object-contain"
           />
         </div>
       );
     }
 
-     if (content_type === "image_text") {
+    if (content_type === "image_text") {
       return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-          <img 
-            src={content_content.left}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+          <img
+            src={content_content?.left}
             alt="content image"
-            className="w-full rounded-md"
+            className="w-full max-w-2xl rounded-lg object-contain"
           />
-          <p>{content_content.right}</p>
+          <div className="min-w-0">{renderHtml(content_content?.right)}</div>
         </div>
       );
     }
 
-     return (
+    return (
       <div className="p-4 bg-yellow-100 text-yellow-700 rounded-md">
         ⚠ Unknown content type: {content_type}
       </div>
@@ -156,14 +167,11 @@ const Article = () => {
         ))}
       </div>
 
-      <div className="mt-8 flex flex-col gap-6">
+      <div className="mt-8 flex flex-col gap-8 max-w-4xl">
         {(selectedArticle.contents_array || []).map((contentId: string) => (
-          <div 
-            key={contentId} 
-            className="p-6 bg-gray-100 rounded-md shadow flex flex-col gap-4"
-          >
+          <section key={contentId} className="flex flex-col gap-4">
             {renderContent(contentId)}
-          </div>
+          </section>
         ))}
       </div>
 

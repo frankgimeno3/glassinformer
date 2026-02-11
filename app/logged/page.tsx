@@ -4,9 +4,7 @@ import React, { FC } from 'react';
 import Home from '../(main)/page';
 import Link from 'next/link';
 
-interface LoggedProps {
-  
-}
+interface LoggedProps { }
 
 const Logged: FC<LoggedProps> = ({ }) => {
   return (

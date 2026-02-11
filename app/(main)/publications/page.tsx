@@ -1,4 +1,5 @@
 "use client";
+
 import { FC, useState, useMemo } from "react";
 import publicationsData from "@/app/contents/PublicationsContents.json";
 import PublicationFilter, {
