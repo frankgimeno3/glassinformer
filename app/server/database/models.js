@@ -85,6 +85,10 @@ ArticleModel.init({
     contents_array: {
         type: DataTypes.ARRAY(DataTypes.STRING),
         defaultValue: []
+    },
+    highlited_position: {
+        type: DataTypes.STRING,
+        defaultValue: ""
     }
 }, {
     sequelize,

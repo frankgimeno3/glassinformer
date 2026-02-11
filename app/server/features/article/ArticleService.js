@@ -22,6 +22,7 @@ function getFallbackArticles() {
             date: article.date || new Date().toISOString().split('T')[0],
             article_tags_array: article.article_tags_array || [],
             contents_array: article.contents_array || [],
+            highlited_position: article.highlited_position ?? '',
             isEventNews: article.isEventNews || false,
             article_countries_array: article.article_countries_array || [],
             article_region: article.article_region || '',
@@ -61,7 +62,8 @@ export async function getAllArticles() {
             company: article.company,
             date: article.date ? new Date(article.date).toISOString().split('T')[0] : null,
             article_tags_array: article.article_tags_array || [],
-            contents_array: article.contents_array || []
+            contents_array: article.contents_array || [],
+            highlited_position: article.highlited_position ?? ""
         }));
     } catch (error) {
         console.error('Error fetching articles from database:', error);
@@ -102,7 +104,8 @@ export async function getArticleById(idArticle) {
             company: article.company,
             date: article.date ? new Date(article.date).toISOString().split('T')[0] : null,
             article_tags_array: article.article_tags_array || [],
-            contents_array: article.contents_array || []
+            contents_array: article.contents_array || [],
+            highlited_position: article.highlited_position ?? ""
         };
     } catch (error) {
         console.error('Error fetching article from database:', error);
@@ -134,7 +137,8 @@ export async function createArticle(articleData) {
             company: articleData.company,
             date: articleData.date,
             article_tags_array: articleData.article_tags_array || [],
-            contents_array: articleData.contents_array || []
+            contents_array: articleData.contents_array || [],
+            highlited_position: articleData.highlited_position ?? ""
         });
         
         console.log(`[ArticleService] [${requestId}] Article created successfully:`, article.toJSON());
@@ -148,7 +152,8 @@ export async function createArticle(articleData) {
             company: article.company,
             date: article.date ? new Date(article.date).toISOString().split('T')[0] : null,
             article_tags_array: article.article_tags_array || [],
-            contents_array: article.contents_array || []
+            contents_array: article.contents_array || [],
+            highlited_position: article.highlited_position ?? ""
         };
     } catch (error) {
         console.error(`[ArticleService] [${requestId}] Error creating article in database`);
@@ -204,6 +209,7 @@ export async function updateArticle(idArticle, articleData) {
         if (articleData.date !== undefined) article.date = articleData.date;
         if (articleData.article_tags_array !== undefined) article.article_tags_array = articleData.article_tags_array;
         if (articleData.contents_array !== undefined) article.contents_array = articleData.contents_array;
+        if (articleData.highlited_position !== undefined) article.highlited_position = articleData.highlited_position;
         
         await article.save();
         
@@ -216,7 +222,8 @@ export async function updateArticle(idArticle, articleData) {
             company: article.company,
             date: article.date ? new Date(article.date).toISOString().split('T')[0] : null,
             article_tags_array: article.article_tags_array || [],
-            contents_array: article.contents_array || []
+            contents_array: article.contents_array || [],
+            highlited_position: article.highlited_position ?? ""
         };
     } catch (error) {
         console.error('Error updating article in database:', error);
@@ -242,7 +249,8 @@ export async function deleteArticle(idArticle) {
             company: article.company,
             date: article.date ? new Date(article.date).toISOString().split('T')[0] : null,
             article_tags_array: article.article_tags_array || [],
-            contents_array: article.contents_array || []
+            contents_array: article.contents_array || [],
+            highlited_position: article.highlited_position ?? ""
         };
     } catch (error) {
         console.error('Error deleting article from database:', error);
