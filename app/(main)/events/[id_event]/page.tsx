@@ -3,6 +3,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { EventService } from '@/service/EventService';
+import EventContactForm from '../EventContactForm';
 
 interface Event {
   id_fair: string;
@@ -148,6 +149,8 @@ const IdEvent: FC = () => {
             <p><span className="font-semibold">End Date:</span> {formatDate(event.end_date)}</p>
           </div>
         </div>
+
+        <EventContactForm />
       </div>
     </div>
   );
