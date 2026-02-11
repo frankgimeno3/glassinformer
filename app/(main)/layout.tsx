@@ -4,6 +4,7 @@ import "../globals.css";
 import Topnav from "../general_components/navs/Topnav";
 import TopBanner from "../general_components/banners/TopBanner";
 import RightBanner from "../general_components/banners/RightBanner";
+import Footer from "../general_components/navs/footers/Footer";
 import Link from "next/link";
  
 const geistSans = Geist({
@@ -58,6 +59,7 @@ export default function RootLayout({
                   </Link>
                 </div>
                 {children}
+                <Footer />
               </div>
             </div>
             {/* Sidebar de banners - 3/10 en desktop/tablet, oculto en móvil */}

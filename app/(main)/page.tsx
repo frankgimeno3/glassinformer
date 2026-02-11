@@ -6,7 +6,6 @@ import MidBanner from "../general_components/banners/MidBanner";
 import { ArticleService } from "@/service/ArticleService";
 import MainNews from "./main_components/MainNews";
 import ShowMoreContent from "./main_components/ShowMoreContent";
-import Footer from "../general_components/navs/footers/Footer";
 
 export default function Home() {
   const [allArticles, setAllArticles] = useState<any[]>([]);
@@ -154,7 +153,6 @@ export default function Home() {
           </>
         )}
       </main>
-      <Footer />
     </div>
   );
 }
