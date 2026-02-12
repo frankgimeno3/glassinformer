@@ -3,9 +3,8 @@
 import React, { FC, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import companiesContents from "@/app/contents/companiesContents.json";
-import productsData from "@/app/contents/productsContents.json";
 import usersData from "@/app/contents/usersData.json";
+import { CompanyService } from "@/service/CompanyService";
 import CompanyContactForm from "../../components/CompanyContactForm";
 
 interface UserInCompany {
@@ -22,6 +21,7 @@ interface CompanyItem {
   region: string;
   productsArray: string[];
   userArray: UserInCompany[];
+  products?: Product[];
 }
 
 interface Product {
@@ -55,20 +55,26 @@ const CompanyProfile: FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (idCompany) {
-      const foundCompany = (companiesContents as CompanyItem[]).find(
-        (c) => c.id_company === idCompany
-      );
-
-      if (foundCompany) {
-        setCompany(foundCompany);
-        const companyProducts = (productsData as Product[]).filter(
-          (p) => p.id_company === foundCompany.id_company
-        );
-        setProducts(companyProducts);
-      }
+    if (!idCompany) {
       setLoading(false);
+      return;
     }
+    const fetchCompany = async () => {
+      try {
+        setLoading(true);
+        const data = await CompanyService.getCompanyById(idCompany);
+        setCompany(data);
+        setProducts(data?.products ?? []);
+      } catch (error: unknown) {
+        const err = error as { message?: string; data?: unknown; status?: number };
+        console.error("Error fetching company:", err?.message ?? err?.data ?? error);
+        setCompany(null);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCompany();
   }, [idCompany]);
 
   if (loading) {

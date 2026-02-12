@@ -1,9 +1,9 @@
 "use client";
 
-import React, { FC, useMemo } from "react";
+import React, { FC, useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { DEFAULT_USER_ID } from "../constants";
-import companiesContents from "../../contents/companiesContents.json";
+import { CompanyService } from "@/service/CompanyService";
 
 interface UserInCompany {
   id_user: string;
@@ -19,7 +19,24 @@ interface CompanyItem {
 }
 
 const MyCompanies: FC = () => {
-  const companies = companiesContents as CompanyItem[];
+  const [companies, setCompanies] = useState<CompanyItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const data = await CompanyService.getAllCompanies();
+        setCompanies(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching companies:", error);
+        setCompanies([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCompanies();
+  }, []);
+
   const myCompanies = useMemo(
     () =>
       companies.filter(
@@ -30,12 +47,20 @@ const MyCompanies: FC = () => {
     [companies]
   );
 
+  if (loading) {
+    return (
+      <div className="p-12 bg-white min-h-screen">
+        <p className="text-gray-600">Loading companies...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="p-12 bg-white min-h-screen">
       <h1 className="text-2xl font-serif font-bold text-gray-900 mb-6 uppercase tracking-wider">
         Companies in which you are an employee
       </h1>
- 
+
       {myCompanies.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
           {myCompanies.map((company) => (

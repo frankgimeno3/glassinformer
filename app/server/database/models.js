@@ -8,6 +8,8 @@ import ArticleModel from "../features/article/ArticleModel.js";
 import ContentModel from "../features/content/ContentModel.js";
 import EventModel from "../features/event/EventModel.js";
 import PublicationModel from "../features/publication/PublicationModel.js";
+import CompanyModel from "../features/company/CompanyModel.js";
+import ProductModel from "../features/product/ProductModel.js";
 import {defineAssociations} from "./associations.js";
 
 const database = Database.getInstance();
@@ -156,6 +158,83 @@ EventModel.init({
     ]
 });
 
+CompanyModel.init({
+    id_company: {
+        type: DataTypes.STRING,
+        primaryKey: true,
+        unique: true,
+        field: "company_id"
+    },
+    company_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        field: "commercial_name"
+    },
+    country: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    main_description: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    category: {
+        type: DataTypes.STRING,
+        allowNull: true
+    }
+}, {
+    sequelize,
+    modelName: 'company',
+    underscored: true,
+    timestamps: false,
+    indexes: [
+        { fields: ['country'] }
+    ]
+});
+
+ProductModel.init({
+    id_product: {
+        type: DataTypes.STRING,
+        primaryKey: true,
+        unique: true,
+        field: "product_id"
+    },
+    product_name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    product_description: {
+        type: DataTypes.TEXT
+    },
+    price: {
+        type: DataTypes.DECIMAL(12, 2),
+        allowNull: true
+    },
+    main_image_src: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    product_categories_array: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        allowNull: true,
+        defaultValue: [],
+        field: "product_categories_array"
+    },
+    id_company: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        field: "company"
+    }
+}, {
+    sequelize,
+    modelName: 'product',
+    underscored: true,
+    indexes: [
+        { fields: ['product_name'] },
+        { fields: ['id_company'] }
+    ]
+});
+
 ContentModel.init({
     content_id: {
         type: DataTypes.STRING,
@@ -217,4 +296,4 @@ PublicationModel.init({
 
 defineAssociations();
 
-export { TimeLogModel, ModificationModel, ArticleModel, ContentModel, EventModel, PublicationModel };
+export { TimeLogModel, ModificationModel, ArticleModel, ContentModel, EventModel, PublicationModel, CompanyModel, ProductModel };

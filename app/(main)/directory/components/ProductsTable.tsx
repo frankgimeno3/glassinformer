@@ -2,7 +2,7 @@
 
 import React, { FC, useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import productsData from '@/app/contents/productsContents.json';
+import { ProductService } from '@/service/ProductService';
 
 interface Product {
   id_product: string;
@@ -11,23 +11,46 @@ interface Product {
   tagsArray: string[];
   id_company: string;
   company_name: string;
+  price: number | null;
+  main_image_src: string;
 }
 
 const ProductsTable: FC = () => {
-  const [products] = useState<Product[]>(productsData as Product[]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setError(null);
+      try {
+        const data = await ProductService.getAllProducts();
+        setProducts(Array.isArray(data) ? data : []);
+      } catch (err: unknown) {
+        const message = err && typeof err === 'object' && 'message' in err ? String((err as { message: string }).message) : 'Error al cargar productos';
+        console.error('Error fetching products:', err);
+        setError(message);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const filteredProducts = useMemo(() => {
     if (!filter) return products;
     const lowerFilter = filter.toLowerCase();
     return products.filter(
       (product) =>
-        product.product_name.toLowerCase().includes(lowerFilter) ||
-        product.product_description.toLowerCase().includes(lowerFilter) ||
-        product.company_name.toLowerCase().includes(lowerFilter) ||
-        product.tagsArray.some((tag) => tag.toLowerCase().includes(lowerFilter))
+        (product.product_name ?? "").toLowerCase().includes(lowerFilter) ||
+        (product.product_description ?? "").toLowerCase().includes(lowerFilter) ||
+        (product.company_name ?? "").toLowerCase().includes(lowerFilter) ||
+        (product.tagsArray ?? []).some((tag) => String(tag).toLowerCase().includes(lowerFilter)) ||
+        (product.price != null && String(product.price).toLowerCase().includes(lowerFilter))
     );
   }, [products, filter]);
 
@@ -61,13 +84,25 @@ const ProductsTable: FC = () => {
         />
       </div>
 
+      {/* Loading */}
+      {loading && (
+        <div className='mb-6 text-center text-gray-600'>Loading products...</div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div className='mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700'>
+          {error}
+        </div>
+      )}
+
       {/* Table */}
       <div className='bg-white rounded-lg shadow overflow-hidden'>
         <table className='min-w-full divide-y divide-gray-200'>
           <thead className='bg-gray-50'>
             <tr>
               <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                Product Name
+                Product
               </th>
               <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                 Description
@@ -76,14 +111,17 @@ const ProductsTable: FC = () => {
                 Company
               </th>
               <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                Tags
+                Price
+              </th>
+              <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                Categories
               </th>
             </tr>
           </thead>
           <tbody className='bg-white divide-y divide-gray-200'>
             {paginatedProducts.length === 0 ? (
               <tr>
-                <td colSpan={4} className='px-6 py-4 text-center text-gray-500'>
+                <td colSpan={5} className='px-6 py-4 text-center text-gray-500'>
                   No products found
                 </td>
               </tr>
@@ -94,12 +132,25 @@ const ProductsTable: FC = () => {
                   className='hover:bg-gray-50 transition-colors'
                 >
                   <td className='px-6 py-4 whitespace-nowrap'>
-                    <Link
-                      href={`/directory/products/${product.id_product}`}
-                      className='text-blue-600 hover:text-blue-800 font-medium cursor-pointer'
-                    >
-                      {product.product_name}
-                    </Link>
+                    <div className='flex items-center gap-3'>
+                      {product.main_image_src ? (
+                        <img
+                          src={product.main_image_src}
+                          alt={product.product_name}
+                          className='h-10 w-10 rounded object-cover'
+                        />
+                      ) : (
+                        <div className='h-10 w-10 rounded bg-gray-200 flex items-center justify-center text-gray-400 text-xs'>
+                          —
+                        </div>
+                      )}
+                      <Link
+                        href={`/directory/products/${product.id_product}`}
+                        className='text-blue-600 hover:text-blue-800 font-medium cursor-pointer'
+                      >
+                        {product.product_name}
+                      </Link>
+                    </div>
                   </td>
                   <td className='px-6 py-4 text-sm text-gray-900 max-w-md truncate'>
                     {product.product_description}
@@ -107,9 +158,12 @@ const ProductsTable: FC = () => {
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
                     {product.company_name}
                   </td>
+                  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+                    {product.price != null ? `€${Number(product.price).toLocaleString('es-ES', { minimumFractionDigits: 2 })}` : '—'}
+                  </td>
                   <td className='px-6 py-4 text-sm text-gray-900'>
                     <div className='flex flex-wrap gap-1'>
-                      {product.tagsArray.map((tag, index) => (
+                      {(product.tagsArray ?? []).map((tag, index) => (
                         <span
                           key={index}
                           className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800'
@@ -117,6 +171,7 @@ const ProductsTable: FC = () => {
                           {tag}
                         </span>
                       ))}
+                      {(product.tagsArray ?? []).length === 0 && '—'}
                     </div>
                   </td>
                 </tr>

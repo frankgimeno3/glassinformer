@@ -3,7 +3,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import productsData from '@/app/contents/productsContents.json';
+import { ProductService } from '@/service/ProductService';
 import CompanyContactForm from '../../components/CompanyContactForm';
 
 interface Product {
@@ -13,6 +13,8 @@ interface Product {
   tagsArray: string[];
   id_company: string;
   company_name: string;
+  price: number | null;
+  main_image_src: string;
 }
 
 const ProductsPage: FC = () => {
@@ -24,13 +26,23 @@ const ProductsPage: FC = () => {
   const [showContactForm, setShowContactForm] = useState(false);
 
   useEffect(() => {
-    if (idProduct) {
-      const foundProduct = (productsData as Product[]).find(
-        (p) => p.id_product === idProduct
-      );
-      setProduct(foundProduct || null);
+    if (!idProduct) {
       setLoading(false);
+      return;
     }
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const data = await ProductService.getProductById(idProduct);
+        setProduct(data);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        setProduct(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
   }, [idProduct]);
 
   if (loading) {
@@ -73,21 +85,42 @@ const ProductsPage: FC = () => {
           {product.product_name}
         </h1>
 
-        {/* Product Information */}
-        <div className='bg-gray-50 rounded-lg p-6 mb-8'>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div>
-              <h3 className='text-sm font-semibold text-gray-500 uppercase mb-1'>Product ID</h3>
-              <p className='text-lg text-gray-900'>{product.id_product}</p>
+        {/* Product image and main info */}
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-8 mb-8'>
+          {product.main_image_src ? (
+            <div className='md:col-span-1'>
+              <img
+                src={product.main_image_src}
+                alt={product.product_name}
+                className='w-full rounded-lg shadow-md object-cover aspect-square'
+              />
             </div>
-            <div>
-              <h3 className='text-sm font-semibold text-gray-500 uppercase mb-1'>Company</h3>
-              <Link
-                href={`/directory/companies/${product.id_company}`}
-                className='text-lg text-blue-600 hover:text-blue-800 font-medium cursor-pointer'
-              >
-                {product.company_name}
-              </Link>
+          ) : null}
+          <div className={product.main_image_src ? 'md:col-span-2' : 'md:col-span-3'}>
+            <div className='bg-gray-50 rounded-lg p-6'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                {product.price != null && (
+                  <div>
+                    <h3 className='text-sm font-semibold text-gray-500 uppercase mb-1'>Price</h3>
+                    <p className='text-2xl font-semibold text-gray-900'>
+                      €{Number(product.price).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                )}
+                <div>
+                  <h3 className='text-sm font-semibold text-gray-500 uppercase mb-1'>Company</h3>
+                  <Link
+                    href={`/directory/companies/${product.id_company}`}
+                    className='text-lg text-blue-600 hover:text-blue-800 font-medium cursor-pointer'
+                  >
+                    {product.company_name}
+                  </Link>
+                </div>
+                <div>
+                  <h3 className='text-sm font-semibold text-gray-500 uppercase mb-1'>Product ID</h3>
+                  <p className='text-sm text-gray-600'>{product.id_product}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -95,21 +128,27 @@ const ProductsPage: FC = () => {
         {/* Description */}
         <div className='mb-8'>
           <h2 className='text-2xl font-bold text-gray-900 mb-4'>Description</h2>
-          <p className='text-gray-700 leading-relaxed'>{product.product_description}</p>
+          <p className='text-gray-700 leading-relaxed'>
+            {product.product_description || 'No description available.'}
+          </p>
         </div>
 
-        {/* Tags */}
+        {/* Categories */}
         <div className='mb-8'>
-          <h2 className='text-2xl font-bold text-gray-900 mb-4'>Tags</h2>
+          <h2 className='text-2xl font-bold text-gray-900 mb-4'>Categories</h2>
           <div className='flex flex-wrap gap-2'>
-            {product.tagsArray.map((tag, index) => (
-              <span
-                key={index}
-                className='inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800'
-              >
-                {tag}
-              </span>
-            ))}
+            {(product.tagsArray || []).length > 0 ? (
+              (product.tagsArray || []).map((tag, index) => (
+                <span
+                  key={index}
+                  className='inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800'
+                >
+                  {tag}
+                </span>
+              ))
+            ) : (
+              <span className='text-gray-500'>No categories</span>
+            )}
           </div>
         </div>
 

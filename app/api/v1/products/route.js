@@ -1,10 +1,10 @@
 import { createEndpoint } from "../../../server/createEndpoint.js";
 import { NextResponse } from "next/server";
-import { getAllCompanies } from "../../../server/features/company/CompanyService.js";
+import { getAllProducts } from "../../../server/features/product/ProductService.js";
 
 export const runtime = "nodejs";
 
 export const GET = createEndpoint(async () => {
-    const companies = await getAllCompanies();
-    return NextResponse.json(companies);
+    const products = await getAllProducts();
+    return NextResponse.json(products);
 }, null, false);

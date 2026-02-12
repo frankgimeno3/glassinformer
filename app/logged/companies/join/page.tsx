@@ -1,8 +1,8 @@
 "use client";
 
-import React, { FC, useState, useMemo } from "react";
+import React, { FC, useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import companiesContents from "../../../contents/companiesContents.json";
+import { CompanyService } from "@/service/CompanyService";
 import JoinRequestModal, { CompanyOption } from "./joinComponents/JoinRequestModal";
 
 interface CompanyItem {
@@ -15,8 +15,24 @@ const JoinCompany: FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<CompanyOption | null>(null);
+  const [companies, setCompanies] = useState<CompanyItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const companies = companiesContents as CompanyItem[];
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const data = await CompanyService.getAllCompanies();
+        setCompanies(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching companies:", error);
+        setCompanies([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCompanies();
+  }, []);
+
   const matches = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return [];

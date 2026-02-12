@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const apiClient = axios.create();
+const apiClient = axios.create({
+    baseURL: typeof window !== "undefined" ? window.location.origin : "",
+});
 
 apiClient.interceptors.request.use(config => {
     config.withCredentials = true;

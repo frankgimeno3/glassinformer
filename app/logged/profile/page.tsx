@@ -3,7 +3,7 @@
 import React, { FC, useState, useEffect, useCallback } from "react";
 import { DEFAULT_USER_ID } from "../constants";
 import usersData from "../../contents/usersData.json";
-import companiesContents from "../../contents/companiesContents.json";
+import { CompanyService } from "@/service/CompanyService";
 import UpdateImageModal from "./profileComponents/UpdateImageModal";
 import CompanyAddEditModal from "./profileComponents/CompanyAddEditModal";
 
@@ -33,12 +33,6 @@ interface UserData {
 interface CompanyEntry {
   id_company: string;
   company_name: string;
-}
-
-function getCompanyNameById(id: string): string {
-  const list = companiesContents as CompanyEntry[];
-  const found = list.find((c) => c.id_company === id);
-  return found?.company_name ?? id;
 }
 
 const Field: FC<{
@@ -89,6 +83,7 @@ const MyProfile: FC = () => {
   const [dirty, setDirty] = useState(false);
   const [updateImageOpen, setUpdateImageOpen] = useState(false);
   const [companyModalOpen, setCompanyModalOpen] = useState(false);
+  const [companiesList, setCompaniesList] = useState<CompanyEntry[]>([]);
 
   useEffect(() => {
     const data = usersData as UserData[];
@@ -103,6 +98,34 @@ const MyProfile: FC = () => {
       setCurrentCompanyPosition(found.userCurrentCompany?.userPosition ?? "");
     }
   }, []);
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const data = await CompanyService.getAllCompanies();
+        setCompaniesList(
+          Array.isArray(data)
+            ? data.map((c: { id_company: string; company_name: string }) => ({
+                id_company: c.id_company,
+                company_name: c.company_name,
+              }))
+            : []
+        );
+      } catch (error) {
+        console.error("Error fetching companies:", error);
+        setCompaniesList([]);
+      }
+    };
+    fetchCompanies();
+  }, []);
+
+  const getCompanyNameById = useCallback(
+    (id: string): string => {
+      const found = companiesList.find((c) => c.id_company === id);
+      return found?.company_name ?? id;
+    },
+    [companiesList]
+  );
 
   useEffect(() => {
     if (!user) return;

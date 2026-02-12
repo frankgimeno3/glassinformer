@@ -2,7 +2,7 @@
 
 import React, { FC, useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import companiesData from '@/app/contents/companiesContents.json';
+import { CompanyService } from '@/service/CompanyService';
 
 interface Company {
   id_company: string;
@@ -14,20 +14,40 @@ interface Company {
 }
 
 const CompaniesTable: FC = () => {
-  const [companies] = useState<Company[]>(companiesData as Company[]);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      setError(null);
+      try {
+        const data = await CompanyService.getAllCompanies();
+        setCompanies(Array.isArray(data) ? data : []);
+      } catch (err: unknown) {
+        const message = err && typeof err === 'object' && 'message' in err ? String((err as { message: string }).message) : 'Error al cargar empresas';
+        console.error('Error fetching companies:', err);
+        setError(message);
+        setCompanies([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCompanies();
+  }, []);
 
   const filteredCompanies = useMemo(() => {
     if (!filter) return companies;
     const lowerFilter = filter.toLowerCase();
     return companies.filter(
       (company) =>
-        company.company_name.toLowerCase().includes(lowerFilter) ||
-        company.country.toLowerCase().includes(lowerFilter) ||
-        company.region.toLowerCase().includes(lowerFilter) ||
-        company.main_description.toLowerCase().includes(lowerFilter)
+        (company.company_name ?? "").toLowerCase().includes(lowerFilter) ||
+        (company.country ?? "").toLowerCase().includes(lowerFilter) ||
+        (company.region ?? "").toLowerCase().includes(lowerFilter) ||
+        (company.main_description ?? "").toLowerCase().includes(lowerFilter)
     );
   }, [companies, filter]);
 
@@ -60,6 +80,18 @@ const CompaniesTable: FC = () => {
           className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
         />
       </div>
+
+      {/* Loading */}
+      {loading && (
+        <div className='mb-6 text-center text-gray-600'>Loading companies...</div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div className='mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700'>
+          {error}
+        </div>
+      )}
 
       {/* Table */}
       <div className='bg-white rounded-lg shadow overflow-hidden'>
