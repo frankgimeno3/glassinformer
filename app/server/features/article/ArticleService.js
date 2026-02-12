@@ -24,6 +24,8 @@ function getFallbackArticles() {
             contents_array: article.contents_array || [],
             highlited_position: article.highlited_position ?? '',
             isEventNews: article.isEventNews || false,
+            is_article_event: article.is_article_event ?? article.isEventNews ?? false,
+            event_id: article.event_id || null,
             article_countries_array: article.article_countries_array || [],
             article_region: article.article_region || '',
             author: article.author || '',
@@ -63,7 +65,9 @@ export async function getAllArticles() {
             date: article.date ? new Date(article.date).toISOString().split('T')[0] : null,
             article_tags_array: article.article_tags_array || [],
             contents_array: article.contents_array || [],
-            highlited_position: article.highlited_position ?? ""
+            highlited_position: article.highlited_position ?? "",
+            is_article_event: article.is_article_event ?? false,
+            event_id: article.event_id ?? null
         }));
     } catch (error) {
         console.error('Error fetching articles from database:', error);
@@ -105,7 +109,9 @@ export async function getArticleById(idArticle) {
             date: article.date ? new Date(article.date).toISOString().split('T')[0] : null,
             article_tags_array: article.article_tags_array || [],
             contents_array: article.contents_array || [],
-            highlited_position: article.highlited_position ?? ""
+            highlited_position: article.highlited_position ?? "",
+            is_article_event: article.is_article_event ?? false,
+            event_id: article.event_id ?? null
         };
     } catch (error) {
         console.error('Error fetching article from database:', error);

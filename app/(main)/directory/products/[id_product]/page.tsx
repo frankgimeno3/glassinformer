@@ -4,6 +4,7 @@ import React, { FC, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import productsData from '@/app/contents/productsContents.json';
+import CompanyContactForm from '../../components/CompanyContactForm';
 
 interface Product {
   id_product: string;
@@ -20,6 +21,7 @@ const ProductsPage: FC = () => {
   const idProduct = params?.id_product as string;
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showContactForm, setShowContactForm] = useState(false);
 
   useEffect(() => {
     if (idProduct) {
@@ -123,6 +125,21 @@ const ProductsPage: FC = () => {
             </Link>
             <p className='text-sm text-gray-600 mt-2'>View company profile</p>
           </div>
+        </div>
+
+        <div className='border-t border-gray-200 pt-6 mt-6'>
+          <button
+            type='button'
+            onClick={() => setShowContactForm((prev) => !prev)}
+            className='px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 cursor-pointer'
+          >
+            Ask the company about this product
+          </button>
+          {showContactForm && (
+            <div className='mt-6'>
+              <CompanyContactForm />
+            </div>
+          )}
         </div>
       </div>
     </div>

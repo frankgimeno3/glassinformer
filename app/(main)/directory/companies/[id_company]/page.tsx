@@ -6,6 +6,7 @@ import Link from "next/link";
 import companiesContents from "@/app/contents/companiesContents.json";
 import productsData from "@/app/contents/productsContents.json";
 import usersData from "@/app/contents/usersData.json";
+import CompanyContactForm from "../../components/CompanyContactForm";
 
 interface UserInCompany {
   id_user: string;
@@ -209,6 +210,8 @@ const CompanyProfile: FC = () => {
             </div>
           )}
         </div>
+
+        <CompanyContactForm />
       </div>
     </div>
   );

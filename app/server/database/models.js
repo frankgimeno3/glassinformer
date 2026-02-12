@@ -6,6 +6,7 @@ import {ModificationStatusEnum} from "../features/modification/ModificationStatu
 import ModificationModel from "../features/modification/ModificationModel.js";
 import ArticleModel from "../features/article/ArticleModel.js";
 import ContentModel from "../features/content/ContentModel.js";
+import EventModel from "../features/event/EventModel.js";
 import PublicationModel from "../features/publication/PublicationModel.js";
 import {defineAssociations} from "./associations.js";
 
@@ -89,6 +90,14 @@ ArticleModel.init({
     highlited_position: {
         type: DataTypes.STRING,
         defaultValue: ""
+    },
+    is_article_event: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    event_id: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     sequelize,
@@ -97,7 +106,53 @@ ArticleModel.init({
     indexes: [
         {fields: ['article_title']},
         {fields: ['date']},
-        {fields: ['company']}
+        {fields: ['company']},
+        {fields: ['is_article_event']},
+        {fields: ['event_id']}
+    ]
+});
+
+EventModel.init({
+    id_fair: {
+        type: DataTypes.STRING,
+        primaryKey: true,
+        unique: true
+    },
+    event_name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    country: {
+        type: DataTypes.STRING
+    },
+    main_description: {
+        type: DataTypes.TEXT
+    },
+    region: {
+        type: DataTypes.STRING
+    },
+    start_date: {
+        type: DataTypes.DATEONLY,
+        allowNull: false
+    },
+    end_date: {
+        type: DataTypes.DATEONLY,
+        allowNull: false
+    },
+    location: {
+        type: DataTypes.STRING
+    },
+    event_main_image: {
+        type: DataTypes.STRING
+    }
+}, {
+    sequelize,
+    modelName: 'event',
+    underscored: true,
+    indexes: [
+        { fields: ['event_name'] },
+        { fields: ['start_date'] },
+        { fields: ['region'] }
     ]
 });
 
@@ -162,4 +217,4 @@ PublicationModel.init({
 
 defineAssociations();
 
-export { TimeLogModel, ModificationModel, ArticleModel, ContentModel, PublicationModel };
+export { TimeLogModel, ModificationModel, ArticleModel, ContentModel, EventModel, PublicationModel };

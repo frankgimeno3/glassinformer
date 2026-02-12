@@ -14,6 +14,7 @@ interface Event {
   start_date: string;
   end_date: string;
   location: string;
+  event_main_image?: string;
 }
 
 const IdEvent: FC = () => {
@@ -29,15 +30,8 @@ const IdEvent: FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const events = await EventService.getAllEvents();
-        const foundEvent = events.find((e: Event) => e.id_fair === eventId);
-        
-        if (!foundEvent) {
-          setError('Event not found');
-          return;
-        }
-        
-        setEvent(foundEvent);
+        const eventData = await EventService.getEventById(eventId);
+        setEvent(eventData);
       } catch (err: any) {
         console.error('Error fetching event:', err);
         setError(err?.message || 'Error loading event');
@@ -101,8 +95,17 @@ const IdEvent: FC = () => {
       </button>
 
       <div className="max-w-4xl mx-auto w-full">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">{event.event_name}</h1>
-        
+        <div className="flex flex-wrap items-start gap-4 mb-6">
+          {event.event_main_image && (
+            <img
+              src={event.event_main_image}
+              alt={event.event_name}
+              className="w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 rounded-lg object-cover border border-gray-200"
+            />
+          )}
+          <h1 className="text-4xl font-bold text-gray-900 flex-1 min-w-0">{event.event_name}</h1>
+        </div>
+
         <div className="bg-gray-50 rounded-lg p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
