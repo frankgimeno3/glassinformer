@@ -3,19 +3,23 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import bannersContents from "@/app/contents/bannersContents.json";
 import {
   pickBannerByPriority,
   type BannerItem,
 } from "./pickBannerByPriority";
 
+const BANNERS_API = "/api/v1/banners";
+
 export default function TopBanner() {
   const [banner, setBanner] = useState<BannerItem | null>(null);
 
   useEffect(() => {
-    setBanner(
-      pickBannerByPriority(bannersContents as BannerItem[], "top")
-    );
+    fetch(BANNERS_API)
+      .then((res) => res.json())
+      .then((data: BannerItem[]) => {
+        setBanner(pickBannerByPriority(data, "top"));
+      })
+      .catch(() => setBanner(null));
   }, []);
 
   if (!banner) return (

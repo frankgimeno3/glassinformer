@@ -1,20 +1,27 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import bannersContents from "@/app/contents/bannersContents.json";
 import type { BannerItem } from "./pickBannerByPriority";
 
+const BANNERS_API = "/api/v1/banners";
 const MIN_RIGHT_BANNERS = 4;
 
 export default function RightBanner() {
-  const rightBanners = useMemo(() => {
-    const filtered = (bannersContents as BannerItem[]).filter(
-      (b) => b.bannerType === "right"
-    );
-    return filtered.slice(0, Math.max(MIN_RIGHT_BANNERS, filtered.length));
+  const [banners, setBanners] = useState<BannerItem[]>([]);
+
+  useEffect(() => {
+    fetch(BANNERS_API)
+      .then((res) => res.json())
+      .then((data: BannerItem[]) => setBanners(data))
+      .catch(() => setBanners([]));
   }, []);
+
+  const rightBanners = useMemo(() => {
+    const filtered = banners.filter((b) => b.bannerType === "right");
+    return filtered.slice(0, Math.max(MIN_RIGHT_BANNERS, filtered.length));
+  }, [banners]);
 
   if (rightBanners.length === 0)
     return (

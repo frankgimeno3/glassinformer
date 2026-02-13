@@ -10,6 +10,7 @@ import EventModel from "../features/event/EventModel.js";
 import PublicationModel from "../features/publication/PublicationModel.js";
 import CompanyModel from "../features/company/CompanyModel.js";
 import ProductModel from "../features/product/ProductModel.js";
+import BannerModel from "../features/banner/BannerModel.js";
 import {defineAssociations} from "./associations.js";
 
 const database = Database.getInstance();
@@ -294,6 +295,51 @@ PublicationModel.init({
     ]
 });
 
+BannerModel.init({
+    id: {
+        type: DataTypes.STRING(255),
+        primaryKey: true,
+        unique: true
+    },
+    src: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    route: {
+        type: DataTypes.STRING,
+        defaultValue: "/"
+    },
+    banner_redirection: {
+        type: DataTypes.STRING(2048),
+        defaultValue: ""
+    },
+    position_type: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    page_type: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    position: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    }
+}, {
+    sequelize,
+    modelName: 'banner',
+    tableName: 'banners',
+    underscored: true,
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    indexes: [
+        { fields: ['position_type'] },
+        { fields: ['page_type'] },
+        { fields: ['position'] }
+    ]
+});
+
 defineAssociations();
 
-export { TimeLogModel, ModificationModel, ArticleModel, ContentModel, EventModel, PublicationModel, CompanyModel, ProductModel };
+export { TimeLogModel, ModificationModel, ArticleModel, ContentModel, EventModel, PublicationModel, CompanyModel, ProductModel, BannerModel };
