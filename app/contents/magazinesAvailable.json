@@ -1,0 +1,27 @@
+[
+  {
+    "magazineName": "Glass Somewhere",
+    "issues": [
+      { "magazineNumber": "Issue 1 - 2025", "isCoverUnavailable": false },
+      { "magazineNumber": "Issue 2 - 2025", "isCoverUnavailable": true },
+      { "magazineNumber": "Issue 3 - 2025", "isCoverUnavailable": false }
+    ]
+  },
+  {
+    "magazineName": "Hollow Glass Eventually",
+    "issues": [
+      { "magazineNumber": "Q1 2025", "isCoverUnavailable": false },
+      { "magazineNumber": "Q2 2025", "isCoverUnavailable": false },
+      { "magazineNumber": "Q3 2025", "isCoverUnavailable": true },
+      { "magazineNumber": "Q4 2025", "isCoverUnavailable": false }
+    ]
+  },
+  {
+    "magazineName": "Glassinformer Magazine",
+    "issues": [
+      { "magazineNumber": "January 2025", "isCoverUnavailable": false },
+      { "magazineNumber": "February 2025", "isCoverUnavailable": false },
+      { "magazineNumber": "March 2025", "isCoverUnavailable": false }
+    ]
+  }
+]
