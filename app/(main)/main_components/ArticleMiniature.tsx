@@ -34,7 +34,7 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
 
   return (
     <article className="group flex flex-col bg-white border border-gray-200 hover:border-gray-300 transition-all duration-300 ease-in-out overflow-hidden">
-      {/* Imagen - Link al artículo */}
+      {/* Image - Link to article */}
       <Link href={`/articles/${id_article}`} className="relative w-full h-48 md:h-56 overflow-hidden bg-gray-100 block">
         <Image
           src={image}
@@ -46,9 +46,9 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
         />
       </Link>
 
-      {/* Contenido */}
+      {/* Content */}
       <div className="flex flex-col p-6 space-y-3">
-        {/* Metadata superior */}
+        {/* Top metadata */}
         {(company || date) && (
           <div className="flex items-center gap-3 text-xs text-gray-500 uppercase tracking-wider font-sans">
             {company && (
@@ -69,19 +69,19 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
           </div>
         )}
 
-        {/* Título */}
+        {/* Title */}
         <h2 className="font-serif text-xl md:text-2xl font-bold text-gray-900 leading-tight group-hover:text-gray-700 transition-colors duration-200 line-clamp-3">
           {title}
         </h2>
 
-        {/* Subtítulo */}
+        {/* Subtitle */}
         {subtitle && (
           <p className="text-sm text-gray-600 font-sans leading-relaxed line-clamp-2">
             {subtitle}
           </p>
         )}
 
-        {/* Indicador de lectura - Link al artículo */}
+        {/* Read more - Link to article */}
         <div className="pt-2 border-t border-gray-100">
           <Link 
             href={`/articles/${id_article}`}

@@ -103,7 +103,7 @@ const ProductsPage: FC = () => {
                   <div>
                     <h3 className='text-sm font-semibold text-gray-500 uppercase mb-1'>Price</h3>
                     <p className='text-2xl font-semibold text-gray-900'>
-                      €{Number(product.price).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                      €{Number(product.price).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </p>
                   </div>
                 )}

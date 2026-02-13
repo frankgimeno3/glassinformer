@@ -165,11 +165,11 @@ const Publications: FC<PublicationsProps> = () => {
 
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-gray-500">Cargando publicaciones...</p>
+          <p className="text-gray-500">Loading publications...</p>
         </div>
       ) : filteredPublications.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 w-full">
-          <p className="text-gray-500 text-lg">No se encontraron publicaciones</p>
+          <p className="text-gray-500 text-lg">No publications found</p>
         </div>
       ) : (
       <>
@@ -209,10 +209,10 @@ const Publications: FC<PublicationsProps> = () => {
               : 'bg-blue-600 text-white hover:bg-blue-700'
           }`}
         >
-          Anterior
+          Previous
         </button>
         <span className="text-gray-700 font-medium">
-          {currentPage} de {totalPages}
+          {currentPage} of {totalPages}
         </span>
         <button
           onClick={handleNext}
@@ -223,7 +223,7 @@ const Publications: FC<PublicationsProps> = () => {
               : 'bg-blue-600 text-white hover:bg-blue-700'
           }`}
         >
-          Siguiente
+          Next
         </button>
       </div>
       </>

@@ -95,11 +95,11 @@ const Articles: FC<ArticlesProps> = ({}) => {
       <main className="max-w-7xl mx-auto w-full pt-12 px-4 sm:px-6 lg:px-8 pb-16">
         {loading ? (
           <div className="text-center py-20">
-            <p className="text-gray-400 text-lg font-serif">Cargando artículos...</p>
+            <p className="text-gray-400 text-lg font-serif">Loading articles...</p>
           </div>
         ) : validArticles.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <p className="text-gray-400 text-xl font-serif">No hay artículos disponibles</p>
+            <p className="text-gray-400 text-xl font-serif">No articles available</p>
           </div>
         ) : (
           <>

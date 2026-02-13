@@ -28,7 +28,7 @@ const CompaniesTable: FC = () => {
         const data = await CompanyService.getAllCompanies();
         setCompanies(Array.isArray(data) ? data : []);
       } catch (err: unknown) {
-        const message = err && typeof err === 'object' && 'message' in err ? String((err as { message: string }).message) : 'Error al cargar empresas';
+        const message = err && typeof err === 'object' && 'message' in err ? String((err as { message: string }).message) : 'Error loading companies';
         console.error('Error fetching companies:', err);
         setError(message);
         setCompanies([]);

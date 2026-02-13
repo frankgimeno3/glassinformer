@@ -45,7 +45,7 @@ const Article = () => {
   if (loading) {
     return (
       <div className="flex flex-col h-full min-h-screen text-gray-600 px-6 py-10 gap-6 items-center justify-center">
-        <p className="text-lg">Cargando artículo...</p>
+        <p className="text-lg">Loading article...</p>
       </div>
     );
   }
@@ -60,7 +60,7 @@ const Article = () => {
           onClick={() => router.push("/articles")}
           className="mt-4 px-4 py-2 bg-blue-950 text-white rounded-xl"
         >
-          Volver a artículos
+          Back to articles
         </button>
       </div>
     );

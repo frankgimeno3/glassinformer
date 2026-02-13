@@ -17,7 +17,7 @@ export interface Publication {
 function formatPublicationDate(isoDate: string): string {
   if (!isoDate) return "";
   const d = new Date(isoDate);
-  return d.toLocaleDateString("es-ES", {
+  return d.toLocaleDateString("en-US", {
     day: "numeric",
     month: "long",
     year: "numeric",

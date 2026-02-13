@@ -39,8 +39,8 @@ const Login: FC<LoginProps> = ({ }) => {
                         className="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-gray-200"
                         tabIndex={-1}
                         aria-label={
-                            // showPassword ? 'Ocultar contraseña' : 
-                            'Mostrar contraseña'}
+                            // showPassword ? 'Hide password' : 
+                            'Show password'}
                     >
                         {/* {showPassword ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

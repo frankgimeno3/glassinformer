@@ -15,7 +15,7 @@ const PublicationFlipbook = memo<PublicationFlipbookProps>(({ title, imageUrl })
       className="mx-auto w-full relative aspect-[3/4] overflow-visible group/flipbook"
       style={{ perspective: "1200px" }}
     >
-      {/* Páginas de atrás (se ven al pasar la portada) */}
+      {/* Back pages (visible when flipping the cover) */}
  
             <div
         className="absolute top-0 left-1 h-full w-full rounded-xs bg-gray-100 border border-gray-200 z-3"
@@ -28,7 +28,7 @@ const PublicationFlipbook = memo<PublicationFlipbookProps>(({ title, imageUrl })
       />
        
 
-      {/* Portada: gira desde el borde izquierdo al hacer hover */}
+      {/* Cover: rotates from the left edge on hover */}
       <div
         className="absolute top-0 left-0 w-full h-full rounded-r-xs z-10 transition-transform duration-[600ms] ease-[cubic-bezier(0.25,0.46,0.45,0.94)] origin-left group-hover/flipbook:rotate-y-[-24deg]"
         style={{ transformStyle: "preserve-3d" }}

@@ -12,16 +12,16 @@ const Forgot: FC<ForgotProps> = ({ }) => {
             <form // onSubmit={handleForgot}
                 className="flex flex-col gap-4 bg-gray-900 p-8 rounded shadow-md w-full max-w-md" >
                 <h2 className="text-2xl text-white font-semibold mb-4 text-center">
-                    Recuperar contraseña
+                    Recover password
                 </h2>
 
                 <p className="text-sm text-gray-300 text-center mb-2">
-                    Introduzca su email y le enviaremos un enlace para restablecer su contraseña.
+                    Enter your email and we will send you a link to reset your password.
                 </p>
 
                 <input
                     type="email"
-                    placeholder="Introduzca su email"
+                    placeholder="Enter your email"
                     // value={email}
                     // onChange={(e) => setEmail(e.target.value)}
                     className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400"
@@ -32,19 +32,19 @@ const Forgot: FC<ForgotProps> = ({ }) => {
                     type="submit"
                     className="bg-white text-black py-2 rounded hover:bg-gray-300 transition cursor-pointer"
                 >
-                    Enviar enlace de confirmación
+                    Send confirmation link
                 </button>
 
                 <p className='text-xs text-white'>
-                    ¿Recuerda su contraseña?
+                    Remember your password?
                     <a href='/auth/login' className=' font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer ml-1'>
-                        Iniciar sesión
+                        Log in
                     </a>
                 </p>
             </form>
             <div className='flex flex-col py-5 text-gray-500 text-center text-sm'>
-                <p className='text-xs pb-1'>¿Ya tiene cuenta?</p>
-                <BasicButton textContent='Iniciar sesión' urlRedirection='/auth/login'/>
+                <p className='text-xs pb-1'>Already have an account?</p>
+                <BasicButton textContent='Log in' urlRedirection='/auth/login'/>
             </div>
         </div>
     );

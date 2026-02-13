@@ -30,7 +30,7 @@ const ProductsTable: FC = () => {
         const data = await ProductService.getAllProducts();
         setProducts(Array.isArray(data) ? data : []);
       } catch (err: unknown) {
-        const message = err && typeof err === 'object' && 'message' in err ? String((err as { message: string }).message) : 'Error al cargar productos';
+        const message = err && typeof err === 'object' && 'message' in err ? String((err as { message: string }).message) : 'Error loading products';
         console.error('Error fetching products:', err);
         setError(message);
         setProducts([]);
@@ -159,7 +159,7 @@ const ProductsTable: FC = () => {
                     {product.company_name}
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                    {product.price != null ? `€${Number(product.price).toLocaleString('es-ES', { minimumFractionDigits: 2 })}` : '—'}
+                    {product.price != null ? `€${Number(product.price).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '—'}
                   </td>
                   <td className='px-6 py-4 text-sm text-gray-900'>
                     <div className='flex flex-wrap gap-1'>
