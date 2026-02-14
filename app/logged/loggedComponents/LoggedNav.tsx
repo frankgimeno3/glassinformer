@@ -3,6 +3,7 @@ import { FC, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import BasicButton from '../../general_components/buttons/BasicButton';
+import AuthenticationService from '@/app/service/AuthenticationService.js';
 
 interface LoggedNavProps { }
 
@@ -17,7 +18,10 @@ const LoggedNav: FC<LoggedNavProps> = ({ }) => {
     const [isLogged] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const router = useRouter();
-    const logout = () => { console.log("logout") };
+    const handleLogout = async () => {
+        await AuthenticationService.logout();
+        router.replace('/');
+    };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,7 +32,7 @@ const LoggedNav: FC<LoggedNavProps> = ({ }) => {
     };
 
     return (
-        <nav className='flex flex-col shadow-xl bg-white border-b'>
+        <nav className='flex flex-col shadow-xl bg-white border-b w-full'>
                 <header className="flex flex-row  justify-between border-b border-gray-200 py-8 px-4 w-full px-4 sm:px-6 lg:px-12">
                     <Link href="/logged" className="flex flex-col hover:opacity-80 transition-opacity">
                         <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 tracking-tight mb-2">
@@ -67,12 +71,16 @@ const LoggedNav: FC<LoggedNavProps> = ({ }) => {
                                 <BasicButton textContent='My Companies' urlRedirection='/logged/companies' />
                                 <BasicButton textContent='My Profile' urlRedirection='/logged/profile' />
                                 <BasicButton textContent='Settings' urlRedirection='/logged/settings' />
-                                <BasicButton textContent='Logout' urlRedirection='/' />
+                                <button
+                                    type="button"
+                                    onClick={handleLogout}
+                                    className="px-3 py-1 rounded-lg shadow-lg bg-blue-950 hover:bg-blue-950/90 cursor-pointer text-white"
+                                >
+                                    Log out
+                                </button>
                             </div>
                             :
-                            <div className='flex flex-row items-center text-sm text-gray-500 uppercase tracking-wider font-sans' onClick={logout}>
-                                <BasicButton textContent='Log out' urlRedirection='/' />
-                            </div>
+                            null
                     }
                                         </div>
 

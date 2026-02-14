@@ -38,6 +38,7 @@ function configureAmplify() {
 
 export default class AuthenticationService {
   static async login(username, password) {
+    
     configureAmplify();
     
     // Verify configuration was successful before proceeding
@@ -95,7 +96,6 @@ export default class AuthenticationService {
     if (typeof window !== "undefined") {
       localStorage.removeItem("username");
     }
-
     await signOut();
   }
 }
