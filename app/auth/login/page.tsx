@@ -1,48 +1,76 @@
 "use client"
-import BasicButton from '@/app/general_components/buttons/BasicButton';
-import React, { FC } from 'react';
+import { FC, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import AuthenticationService from "@/app/service/AuthenticationService";
+
 
 interface LoginProps {
 
 }
 
 const Login: FC<LoginProps> = ({ }) => {
-    return (
-        <div className='flex flex-col bg-white items-center justify-center min-h-screen'>
-            <form // onSubmit={handleLogin}
-                className="flex flex-col gap-4 bg-gray-900 p-8 rounded shadow-md w-full max-w-md" >
-                <h2 className="text-2xl text-white font-semibold mb-4 text-center">
-                    Enter your email and password
-                </h2>
-
-                <input
-                    type="text"
-                    placeholder="Enter your email"
-                    // value={employeeNumber}
-                    // onChange={(e) => setEmployeeNumber(e.target.value)}
-                    className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400"
-                    required
-                />
-
-                <div className="relative">
+         const router = useRouter();
+    
+        const [email, setEmail] = useState('');
+        const [password, setPassword] = useState('');
+        const [error, setError] = useState<string | null>(null);
+        const [showPassword, setShowPassword] = useState(false);
+    
+        // El middleware maneja la redirección automáticamente, no necesitamos verificar aquí
+    
+        const handleLogin = async (e: React.FormEvent) => {
+            e.preventDefault();
+            setError(null);
+    
+            try {
+                const payload: any = await AuthenticationService.login(email, password);
+                
+                // El AuthenticationService ya guarda los tokens en cookies mediante CookieStorage
+                // y el username en localStorage
+                // El middleware detectará las cookies y redirigirá automáticamente
+                router.replace('/logged');
+            } catch (e: any) {
+                console.error(e);
+                setError(e?.message || 'Error al iniciar sesión. Verifica tus credenciales.');
+            }
+        };
+    
+        return (
+            <div className='flex flex-col bg-white items-center justify-center min-h-screen'>
+                <form 
+                    onSubmit={handleLogin}
+                    className="flex flex-col gap-4 bg-gray-900 p-8 rounded shadow-md w-full max-w-md" 
+                >
+                    <h2 className="text-2xl text-white font-semibold mb-4 text-center">
+                        Ingrese email y contraseña
+                    </h2>
+    
                     <input
-                        // type={showPassword ? 'text' : 'password'}
-                        placeholder="Enter your password"
-                        // value={password}
-                        // onChange={(e) => setPassword(e.target.value)}
-                        className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400 w-full pr-10"
+                        type="text"
+                        placeholder="Introduzca su email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400"
                         required
                     />
-                    <button
-                        type="button"
-                        // onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-gray-200"
-                        tabIndex={-1}
-                        aria-label={
-                            // showPassword ? 'Hide password' : 
-                            'Show password'}
-                    >
-                        {/* {showPassword ? (
+    
+                    <div className="relative">
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Introduzca su contraseña"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400 w-full pr-10"
+                            required
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-gray-200"
+                            tabIndex={-1}
+                            aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                        >
+                            {showPassword ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -51,37 +79,28 @@ const Login: FC<LoginProps> = ({ }) => {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
-                            )} */}
-                    </button>
-
-                </div>
-
-                {/* {error && (
+                            )}
+                        </button>
+                       
+                    </div>
+    
+                    {error && (
                         <div className="flex flex-col text-red-500 text-sm text-center">
                             <p>ERROR:</p>
                             <p>{error}</p>
                         </div>
-                    )} */}
-
-                <button
-                    type="submit"
-                    className="bg-white text-black py-2 rounded hover:bg-gray-300 transition cursor-pointer"
-                >
-                    Log in
-                </button>
-
-                <p className='text-xs text-white'>
-                    If you forgot your password, you can create a new one here:
-                    <a href='/auth/forgot' className=' font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer'>
-                        I forgot my password
-                    </a>
-                </p>
-            </form>
-            <div className='flex flex-col py-5 text-gray-500 text-center text-sm'>
-                <p className='text-xs pb-1'> Don't have an account?</p>
-                <BasicButton textContent='Create an account  ' urlRedirection='/auth/signup' />
+                    )}
+    
+                    <button
+                        type="submit"
+                        className="bg-white text-black py-2 rounded hover:bg-gray-300 transition cursor-pointer"
+                    >
+                        Identificarse
+                    </button>
+    
+                </form>
+    
             </div>
-        </div>
     );
 };
 
