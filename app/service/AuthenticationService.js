@@ -1,5 +1,6 @@
 import { Amplify } from "aws-amplify";
 import { signIn, confirmSignIn, signOut } from "aws-amplify/auth/cognito";
+import { signUp, confirmSignUp } from "aws-amplify/auth";
 import { cognitoUserPoolsTokenProvider } from "aws-amplify/auth/cognito";
 import { CookieStorage, decodeJWT, fetchAuthSession } from "@aws-amplify/core";
 
@@ -97,5 +98,54 @@ export default class AuthenticationService {
       localStorage.removeItem("username");
     }
     await signOut();
+  }
+
+  /**
+   * Registra un nuevo usuario en Cognito. AWS enviará un correo de verificación.
+   * El usuario debe confirmar con el código recibido (confirmSignUp).
+   * @param {string} email - Email del usuario (usado como username en Cognito)
+   * @param {string} password - Contraseña
+   * @returns {Promise<{ isSignUpComplete: boolean, nextStep: object }>}
+   */
+  static async signUp(email, password) {
+    configureAmplify();
+
+    const userPoolId = process.env.NEXT_PUBLIC_USER_POOL_ID;
+    const userPoolClientId = process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID;
+    if (!userPoolId || !userPoolClientId) {
+      throw new Error("Missing Cognito env vars: NEXT_PUBLIC_USER_POOL_ID and/or NEXT_PUBLIC_USER_POOL_CLIENT_ID");
+    }
+
+    const result = await signUp({
+      username: email,
+      password,
+      options: {
+        userAttributes: {
+          email,
+        },
+      },
+    });
+
+    return result;
+  }
+
+  /**
+   * Confirma el registro con el código enviado por email.
+   * @param {string} email - Email (username) del usuario
+   * @param {string} confirmationCode - Código recibido por correo
+   */
+  static async confirmSignUp(email, confirmationCode) {
+    configureAmplify();
+
+    const userPoolId = process.env.NEXT_PUBLIC_USER_POOL_ID;
+    const userPoolClientId = process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID;
+    if (!userPoolId || !userPoolClientId) {
+      throw new Error("Missing Cognito env vars: NEXT_PUBLIC_USER_POOL_ID and/or NEXT_PUBLIC_USER_POOL_CLIENT_ID");
+    }
+
+    await confirmSignUp({
+      username: email,
+      confirmationCode,
+    });
   }
 }

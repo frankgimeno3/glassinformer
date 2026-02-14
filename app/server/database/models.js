@@ -11,6 +11,7 @@ import PublicationModel from "../features/publication/PublicationModel.js";
 import CompanyModel from "../features/company/CompanyModel.js";
 import ProductModel from "../features/product/ProductModel.js";
 import BannerModel from "../features/banner/BannerModel.js";
+import UserProfileModel from "../features/userProfile/UserProfileModel.js";
 import {defineAssociations} from "./associations.js";
 
 const database = Database.getInstance();
@@ -295,6 +296,54 @@ PublicationModel.init({
     ]
 });
 
+UserProfileModel.init({
+    id_user: {
+        type: DataTypes.STRING(255),
+        primaryKey: true,
+        unique: true,
+        field: "id_user"
+    },
+    user_name: {
+        type: DataTypes.STRING(255),
+        defaultValue: "",
+        allowNull: true
+    },
+    user_surnames: {
+        type: DataTypes.STRING(255),
+        defaultValue: "",
+        allowNull: true
+    },
+    user_description: {
+        type: DataTypes.TEXT,
+        defaultValue: "",
+        allowNull: true
+    },
+    user_main_image_src: {
+        type: DataTypes.STRING(2048),
+        defaultValue: "",
+        allowNull: true
+    },
+    user_current_company: {
+        type: DataTypes.JSONB,
+        defaultValue: { id_company: "", userPosition: "" },
+        allowNull: true
+    },
+    experience_array: {
+        type: DataTypes.JSONB,
+        defaultValue: [],
+        allowNull: true
+    }
+}, {
+    sequelize,
+    modelName: "userProfile",
+    tableName: "users",
+    underscored: true,
+    timestamps: false,
+    indexes: [
+        { fields: ["id_user"] }
+    ]
+});
+
 BannerModel.init({
     id: {
         type: DataTypes.STRING(255),
@@ -342,4 +391,4 @@ BannerModel.init({
 
 defineAssociations();
 
-export { TimeLogModel, ModificationModel, ArticleModel, ContentModel, EventModel, PublicationModel, CompanyModel, ProductModel, BannerModel };
+export { TimeLogModel, ModificationModel, ArticleModel, ContentModel, EventModel, PublicationModel, CompanyModel, ProductModel, BannerModel, UserProfileModel };
