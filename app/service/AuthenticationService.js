@@ -1,6 +1,6 @@
 import { Amplify } from "aws-amplify";
 import { signIn, confirmSignIn, signOut } from "aws-amplify/auth/cognito";
-import { signUp, confirmSignUp } from "aws-amplify/auth";
+import { signUp, confirmSignUp, resetPassword, confirmResetPassword } from "aws-amplify/auth";
 import { cognitoUserPoolsTokenProvider } from "aws-amplify/auth/cognito";
 import { CookieStorage, decodeJWT, fetchAuthSession } from "@aws-amplify/core";
 
@@ -146,6 +146,46 @@ export default class AuthenticationService {
     await confirmSignUp({
       username: email,
       confirmationCode,
+    });
+  }
+
+  /**
+   * Inicia el flujo "olvidé mi contraseña". Cognito envía un código al email del usuario.
+   * @param {string} username - Email del usuario (username en Cognito)
+   * @returns {Promise<{ nextStep: object }>}
+   */
+  static async resetPassword(username) {
+    configureAmplify();
+
+    const userPoolId = process.env.NEXT_PUBLIC_USER_POOL_ID;
+    const userPoolClientId = process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID;
+    if (!userPoolId || !userPoolClientId) {
+      throw new Error("Missing Cognito env vars: NEXT_PUBLIC_USER_POOL_ID and/or NEXT_PUBLIC_USER_POOL_CLIENT_ID");
+    }
+
+    const output = await resetPassword({ username: username.trim() });
+    return output;
+  }
+
+  /**
+   * Confirma el restablecimiento de contraseña con el código recibido por email.
+   * @param {string} username - Email del usuario
+   * @param {string} confirmationCode - Código recibido por correo
+   * @param {string} newPassword - Nueva contraseña
+   */
+  static async confirmResetPassword(username, confirmationCode, newPassword) {
+    configureAmplify();
+
+    const userPoolId = process.env.NEXT_PUBLIC_USER_POOL_ID;
+    const userPoolClientId = process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID;
+    if (!userPoolId || !userPoolClientId) {
+      throw new Error("Missing Cognito env vars: NEXT_PUBLIC_USER_POOL_ID and/or NEXT_PUBLIC_USER_POOL_CLIENT_ID");
+    }
+
+    await confirmResetPassword({
+      username: username.trim(),
+      confirmationCode: confirmationCode.trim(),
+      newPassword,
     });
   }
 }

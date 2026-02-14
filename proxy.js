@@ -62,7 +62,7 @@ export async function proxy(request) {
     };
 
     // Public paths that unauthenticated users are allowed to visit (no redirect to /)
-    const publicPaths = ['/auth/login', '/auth/signup', '/auth/confirm'];
+    const publicPaths = ['/auth/login', '/auth/signup', '/auth/confirm', '/auth/forgot'];
     const isPublicPath = publicPaths.some((p) => pathname === p || pathname.startsWith(p + '/'));
 
     // Early return for Unlogged Home page if no auth
