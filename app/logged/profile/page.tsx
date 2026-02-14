@@ -1,8 +1,6 @@
 "use client";
 
 import React, { FC, useState, useEffect, useCallback } from "react";
-import { DEFAULT_USER_ID } from "../constants";
-import usersData from "../../contents/usersData.json";
 import { CompanyService } from "@/service/CompanyService";
 import UpdateImageModal from "./profileComponents/UpdateImageModal";
 import CompanyAddEditModal from "./profileComponents/CompanyAddEditModal";
@@ -72,6 +70,8 @@ const ExperienceCard: FC<{ item: ExperienceItem }> = ({ item }) => (
   </div>
 );
 
+const API_ME = "/api/v1/users/me";
+
 const MyProfile: FC = () => {
   const [user, setUser] = useState<UserData | null>(null);
   const [userName, setUserName] = useState("");
@@ -84,19 +84,43 @@ const MyProfile: FC = () => {
   const [updateImageOpen, setUpdateImageOpen] = useState(false);
   const [companyModalOpen, setCompanyModalOpen] = useState(false);
   const [companiesList, setCompaniesList] = useState<CompanyEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const data = usersData as UserData[];
-    const found = data.find((u) => u.id_user === DEFAULT_USER_ID);
-    if (found) {
-      setUser(found);
-      setUserName(found.userName);
-      setUserSurnames(found.userSurnames);
-      setUserDescription(found.userDescription);
-      setUserMainImageSrc(found.userMainImageSrc);
-      setCurrentCompanyId(found.userCurrentCompany?.id_company ?? "");
-      setCurrentCompanyPosition(found.userCurrentCompany?.userPosition ?? "");
-    }
+    const fetchProfile = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(API_ME, { credentials: "include" });
+        if (res.status === 401) {
+          setError("No hay sesión activa. Inicia sesión para ver tu perfil.");
+          setUser(null);
+          return;
+        }
+        if (!res.ok) {
+          setError("Error al cargar el perfil.");
+          setUser(null);
+          return;
+        }
+        const data: UserData = await res.json();
+        setUser(data);
+        setUserName(data.userName ?? "");
+        setUserSurnames(data.userSurnames ?? "");
+        setUserDescription(data.userDescription ?? "");
+        setUserMainImageSrc(data.userMainImageSrc ?? "");
+        setCurrentCompanyId(data.userCurrentCompany?.id_company ?? "");
+        setCurrentCompanyPosition(data.userCurrentCompany?.userPosition ?? "");
+      } catch (e) {
+        console.error(e);
+        setError("Error al cargar el perfil.");
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
   }, []);
 
   useEffect(() => {
@@ -147,8 +171,36 @@ const MyProfile: FC = () => {
     currentCompanyPosition,
   ]);
 
-  const handleUpdateChanges = () => {
-    window.location.reload();
+  const handleUpdateChanges = async () => {
+    if (!user) return;
+    setSaving(true);
+    try {
+      const res = await fetch(API_ME, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userName,
+          userSurnames,
+          userDescription,
+          userMainImageSrc,
+          userCurrentCompany: { id_company: currentCompanyId, userPosition: currentCompanyPosition },
+          experienceArray: user.experienceArray ?? [],
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Error al guardar");
+      }
+      const updated: UserData = await res.json();
+      setUser(updated);
+      setDirty(false);
+    } catch (e) {
+      console.error(e);
+      setError(e instanceof Error ? e.message : "Error al guardar los cambios.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleImageConfirm = useCallback((newUrl: string) => {
@@ -159,10 +211,23 @@ const MyProfile: FC = () => {
     setCurrentCompanyId("");
   }, []);
 
-  if (!user) {
+  if (loading) {
     return (
-      <div className="p-6 text-gray-600">
-        <p>User not found.</p>
+      <div className="p-6 text-gray-600 text-center">
+        <p>Cargando perfil…</p>
+      </div>
+    );
+  }
+
+  if (error || !user) {
+    return (
+      <div className="p-6 max-w-2xl mx-auto text-gray-600">
+        <p>{error || "User not found."}</p>
+        {error?.includes("sesión") && (
+          <a href="/auth/login" className="mt-2 inline-block text-blue-950 underline">
+            Ir a iniciar sesión
+          </a>
+        )}
       </div>
     );
   }
@@ -181,7 +246,7 @@ const MyProfile: FC = () => {
         <div className="mb-6 flex justify-center">
           <div className="relative inline-block">
             <img
-              src={userMainImageSrc}
+              src={userMainImageSrc || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'%3E%3Crect fill='%23e5e7eb' width='128' height='128'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%239ca3af' font-size='48'%3E?%3C/text%3E%3C/svg%3E"}
               alt="Profile"
               className="w-32 h-32 rounded-full object-cover border-2 border-gray-200"
             />
@@ -246,9 +311,10 @@ const MyProfile: FC = () => {
           <button
             type="button"
             onClick={handleUpdateChanges}
-            className="fixed bottom-8 right-8 px-6 py-3 rounded-lg shadow-lg bg-blue-950 hover:bg-blue-950/90 text-white font-medium uppercase tracking-wider z-50"
+            disabled={saving}
+            className="fixed bottom-8 right-8 px-6 py-3 rounded-lg shadow-lg bg-blue-950 hover:bg-blue-950/90 disabled:opacity-60 text-white font-medium uppercase tracking-wider z-50"
           >
-            Update changes
+            {saving ? "Guardando…" : "Update changes"}
           </button>
         )}
       </div>

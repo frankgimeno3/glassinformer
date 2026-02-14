@@ -54,6 +54,34 @@ export async function getProfileUserById(id_user) {
     return user ? toApiFormat(user) : null;
 }
 
+/**
+ * Actualiza el perfil de un usuario por id_user (email).
+ * @param {string} id_user - Email del usuario (debe coincidir con sesión)
+ * @param {object} data - Campos en formato API: userName, userSurnames, userDescription, userMainImageSrc, userCurrentCompany, experienceArray
+ * @returns {Promise<object>} Perfil actualizado en formato API
+ */
+export async function updateProfileUser(id_user, data) {
+    if (!id_user || typeof id_user !== "string" || !id_user.trim()) {
+        throw new Error("id_user (email) es obligatorio");
+    }
+    if (!UserProfileModel.sequelize) {
+        throw new Error("UserProfileModel no inicializado.");
+    }
+    const user = await UserProfileModel.findByPk(id_user.trim());
+    if (!user) {
+        throw new Error("Usuario no encontrado");
+    }
+    const updates = {};
+    if (data.userName !== undefined) updates.user_name = data.userName;
+    if (data.userSurnames !== undefined) updates.user_surnames = data.userSurnames;
+    if (data.userDescription !== undefined) updates.user_description = data.userDescription;
+    if (data.userMainImageSrc !== undefined) updates.user_main_image_src = data.userMainImageSrc;
+    if (data.userCurrentCompany !== undefined) updates.user_current_company = data.userCurrentCompany;
+    if (data.experienceArray !== undefined) updates.experience_array = data.experienceArray;
+    await user.update(updates);
+    return toApiFormat(user);
+}
+
 function toApiFormat(user) {
     const u = user.toJSON ? user.toJSON() : user;
     return {
