@@ -42,6 +42,18 @@ export async function createProfileUser(id_user) {
 }
 
 /**
+ * Obtiene todos los usuarios de perfil.
+ * @returns {Promise<object[]>}
+ */
+export async function getAllProfileUsers() {
+    if (!UserProfileModel.sequelize) {
+        return [];
+    }
+    const users = await UserProfileModel.findAll({ order: [["user_name", "ASC"]] });
+    return users.map((u) => toApiFormat(u));
+}
+
+/**
  * Obtiene un usuario de perfil por id_user (email).
  * @param {string} id_user
  * @returns {Promise<object|null>}

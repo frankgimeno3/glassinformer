@@ -78,7 +78,7 @@ const LoggedNav: FC = () => {
           <div className="flex flex-row items-center gap-5 text-sm text-gray-500 uppercase tracking-wider font-sans">
             <BasicButton textContent="Mediakit" urlRedirection="/mediakit" />
             <BasicButton textContent="My Companies" urlRedirection="/logged/companies" />
-            <BasicButton textContent="My Profile" urlRedirection="/logged/profile" />
+            <BasicButton textContent="My Profile" urlRedirection="/logged/profiles/me" />
             <BasicButton textContent="Settings" urlRedirection="/logged/settings" />
             <button
               type="button"

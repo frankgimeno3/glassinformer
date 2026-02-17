@@ -69,7 +69,7 @@ async function checkTokens(request, response) {
 }
 
 export function createEndpoint(callback, schema = null, isProtected = false, roles = []) {
-    return async (request) => {
+    return async (request, context) => {
         const response = NextResponse.next();
         let body;
         try {
@@ -103,7 +103,7 @@ export function createEndpoint(callback, schema = null, isProtected = false, rol
         }
 
         try {
-            const response = await callback(request, body);
+            const response = await callback(request, body, context);
             if(isRefreshed){
                 response.cookies.set({
                     name: cookieKeys.access,
