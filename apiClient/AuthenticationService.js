@@ -82,6 +82,25 @@ export default class AuthenticationService {
     return payload;
   }
 
+  /**
+   * Returns whether the current user has a valid session (client-side only).
+   * @returns {Promise<boolean>}
+   */
+  static async isAuthenticated() {
+    try {
+      configureAmplify();
+      const userPoolId = process.env.NEXT_PUBLIC_USER_POOL_ID;
+      const userPoolClientId = process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID;
+      if (!userPoolId || !userPoolClientId) return false;
+      if (typeof window === "undefined") return false;
+      cognitoUserPoolsTokenProvider.setKeyValueStorage(new CookieStorage());
+      const session = await fetchAuthSession();
+      return !!(session?.tokens?.idToken);
+    } catch {
+      return false;
+    }
+  }
+
   static async logout() {
     configureAmplify();
 

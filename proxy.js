@@ -62,8 +62,12 @@ export async function proxy(request) {
     };
 
     // Public paths that unauthenticated users are allowed to visit (no redirect to /)
-    const publicPaths = ['/auth/login', '/auth/signup', '/auth/confirm', '/auth/forgot'];
-    const isPublicPath = publicPaths.some((p) => pathname === p || pathname.startsWith(p + '/'));
+    // Auth routes + (main) content routes (publications, directory, events, mediakit, articles, search)
+    const publicPathPrefixes = [
+        '/auth/login', '/auth/signup', '/auth/confirm', '/auth/forgot',
+        '/publications', '/directory', '/events', '/mediakit', '/articles', '/search'
+    ];
+    const isPublicPath = pathname === '/' || publicPathPrefixes.some((p) => pathname === p || pathname.startsWith(p + '/'));
 
     // Early return for Unlogged Home page if no auth
     if (pathname === '/') {

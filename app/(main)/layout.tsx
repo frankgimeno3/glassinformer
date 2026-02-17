@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "../globals.css";
-import Topnav from "../general_components/navs/Topnav";
+import AppNav from "../general_components/navs/AppNav";
 import TopBanner from "../general_components/banners/TopBanner";
 import RightBanner from "../general_components/banners/RightBanner";
 import Footer from "../general_components/navs/footers/Footer";
@@ -22,7 +22,7 @@ export default function MainLayout({
         <div className="bg-gray-100 w-full">
           <TopBanner />
         </div>
-        <Topnav />
+        <AppNav />
       </div>
       <div className="flex flex-row bg-gray-100 min-h-screen text-gray-600 pt-48">
         {/* Contenedor principal - 7/10 en desktop/tablet, 100% en móvil */}

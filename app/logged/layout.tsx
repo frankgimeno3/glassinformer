@@ -3,7 +3,7 @@ import "../globals.css";
 import TopBanner from "../general_components/banners/TopBanner";
 import RightBanner from "../general_components/banners/RightBanner";
 import Link from "next/link";
-import LoggedNav from "./loggedComponents/LoggedNav";
+import AppNav from "../general_components/navs/AppNav";
 
 export const metadata: Metadata = {
   title: "GlassInformer",
@@ -21,7 +21,7 @@ export default function LoggedLayout({
         <div className="bg-gray-100 w-full">
           <TopBanner />
         </div>
-        <LoggedNav />
+        <AppNav />
       </div>
       <div className="flex flex-row bg-gray-100 min-h-screen text-gray-600 pt-48">
         {/* Contenedor principal - 7/10 en desktop/tablet, 100% en móvil */}
@@ -32,13 +32,13 @@ export default function LoggedLayout({
               <Link href='/logged/' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
                 Home
               </Link>
-              <Link href='/logged/publications' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
+              <Link href='/publications' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
                 Publications
               </Link>
-              <Link href='/logged/directory' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
+              <Link href='/directory' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
                 Directory
               </Link>
-              <Link href='/logged/events' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
+              <Link href='/events' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
                 Events
               </Link>
             </div>
