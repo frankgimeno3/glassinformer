@@ -4,7 +4,7 @@ import { FC, Suspense, useEffect, useMemo, useState } from "react";
 
 import ArticleMiniature from "../main_components/ArticleMiniature";
 import ArticleFilter from "./article_components/ArticleFilter";
-import { ArticleService } from "@/service/ArticleService";
+import { ArticleService } from "@/apiClient/ArticleService";
 import MidBanner from "@/app/general_components/banners/MidBanner";
 import ShowMoreContent from "../main_components/ShowMoreContent";
 

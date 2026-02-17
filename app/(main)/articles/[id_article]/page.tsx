@@ -3,8 +3,8 @@
 import { useRouter, useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react'; 
 
-import { ArticleService } from "@/service/ArticleService";
-import { ContentService } from "@/service/ContentService";
+import { ArticleService } from "@/apiClient/ArticleService";
+import { ContentService } from "@/apiClient/ContentService";
  
 const Article = () => {
   const router = useRouter();

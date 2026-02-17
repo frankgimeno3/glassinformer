@@ -1,7 +1,7 @@
 "use client";
 
 import React, { FC, useState, useEffect, useCallback } from "react";
-import { CompanyService } from "@/service/CompanyService";
+import { CompanyService } from "@/apiClient/CompanyService";
 import UpdateImageModal from "./profileComponents/UpdateImageModal";
 import CompanyAddEditModal from "./profileComponents/CompanyAddEditModal";
 

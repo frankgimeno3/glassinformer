@@ -39,16 +39,16 @@ function configureAmplify() {
 
 export default class AuthenticationService {
   static async login(username, password) {
-    
+
     configureAmplify();
-    
+
     // Verify configuration was successful before proceeding
     const userPoolId = process.env.NEXT_PUBLIC_USER_POOL_ID;
     const userPoolClientId = process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID;
     if (!userPoolId || !userPoolClientId) {
       throw new Error("Missing Cognito env vars: NEXT_PUBLIC_USER_POOL_ID and/or NEXT_PUBLIC_USER_POOL_CLIENT_ID");
     }
-    
+
     cognitoUserPoolsTokenProvider.setKeyValueStorage(new CookieStorage());
 
     const response = await signIn({
@@ -84,14 +84,14 @@ export default class AuthenticationService {
 
   static async logout() {
     configureAmplify();
-    
+
     // Verify configuration was successful before proceeding
     const userPoolId = process.env.NEXT_PUBLIC_USER_POOL_ID;
     const userPoolClientId = process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID;
     if (!userPoolId || !userPoolClientId) {
       throw new Error("Missing Cognito env vars: NEXT_PUBLIC_USER_POOL_ID and/or NEXT_PUBLIC_USER_POOL_CLIENT_ID");
     }
-    
+
     cognitoUserPoolsTokenProvider.setKeyValueStorage(new CookieStorage());
 
     if (typeof window !== "undefined") {

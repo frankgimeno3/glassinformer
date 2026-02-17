@@ -1,7 +1,7 @@
 "use client"
 import { FC, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AuthenticationService from "@/app/service/AuthenticationService";
+import AuthenticationService from "@/apiClient/AuthenticationService";
 
 
 interface LoginProps {

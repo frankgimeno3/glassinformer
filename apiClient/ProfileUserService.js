@@ -1,4 +1,4 @@
-import apiClient from "../apiClient.js";
+import apiClient from "../app/apiClient.js";
 
 /**
  * Crea un usuario de perfil en RDS (tabla users) con id_user = email y campos en blanco.

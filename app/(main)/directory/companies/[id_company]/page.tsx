@@ -4,7 +4,7 @@ import React, { FC, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import usersData from "@/app/contents/usersData.json";
-import { CompanyService } from "@/service/CompanyService";
+import { CompanyService } from "@/apiClient/CompanyService";
 import CompanyContactForm from "../../components/CompanyContactForm";
 
 interface UserInCompany {

@@ -2,7 +2,7 @@
 
 import React, { FC, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { EventService } from '@/service/EventService';
+import { EventService } from '@/apiClient/EventService';
 
 export interface Event {
   id_fair: string;

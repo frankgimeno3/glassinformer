@@ -7,7 +7,7 @@ import PublicationFilter, {
 import PublicationCard, {
   type Publication,
 } from "./publicationComponents/PublicationCard";
-import { PublicationService } from "@/service/PublicationService";
+import { PublicationService } from "@/apiClient/PublicationService";
 
 interface PublicationsProps {}
 

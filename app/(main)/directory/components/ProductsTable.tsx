@@ -2,7 +2,7 @@
 
 import React, { FC, useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { ProductService } from '@/service/ProductService';
+import { ProductService } from '@/apiClient/ProductService';
 
 interface Product {
   id_product: string;

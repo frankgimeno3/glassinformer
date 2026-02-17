@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import ArticleMiniature from "./main_components/ArticleMiniature";
 import MidBanner from "../general_components/banners/MidBanner";
-import { ArticleService } from "@/service/ArticleService";
+import { ArticleService } from "@/apiClient/ArticleService";
 import MainNews from "./main_components/MainNews";
 import ShowMoreContent from "./main_components/ShowMoreContent";
 

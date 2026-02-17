@@ -3,7 +3,7 @@ import { FC, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import BasicButton from '../../general_components/buttons/BasicButton';
-import AuthenticationService from '@/app/service/AuthenticationService.js';
+import AuthenticationService from '@/apiClient/AuthenticationService';
 
 interface LoggedNavProps { }
 

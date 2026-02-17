@@ -2,7 +2,7 @@
 
 import React, { FC, useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { CompanyService } from '@/service/CompanyService';
+import { CompanyService } from '@/apiClient/CompanyService';
 
 interface Company {
   id_company: string;

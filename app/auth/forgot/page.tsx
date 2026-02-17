@@ -1,7 +1,7 @@
 "use client";
 
 import React, { FC, useState } from "react";
-import AuthenticationService from "@/app/service/AuthenticationService";
+import AuthenticationService from "@/apiClient/AuthenticationService";
 
 interface ForgotProps {}
 

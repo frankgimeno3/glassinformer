@@ -2,7 +2,7 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { EventService } from '@/service/EventService';
+import { EventService } from '@/apiClient/EventService';
 import EventContactForm from '../EventContactForm';
 
 interface Event {

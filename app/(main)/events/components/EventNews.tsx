@@ -3,8 +3,8 @@
 import React, { FC, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { ArticleService } from '@/service/ArticleService';
-import { EventService } from '@/service/EventService';
+import { ArticleService } from '@/apiClient/ArticleService';
+import { EventService } from '@/apiClient/EventService';
 import type { Event } from './EventsCalendar';
 
 export interface EventNewsArticle {

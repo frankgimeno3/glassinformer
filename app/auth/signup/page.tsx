@@ -2,8 +2,8 @@
 
 import React, { FC, useState } from "react";
 import { useRouter } from "next/navigation";
-import AuthenticationService from "@/app/service/AuthenticationService";
-import { createProfileUser } from "@/app/service/ProfileUserService";
+import AuthenticationService from "@/apiClient/AuthenticationService";
+import { createProfileUser } from "@/apiClient/ProfileUserService";
 
 interface SignupProps {}
 

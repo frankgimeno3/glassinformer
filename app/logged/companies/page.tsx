@@ -3,7 +3,7 @@
 import React, { FC, useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { DEFAULT_USER_ID } from "../constants";
-import { CompanyService } from "@/service/CompanyService";
+import { CompanyService } from "@/apiClient/CompanyService";
 
 interface UserInCompany {
   id_user: string;

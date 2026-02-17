@@ -3,7 +3,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ProductService } from '@/service/ProductService';
+import { ProductService } from '@/apiClient/ProductService';
 import CompanyContactForm from '../../components/CompanyContactForm';
 
 interface Product {
