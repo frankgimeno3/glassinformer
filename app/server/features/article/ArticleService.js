@@ -67,7 +67,8 @@ export async function getAllArticles() {
             contents_array: article.contents_array || [],
             highlited_position: article.highlited_position ?? "",
             is_article_event: article.is_article_event ?? false,
-            event_id: article.event_id ?? null
+            event_id: article.event_id ?? null,
+            comments_array: article.comments_array || []
         }));
     } catch (error) {
         console.error('Error fetching articles from database:', error);
@@ -111,7 +112,8 @@ export async function getArticleById(idArticle) {
             contents_array: article.contents_array || [],
             highlited_position: article.highlited_position ?? "",
             is_article_event: article.is_article_event ?? false,
-            event_id: article.event_id ?? null
+            event_id: article.event_id ?? null,
+            comments_array: article.comments_array || []
         };
     } catch (error) {
         console.error('Error fetching article from database:', error);
@@ -144,7 +146,8 @@ export async function createArticle(articleData) {
             date: articleData.date,
             article_tags_array: articleData.article_tags_array || [],
             contents_array: articleData.contents_array || [],
-            highlited_position: articleData.highlited_position ?? ""
+            highlited_position: articleData.highlited_position ?? "",
+            comments_array: articleData.comments_array || []
         });
         
         console.log(`[ArticleService] [${requestId}] Article created successfully:`, article.toJSON());
@@ -216,6 +219,7 @@ export async function updateArticle(idArticle, articleData) {
         if (articleData.article_tags_array !== undefined) article.article_tags_array = articleData.article_tags_array;
         if (articleData.contents_array !== undefined) article.contents_array = articleData.contents_array;
         if (articleData.highlited_position !== undefined) article.highlited_position = articleData.highlited_position;
+        if (articleData.comments_array !== undefined) article.comments_array = articleData.comments_array;
         
         await article.save();
         

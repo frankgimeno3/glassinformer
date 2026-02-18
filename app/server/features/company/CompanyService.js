@@ -6,6 +6,8 @@ import "../../database/models.js";
 
 function mapCompanyToApiFormat(company, products = [], options = { includeProducts: false }) {
     const plain = company.get ? company.get({ plain: true }) : company;
+    // Workers from RDS workers_array (add column + field in models.js when ready). Until then, [].
+    const workers = Array.isArray(plain.workers_array) ? plain.workers_array : [];
     const base = {
         id_company: plain.id_company,
         company_name: plain.company_name,
@@ -14,7 +16,7 @@ function mapCompanyToApiFormat(company, products = [], options = { includeProduc
         region: plain.region || plain.category || "",
         category: plain.category || "",
         productsArray: products.map((p) => (typeof p === "object" && p.id_product ? p.id_product : p)),
-        userArray: [],
+        userArray: workers,
     };
     if (options.includeProducts && products.length > 0) {
         base.products = products.map((p) => ({
@@ -77,4 +79,28 @@ export async function getCompanyById(idCompany) {
         console.error("Error fetching company from database:", error);
         throw error;
     }
+}
+
+/**
+ * Create a new company.
+ * @param {object} data - { id_company, company_name, country, main_description, region (stored as category), productsArray }
+ * @returns {Promise<object>} Created company in API format
+ */
+export async function createCompany(data) {
+    if (!CompanyModel.sequelize) {
+        throw new Error("CompanyModel not initialized");
+    }
+    const id_company = data.id_company || `comp-${Date.now()}`;
+    const existing = await CompanyModel.findByPk(id_company);
+    if (existing) {
+        throw new Error("Company with this id already exists");
+    }
+    const company = await CompanyModel.create({
+        id_company,
+        company_name: data.company_name || "",
+        country: data.country || null,
+        main_description: data.main_description || null,
+        category: data.region ?? data.category ?? null,
+    });
+    return mapCompanyToApiFormat(company, []);
 }

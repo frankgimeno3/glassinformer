@@ -3,14 +3,15 @@
 import React, { FC, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import usersData from "@/app/contents/usersData.json";
 import { CompanyService } from "@/apiClient/CompanyService";
 import CompanyContactForm from "../../components/CompanyContactForm";
+import AuthenticationService from "@/apiClient/AuthenticationService";
+import apiClient from "@/app/apiClient";
 
 interface UserInCompany {
   id_user: string;
-  userPosition: string;
-  userRole: string;
+  userPosition?: string;
+  userRole?: string;
 }
 
 interface CompanyItem {
@@ -33,17 +34,8 @@ interface Product {
   company_name: string;
 }
 
-interface UserData {
-  id_user: string;
-  userName: string;
-  userSurnames: string;
-}
-
-function getUserDisplayName(id_user: string): string {
-  const users = usersData as UserData[];
-  const user = users.find((u) => u.id_user === id_user);
-  if (!user) return id_user;
-  return `${user.userName} ${user.userSurnames}`.trim();
+interface UserProfile {
+  userCurrentCompany?: { id_company: string; userPosition: string };
 }
 
 const CompanyProfile: FC = () => {
@@ -53,6 +45,8 @@ const CompanyProfile: FC = () => {
   const [company, setCompany] = useState<CompanyItem | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLogged, setIsLogged] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     if (!idCompany) {
@@ -76,6 +70,34 @@ const CompanyProfile: FC = () => {
     };
     fetchCompany();
   }, [idCompany]);
+
+  useEffect(() => {
+    let cancelled = false;
+    AuthenticationService.isAuthenticated().then((auth) => {
+      if (cancelled) return;
+      setIsLogged(auth);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!isLogged) {
+      setUserProfile(null);
+      return;
+    }
+    let cancelled = false;
+    apiClient.get<UserProfile>("/api/v1/users/me").then((res) => {
+      if (cancelled) return;
+      setUserProfile(res.data);
+    }).catch(() => {
+      if (!cancelled) setUserProfile(null);
+    });
+    return () => { cancelled = true; };
+  }, [isLogged]);
+
+  const isLinkedToCompany = Boolean(
+    isLogged && company && userProfile?.userCurrentCompany?.id_company === company.id_company
+  );
 
   if (loading) {
     return (
@@ -119,9 +141,19 @@ const CompanyProfile: FC = () => {
           </Link>
         </div>
 
-        <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-8">
-          {company.company_name}
-        </h1>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900">
+            {company.company_name}
+          </h1>
+          {isLinkedToCompany && (
+            <Link
+              href="/logged/companies"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
+            >
+              Edit data
+            </Link>
+          )}
+        </div>
 
         {/* Company Information */}
         <div className="bg-gray-50 rounded-lg p-6 mb-8">
@@ -164,13 +196,13 @@ const CompanyProfile: FC = () => {
                   className="bg-white rounded-lg shadow-md p-4 border border-gray-200"
                 >
                   <p className="text-lg font-semibold text-gray-900">
-                    {getUserDisplayName(member.id_user)}
+                    {member.id_user}
                   </p>
-                  <p className="text-sm text-gray-600 capitalize mt-1">
-                    {member.userPosition}
-                    <span className="text-gray-400 mx-1">·</span>
-                    {member.userRole}
-                  </p>
+                  {(member.userPosition != null || member.userRole != null) && (
+                    <p className="text-sm text-gray-600 capitalize mt-1">
+                      {[member.userPosition, member.userRole].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

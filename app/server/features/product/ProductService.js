@@ -93,3 +93,30 @@ export async function getProductById(idProduct) {
         throw error;
     }
 }
+
+/**
+ * Create a new product.
+ * @param {object} data - { id_product?, product_name, product_description, id_company, tagsArray?, price?, main_image_src? }
+ * @returns {Promise<object>} Created product in API format
+ */
+export async function createProduct(data) {
+    if (!ProductModel.sequelize) {
+        throw new Error("ProductModel not initialized");
+    }
+    const id_product = data.id_product || `prod-${Date.now()}`;
+    const existing = await ProductModel.findByPk(id_product);
+    if (existing) {
+        throw new Error("Product with this id already exists");
+    }
+    const tagsArray = Array.isArray(data.tagsArray) ? data.tagsArray : [];
+    const product = await ProductModel.create({
+        id_product,
+        product_name: data.product_name || "",
+        product_description: data.product_description || null,
+        id_company: data.id_company,
+        price: data.price != null && data.price !== "" ? data.price : null,
+        main_image_src: data.main_image_src || null,
+        product_categories_array: tagsArray,
+    });
+    return mapProductToApiFormat(product);
+}

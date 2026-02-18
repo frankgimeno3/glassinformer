@@ -1,15 +1,17 @@
 "use client";
 import { FC, useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import AuthenticationService from "@/apiClient/AuthenticationService";
 import LoggedNav from "./LoggedNav";
 import UnloggedNav from "./UnloggedNav";
 
 const AppNav: FC = () => {
   const [isLogged, setIsLogged] = useState<boolean | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     AuthenticationService.isAuthenticated().then(setIsLogged);
-  }, []);
+  }, [pathname]);
 
   if (isLogged === null) {
     return (

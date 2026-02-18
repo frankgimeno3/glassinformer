@@ -16,4 +16,9 @@ export class ProductService {
         const response = await apiClient.get(`/api/v1/products/${encodeURIComponent(idProduct)}`);
         return response.data;
     }
+
+    static async createProduct(data) {
+        const response = await apiClient.post("/api/v1/products", data);
+        return response.data;
+    }
 }

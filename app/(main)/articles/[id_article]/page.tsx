@@ -5,6 +5,8 @@ import React, { useEffect, useState } from 'react';
 
 import { ArticleService } from "@/apiClient/ArticleService";
 import { ContentService } from "@/apiClient/ContentService";
+import CommentsSection from "../article_components/CommentsSection";
+import RelatedContent from "../article_components/RelatedContent";
  
 const Article = () => {
   const router = useRouter();
@@ -175,6 +177,8 @@ const Article = () => {
         ))}
       </div>
 
+      <CommentsSection idArticle={ArticleId} />
+      <RelatedContent />
     </div>
   );
 };

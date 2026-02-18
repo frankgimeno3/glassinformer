@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ProductService } from '@/apiClient/ProductService';
 import CompanyContactForm from '../../components/CompanyContactForm';
+import AuthenticationService from '@/apiClient/AuthenticationService';
+import apiClient from '@/app/apiClient';
 
 interface Product {
   id_product: string;
@@ -17,6 +19,10 @@ interface Product {
   main_image_src: string;
 }
 
+interface UserProfile {
+  userCurrentCompany?: { id_company: string; userPosition: string };
+}
+
 const ProductsPage: FC = () => {
   const params = useParams();
   const router = useRouter();
@@ -24,6 +30,8 @@ const ProductsPage: FC = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [showContactForm, setShowContactForm] = useState(false);
+  const [isLogged, setIsLogged] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     if (!idProduct) {
@@ -44,6 +52,34 @@ const ProductsPage: FC = () => {
     };
     fetchProduct();
   }, [idProduct]);
+
+  useEffect(() => {
+    let cancelled = false;
+    AuthenticationService.isAuthenticated().then((auth) => {
+      if (cancelled) return;
+      setIsLogged(auth);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!isLogged) {
+      setUserProfile(null);
+      return;
+    }
+    let cancelled = false;
+    apiClient.get<UserProfile>('/api/v1/users/me').then((res) => {
+      if (cancelled) return;
+      setUserProfile(res.data);
+    }).catch(() => {
+      if (!cancelled) setUserProfile(null);
+    });
+    return () => { cancelled = true; };
+  }, [isLogged]);
+
+  const isLinkedToCompany = Boolean(
+    isLogged && product && userProfile?.userCurrentCompany?.id_company === product.id_company
+  );
 
   if (loading) {
     return (
@@ -81,9 +117,19 @@ const ProductsPage: FC = () => {
           ← Back to Directory
         </button>
 
-        <h1 className='text-4xl sm:text-5xl font-bold text-gray-900 mb-8'>
-          {product.product_name}
-        </h1>
+        <div className='flex flex-wrap items-center justify-between gap-4 mb-8'>
+          <h1 className='text-4xl sm:text-5xl font-bold text-gray-900'>
+            {product.product_name}
+          </h1>
+          {isLinkedToCompany && (
+            <Link
+              href='/logged/companies'
+              className='px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700'
+            >
+              Edit data
+            </Link>
+          )}
+        </div>
 
         {/* Product image and main info */}
         <div className='grid grid-cols-1 md:grid-cols-3 gap-8 mb-8'>

@@ -16,4 +16,9 @@ export class CompanyService {
         const response = await apiClient.get(`/api/v1/companies/${encodeURIComponent(idCompany)}`);
         return response.data;
     }
+
+    static async createCompany(data) {
+        const response = await apiClient.post("/api/v1/companies", data);
+        return response.data;
+    }
 }

@@ -5,6 +5,7 @@ import Database from "./database.js";
 import {ModificationStatusEnum} from "../features/modification/ModificationStatusEnum.js";
 import ModificationModel from "../features/modification/ModificationModel.js";
 import ArticleModel from "../features/article/ArticleModel.js";
+import CommentModel from "../features/comment/CommentModel.js";
 import ContentModel from "../features/content/ContentModel.js";
 import EventModel from "../features/event/EventModel.js";
 import PublicationModel from "../features/publication/PublicationModel.js";
@@ -103,6 +104,8 @@ ArticleModel.init({
         type: DataTypes.STRING,
         allowNull: true
     }
+    // comments_array: add this column in RDS first, then uncomment:
+    // comments_array: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] }
 }, {
     sequelize,
     modelName: 'article',
@@ -389,6 +392,42 @@ BannerModel.init({
     ]
 });
 
+CommentModel.init({
+    id_comment: {
+        type: DataTypes.STRING,
+        primaryKey: true,
+        unique: true
+    },
+    id_article: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        references: { model: 'articles', key: 'id_article' }
+    },
+    id_timestamp: {
+        type: DataTypes.DATE,
+        allowNull: false
+    },
+    comment_id_user: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        references: { model: 'users', key: 'id_user' }
+    },
+    comment_content: {
+        type: DataTypes.TEXT,
+        allowNull: false
+    }
+}, {
+    sequelize,
+    modelName: 'comment',
+    tableName: 'comments',
+    underscored: true,
+    timestamps: false,
+    indexes: [
+        { fields: ['id_article'] },
+        { fields: ['id_timestamp'] }
+    ]
+});
+
 defineAssociations();
 
-export { TimeLogModel, ModificationModel, ArticleModel, ContentModel, EventModel, PublicationModel, CompanyModel, ProductModel, BannerModel, UserProfileModel };
+export { TimeLogModel, ModificationModel, ArticleModel, ContentModel, EventModel, PublicationModel, CompanyModel, ProductModel, BannerModel, UserProfileModel, CommentModel };
