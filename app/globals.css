@@ -26,6 +26,13 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Cursor pointer en enlaces y botones */
+a,
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
 /* Article body: left-aligned block, justified text, override editor inline alignment */
 .article-body {
   text-align: left;

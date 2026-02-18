@@ -28,4 +28,16 @@ export class CommentService {
         );
         return response.data;
     }
+
+    /**
+     * @param {string} idArticle
+     * @param {string} idComment
+     * @returns {Promise<{ success: boolean }>}
+     */
+    static async deleteComment(idArticle, idComment) {
+        const response = await apiClient.delete(
+            `/api/v1/articles/${encodeURIComponent(idArticle)}/comments/${encodeURIComponent(idComment)}`
+        );
+        return response.data;
+    }
 }

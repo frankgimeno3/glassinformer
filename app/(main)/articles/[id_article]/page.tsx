@@ -1,13 +1,16 @@
 'use client';
 
 import { useRouter, useParams } from 'next/navigation';
-import React, { useEffect, useState } from 'react'; 
+import React, { useEffect, useState } from 'react';
 
 import { ArticleService } from "@/apiClient/ArticleService";
 import { ContentService } from "@/apiClient/ContentService";
+import AuthenticationService from "@/apiClient/AuthenticationService";
+import apiClient from "@/app/apiClient";
 import CommentsSection from "../article_components/CommentsSection";
 import RelatedContent from "../article_components/RelatedContent";
- 
+import DeleteArticleModal from "../article_components/DeleteArticleModal";
+
 const Article = () => {
   const router = useRouter();
   const params = useParams();
@@ -17,6 +20,9 @@ const Article = () => {
   const [contents, setContents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchArticleData = async () => {
@@ -43,6 +49,40 @@ const Article = () => {
       fetchArticleData();
     }
   }, [ArticleId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    AuthenticationService.isAuthenticated().then((auth) => {
+      if (cancelled) return;
+      if (!auth) {
+        setCurrentUserId(null);
+        return;
+      }
+      apiClient.get<{ id_user: string }>("/api/v1/users/me").then((res) => {
+        if (!cancelled) setCurrentUserId(res.data?.id_user ?? null);
+      }).catch(() => {
+        if (!cancelled) setCurrentUserId(null);
+      });
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const isOwner = Boolean(currentUserId && selectedArticle?.author === currentUserId) || Boolean(currentUserId && selectedArticle && !selectedArticle.author);
+
+  const handleDeleteArticle = async () => {
+    if (!ArticleId || isDeleting) return;
+    setIsDeleting(true);
+    try {
+      await ArticleService.deleteArticle(ArticleId);
+      setDeleteModalOpen(false);
+      router.push("/articles");
+    } catch (err: unknown) {
+      const e = err as { message?: string };
+      setError(e?.message ?? "Error deleting article");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -148,8 +188,21 @@ const Article = () => {
   return (
     <div className="flex flex-col h-full min-h-screen text-gray-600 px-6 py-10 gap-6">
 
-      <h1 className="text-4xl font-bold">{selectedArticle.articleTitle}</h1>
-      <h2 className="text-xl text-gray-500">{selectedArticle.articleSubtitle}</h2>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-4xl font-bold">{selectedArticle.articleTitle}</h1>
+          <h2 className="text-xl text-gray-500">{selectedArticle.articleSubtitle}</h2>
+        </div>
+        {isOwner && (
+          <button
+            type="button"
+            onClick={() => setDeleteModalOpen(true)}
+            className="shrink-0 px-4 py-2 border border-red-600 text-red-600 rounded-xl hover:bg-red-50 font-medium"
+          >
+            Delete article
+          </button>
+        )}
+      </div>
 
       <img
         src={selectedArticle.article_main_image_url}
@@ -179,6 +232,13 @@ const Article = () => {
 
       <CommentsSection idArticle={ArticleId} />
       <RelatedContent />
+
+      <DeleteArticleModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteArticle}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };
