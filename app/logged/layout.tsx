@@ -4,6 +4,7 @@ import TopBanner from "../general_components/banners/TopBanner";
 import RightBanner from "../general_components/banners/RightBanner";
 import Link from "next/link";
 import AppNav from "../general_components/navs/AppNav";
+import Footer from "../general_components/navs/footers/Footer";
 
 export const metadata: Metadata = {
   title: "GlassInformer",
@@ -43,6 +44,7 @@ export default function LoggedLayout({
               </Link>
             </div>
             {children}
+            <Footer />
           </div>
         </div>
         {/* Sidebar de banners - 3/10 en desktop/tablet, oculto en móvil */}

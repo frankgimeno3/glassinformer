@@ -156,14 +156,14 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ idArticle }) => {
 
   if (!isLogged) {
     return (
-      <section className="mt-10 pt-8 border-t border-gray-200 max-w-4xl">
+      <section className="mt-0 p-6 md:p-8 bg-white shadow-sm border-y border-gray-100">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Comments</h2>
         <p className="text-gray-600 mb-4">
           Log in to see the comments on this article.
         </p>
         <Link
           href="/auth/login"
-          className="inline-block px-4 py-2 bg-blue-950 text-white rounded-xl hover:opacity-90"
+          className="inline-block px-4 py-2 bg-blue-950 text-white rounded-lg hover:opacity-90"
         >
           Log in
         </Link>
@@ -172,7 +172,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ idArticle }) => {
   }
 
   return (
-    <section className="mt-10 pt-8 border-t border-gray-200 max-w-4xl">
+    <section className="mt-0 p-6 md:p-8 bg-white shadow-sm border-y border-gray-100">
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">Comments</h2>
 
       <form onSubmit={handleSubmitComment} className="mb-8">
