@@ -3,12 +3,16 @@
 import { useEffect, useState, useMemo } from "react";
 import ArticleMiniature from "./main_components/ArticleMiniature";
 import MidBanner from "../general_components/banners/MidBanner";
+import { pickNBannersByPriority, type BannerItem } from "../general_components/banners/pickBannerByPriority";
 import { ArticleService } from "@/apiClient/ArticleService";
 import MainNews from "./main_components/MainNews";
 import ShowMoreContent from "./main_components/ShowMoreContent";
 
+const BANNERS_API = "/api/v1/banners";
+
 export default function Home() {
   const [allArticles, setAllArticles] = useState<any[]>([]);
+  const [banners, setBanners] = useState<BannerItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchArticles = async () => {
@@ -40,6 +44,13 @@ export default function Home() {
 
   useEffect(() => {
     fetchArticles();
+  }, []);
+
+  useEffect(() => {
+    fetch(BANNERS_API)
+      .then((res) => res.json())
+      .then((data: BannerItem[]) => setBanners(Array.isArray(data) ? data : []))
+      .catch(() => setBanners([]));
   }, []);
 
   const validArticles = allArticles.filter((a: any) => a && a.id_article && a.articleTitle);
@@ -107,6 +118,15 @@ export default function Home() {
     return items;
   }, [visibleArticles]);
 
+  const midBannerSlotCount = useMemo(
+    () => gridItems.filter((i) => i.type === "banner").length,
+    [gridItems]
+  );
+  const midBanners = useMemo(
+    () => pickNBannersByPriority(banners, "medium", midBannerSlotCount),
+    [banners, midBannerSlotCount]
+  );
+
   const hasMoreContent =
     totalBlocks > DEFAULT_MAX_BLOCKS && effectiveVisibleBlocks < totalBlocks;
 
@@ -135,7 +155,9 @@ export default function Home() {
               {gridItems.map((item, idx) =>
                 item.type === "banner" ? (
                   <div key={`mid-banner-${idx}`} className="col-span-1 md:col-span-2 lg:col-span-3">
-                    <MidBanner />
+                    <MidBanner
+                      banner={midBanners[gridItems.slice(0, idx).filter((i) => i.type === "banner").length] ?? null}
+                    />
                   </div>
                 ) : (
                   <ArticleMiniature

@@ -24,7 +24,7 @@ export default function MainLayout({
         </div>
         <AppNav />
       </div>
-      <div className="flex flex-row bg-gray-100 min-h-screen text-gray-600 pt-48">
+      <div className="flex flex-row bg-gray-100 min-h-screen text-gray-600 pt-78">
         {/* Contenedor principal - 7/10 en desktop/tablet, 100% en móvil */}
         <div className="w-full md:w-[80%] flex-shrink-0 px-12 mt-8">
           <div className="flex flex-col">

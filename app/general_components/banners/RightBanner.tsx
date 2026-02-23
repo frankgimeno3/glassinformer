@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import type { BannerItem } from "./pickBannerByPriority";
+import { pickNBannersByPriority, type BannerItem } from "./pickBannerByPriority";
 
 const BANNERS_API = "/api/v1/banners";
 const MIN_RIGHT_BANNERS = 4;
@@ -20,7 +20,8 @@ export default function RightBanner() {
 
   const rightBanners = useMemo(() => {
     const filtered = banners.filter((b) => b.bannerType === "right");
-    return filtered.slice(0, Math.max(MIN_RIGHT_BANNERS, filtered.length));
+    const count = Math.max(MIN_RIGHT_BANNERS, filtered.length);
+    return pickNBannersByPriority(banners, "right", count);
   }, [banners]);
 
   if (rightBanners.length === 0)

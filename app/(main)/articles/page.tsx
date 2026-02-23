@@ -6,7 +6,10 @@ import ArticleMiniature from "../main_components/ArticleMiniature";
 import ArticleFilter from "./article_components/ArticleFilter";
 import { ArticleService } from "@/apiClient/ArticleService";
 import MidBanner from "@/app/general_components/banners/MidBanner";
+import { pickNBannersByPriority, type BannerItem } from "@/app/general_components/banners/pickBannerByPriority";
 import ShowMoreContent from "../main_components/ShowMoreContent";
+
+const BANNERS_API = "/api/v1/banners";
 
 interface ArticlesProps {}
 
@@ -17,6 +20,7 @@ const INITIAL_VISIBLE_ROWS = 6; // máximo 6 filas al inicio
 
 const Articles: FC<ArticlesProps> = ({}) => {
   const [allArticles, setAllArticles] = useState<any[]>([]);
+  const [banners, setBanners] = useState<BannerItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [visibleRows, setVisibleRows] = useState(INITIAL_VISIBLE_ROWS);
 
@@ -39,6 +43,13 @@ const Articles: FC<ArticlesProps> = ({}) => {
 
   useEffect(() => {
     fetchArticles();
+  }, []);
+
+  useEffect(() => {
+    fetch(BANNERS_API)
+      .then((res) => res.json())
+      .then((data: BannerItem[]) => setBanners(Array.isArray(data) ? data : []))
+      .catch(() => setBanners([]));
   }, []);
 
   const validArticles = useMemo(
@@ -78,6 +89,15 @@ const Articles: FC<ArticlesProps> = ({}) => {
     return items;
   }, [visibleArticles]);
 
+  const midBannerSlotCount = useMemo(
+    () => gridItems.filter((i) => i.type === "banner").length,
+    [gridItems]
+  );
+  const midBanners = useMemo(
+    () => pickNBannersByPriority(banners, "medium", midBannerSlotCount),
+    [banners, midBannerSlotCount]
+  );
+
   const handleShowMore = () => {
     setVisibleRows((prev) => prev + INITIAL_VISIBLE_ROWS);
   };
@@ -107,7 +127,9 @@ const Articles: FC<ArticlesProps> = ({}) => {
               {gridItems.map((item, idx) =>
                 item.type === "banner" ? (
                   <div key={`mid-banner-${idx}`} className="col-span-1 md:col-span-2 lg:col-span-3">
-                    <MidBanner />
+                    <MidBanner
+                      banner={midBanners[gridItems.slice(0, idx).filter((i) => i.type === "banner").length] ?? null}
+                    />
                   </div>
                 ) : (
                   <ArticleMiniature

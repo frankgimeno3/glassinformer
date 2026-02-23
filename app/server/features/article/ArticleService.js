@@ -20,6 +20,7 @@ function getFallbackArticles() {
             article_main_image_url: article.article_main_image_url || '',
             company: article.company || '',
             date: article.date || new Date().toISOString().split('T')[0],
+            portal_id: article.portal_id ?? null,
             article_tags_array: article.article_tags_array || [],
             contents_array: article.contents_array || [],
             highlited_position: article.highlited_position ?? '',
@@ -55,7 +56,7 @@ export async function getAllArticles() {
             return getFallbackArticles();
         }
         
-        // Transform database format to API format
+        // Transform database format to API format (DB has no article_tags_array/contents_array; kept in API for compatibility)
         return articles.map(article => ({
             id_article: article.id_article,
             articleTitle: article.article_title,
@@ -63,12 +64,13 @@ export async function getAllArticles() {
             article_main_image_url: article.article_main_image_url,
             company: article.company,
             date: article.date ? new Date(article.date).toISOString().split('T')[0] : null,
-            article_tags_array: article.article_tags_array || [],
-            contents_array: article.contents_array || [],
+            portal_id: article.portal_id ?? null,
+            article_tags_array: [],
+            contents_array: [],
             highlited_position: article.highlited_position ?? "",
             is_article_event: article.is_article_event ?? false,
             event_id: article.event_id ?? null,
-            comments_array: article.comments_array || []
+            comments_array: []
         }));
     } catch (error) {
         console.error('Error fetching articles from database:', error);
@@ -108,12 +110,13 @@ export async function getArticleById(idArticle) {
             article_main_image_url: article.article_main_image_url,
             company: article.company,
             date: article.date ? new Date(article.date).toISOString().split('T')[0] : null,
-            article_tags_array: article.article_tags_array || [],
-            contents_array: article.contents_array || [],
+            portal_id: article.portal_id ?? null,
+            article_tags_array: [],
+            contents_array: [],
             highlited_position: article.highlited_position ?? "",
             is_article_event: article.is_article_event ?? false,
             event_id: article.event_id ?? null,
-            comments_array: article.comments_array || []
+            comments_array: []
         };
     } catch (error) {
         console.error('Error fetching article from database:', error);
@@ -136,7 +139,7 @@ export async function createArticle(articleData) {
         console.log(`[ArticleService] [${requestId}] Database: ${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`);
         console.log(`[ArticleService] [${requestId}] Creating article with data:`, JSON.stringify(articleData, null, 2));
         
-        // Transform API format to database format
+        // Transform API format to database format (DB has no article_tags_array/contents_array)
         const article = await ArticleModel.create({
             id_article: articleData.id_article,
             article_title: articleData.articleTitle,
@@ -144,10 +147,10 @@ export async function createArticle(articleData) {
             article_main_image_url: articleData.article_main_image_url,
             company: articleData.company,
             date: articleData.date,
-            article_tags_array: articleData.article_tags_array || [],
-            contents_array: articleData.contents_array || [],
+            portal_id: articleData.portal_id ?? null,
             highlited_position: articleData.highlited_position ?? "",
-            comments_array: articleData.comments_array || []
+            is_article_event: articleData.is_article_event ?? false,
+            event_id: articleData.event_id ?? null
         });
         
         console.log(`[ArticleService] [${requestId}] Article created successfully:`, article.toJSON());
@@ -160,8 +163,9 @@ export async function createArticle(articleData) {
             article_main_image_url: article.article_main_image_url,
             company: article.company,
             date: article.date ? new Date(article.date).toISOString().split('T')[0] : null,
-            article_tags_array: article.article_tags_array || [],
-            contents_array: article.contents_array || [],
+            portal_id: article.portal_id ?? null,
+            article_tags_array: [],
+            contents_array: [],
             highlited_position: article.highlited_position ?? ""
         };
     } catch (error) {
@@ -210,16 +214,16 @@ export async function updateArticle(idArticle, articleData) {
             throw new Error(`Article with id ${idArticle} not found`);
         }
         
-        // Update fields
+        // Update fields (DB has no article_tags_array/contents_array)
         if (articleData.articleTitle !== undefined) article.article_title = articleData.articleTitle;
         if (articleData.articleSubtitle !== undefined) article.article_subtitle = articleData.articleSubtitle;
         if (articleData.article_main_image_url !== undefined) article.article_main_image_url = articleData.article_main_image_url;
         if (articleData.company !== undefined) article.company = articleData.company;
         if (articleData.date !== undefined) article.date = articleData.date;
-        if (articleData.article_tags_array !== undefined) article.article_tags_array = articleData.article_tags_array;
-        if (articleData.contents_array !== undefined) article.contents_array = articleData.contents_array;
+        if (articleData.portal_id !== undefined) article.portal_id = articleData.portal_id;
         if (articleData.highlited_position !== undefined) article.highlited_position = articleData.highlited_position;
-        if (articleData.comments_array !== undefined) article.comments_array = articleData.comments_array;
+        if (articleData.is_article_event !== undefined) article.is_article_event = articleData.is_article_event;
+        if (articleData.event_id !== undefined) article.event_id = articleData.event_id;
         
         await article.save();
         
@@ -231,8 +235,9 @@ export async function updateArticle(idArticle, articleData) {
             article_main_image_url: article.article_main_image_url,
             company: article.company,
             date: article.date ? new Date(article.date).toISOString().split('T')[0] : null,
-            article_tags_array: article.article_tags_array || [],
-            contents_array: article.contents_array || [],
+            portal_id: article.portal_id ?? null,
+            article_tags_array: [],
+            contents_array: [],
             highlited_position: article.highlited_position ?? ""
         };
     } catch (error) {
@@ -258,8 +263,9 @@ export async function deleteArticle(idArticle) {
             article_main_image_url: article.article_main_image_url,
             company: article.company,
             date: article.date ? new Date(article.date).toISOString().split('T')[0] : null,
-            article_tags_array: article.article_tags_array || [],
-            contents_array: article.contents_array || [],
+            portal_id: article.portal_id ?? null,
+            article_tags_array: [],
+            contents_array: [],
             highlited_position: article.highlited_position ?? ""
         };
     } catch (error) {

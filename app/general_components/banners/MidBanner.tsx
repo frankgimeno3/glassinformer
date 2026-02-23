@@ -10,17 +10,25 @@ import {
 
 const BANNERS_API = "/api/v1/banners";
 
-export default function MidBanner() {
-  const [banner, setBanner] = useState<BannerItem | null>(null);
+interface MidBannerProps {
+  /** When provided, this banner is shown and no fetch happens (avoids duplicates on same page). */
+  banner?: BannerItem | null;
+}
+
+export default function MidBanner({ banner: forcedBanner }: MidBannerProps = {}) {
+  const [pickedBanner, setPickedBanner] = useState<BannerItem | null>(null);
 
   useEffect(() => {
+    if (forcedBanner !== undefined) return; // parent controls banner
     fetch(BANNERS_API)
       .then((res) => res.json())
       .then((data: BannerItem[]) => {
-        setBanner(pickBannerByPriority(data, "medium"));
+        setPickedBanner(pickBannerByPriority(data, "medium"));
       })
-      .catch(() => setBanner(null));
-  }, []);
+      .catch(() => setPickedBanner(null));
+  }, [forcedBanner]);
+
+  const banner = forcedBanner !== undefined ? forcedBanner : pickedBanner;
 
   if (!banner) return (
     <div className="w-full aspect-[800/250] max-h-[250px] rounded-lg bg-gray-100 my-4" />

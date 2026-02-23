@@ -84,13 +84,9 @@ ArticleModel.init({
         type: DataTypes.DATE,
         allowNull: false
     },
-    article_tags_array: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        defaultValue: []
-    },
-    contents_array: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        defaultValue: []
+    portal_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     },
     highlited_position: {
         type: DataTypes.STRING,
@@ -115,7 +111,8 @@ ArticleModel.init({
         {fields: ['date']},
         {fields: ['company']},
         {fields: ['is_article_event']},
-        {fields: ['event_id']}
+        {fields: ['event_id']},
+        {fields: ['portal_id']}
     ]
 });
 
@@ -373,9 +370,13 @@ BannerModel.init({
         type: DataTypes.STRING,
         allowNull: false
     },
-    position: {
+    portal_id: {
         type: DataTypes.INTEGER,
-        defaultValue: 0
+        allowNull: true
+    },
+    appearance_weight: {
+        type: DataTypes.STRING(16),
+        allowNull: true
     }
 }, {
     sequelize,
@@ -388,7 +389,7 @@ BannerModel.init({
     indexes: [
         { fields: ['position_type'] },
         { fields: ['page_type'] },
-        { fields: ['position'] }
+        { fields: ['portal_id'] }
     ]
 });
 

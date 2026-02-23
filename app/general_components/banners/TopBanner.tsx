@@ -27,7 +27,7 @@ export default function TopBanner() {
   );
 
   return (
-    <div className="h-16 md:h-20 flex items-center justify-center w-full overflow-hidden bg-gray-100">
+    <div className="h-24 md:h-48 flex items-center justify-center w-full overflow-hidden bg-gray-100">
       <Link
         href={banner.bannerRedirection || banner.bannerRoute || "/"}
         target="_blank"
