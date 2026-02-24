@@ -8,8 +8,8 @@ interface LoggedProps { }
 
 const Logged: FC<LoggedProps> = ({ }) => {
   return (
-    <div className='bg-white min-h-[60vh] rounded-lg shadow p-6 md:p-8'>
-      <div className='flex flex-row justify-end'>
+    <div className='bg-white min-h-[60vh] rounded-lg shadow p-6  md:p-8'>
+      <div className='flex flex-row justify-end pt-6'>
         <Link
           href="/logged/settings/content-preferences"
           className='group relative overflow-hidden cursor-pointer text-white px-4 py-2 rounded-lg text-sm inline-block min-w-[180px] text-center'

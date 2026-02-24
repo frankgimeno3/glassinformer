@@ -43,7 +43,9 @@ export default function LoggedLayout({
                 Events
               </Link>
             </div>
+            <div className="pt-12">
             {children}
+            </div>
             <Footer />
           </div>
         </div>

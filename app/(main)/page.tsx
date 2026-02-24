@@ -138,7 +138,7 @@ export default function Home() {
     <div className="min-h-screen bg-white">
       <MainNews mainArticle={mainArticle} secondaryArticles={secondaryArticles} />
       {/* Contenido principal */}
-      <main className="max-w-7xl mx-auto pt-12 px-4 sm:px-6 lg:px-8 pb-16">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {loading ? (
           <div className="text-center py-20">
             <div className="inline-block animate-pulse">

@@ -1,6 +1,6 @@
 [
   {
-    "magazineName": "Glass Somewhere",
+    "magazineName": "Fenestrator",
     "issues": [
       { "magazineNumber": "Issue 1 - 2025", "isCoverUnavailable": false },
       { "magazineNumber": "Issue 2 - 2025", "isCoverUnavailable": true },
@@ -8,7 +8,7 @@
     ]
   },
   {
-    "magazineName": "Hollow Glass Eventually",
+    "magazineName": "Buildinformer",
     "issues": [
       { "magazineNumber": "Q1 2025", "isCoverUnavailable": false },
       { "magazineNumber": "Q2 2025", "isCoverUnavailable": false },
@@ -17,7 +17,7 @@
     ]
   },
   {
-    "magazineName": "Glassinformer Magazine",
+    "magazineName": "Glassinformer",
     "issues": [
       { "magazineNumber": "January 2025", "isCoverUnavailable": false },
       { "magazineNumber": "February 2025", "isCoverUnavailable": false },
