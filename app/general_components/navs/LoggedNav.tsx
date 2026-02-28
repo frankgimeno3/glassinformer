@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import BasicButton from "../buttons/BasicButton";
 import AuthenticationService from "@/apiClient/AuthenticationService";
+import { PortalName } from "@/app/GlassInformerSpecificData";
 
 const SearchIcon = () => (
   <svg
@@ -44,7 +45,7 @@ const LoggedNav: FC = () => {
       <header className="flex flex-row justify-between border-b border-gray-200 py-8 px-4 w-full px-4 sm:px-6 lg:px-12">
         <Link href="/logged" className="flex flex-col hover:opacity-80 transition-opacity">
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 tracking-tight mb-2">
-            GlassInformer
+            {PortalName}
           </h1>
           <p className="text-sm text-gray-500 uppercase tracking-wider font-sans">
             {new Date().toLocaleDateString("en-EN", {

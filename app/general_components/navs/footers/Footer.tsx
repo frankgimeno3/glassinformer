@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import AuthenticationService from "@/apiClient/AuthenticationService";
+import { PortalName } from "@/app/GlassInformerSpecificData";
 
 const ChevronDownIcon = ({ className }: { className?: string }) => (
   <svg className={className} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -43,7 +44,7 @@ const Footer: FC = () => {
             className="flex flex-col hover:opacity-80 transition-opacity"
           >
             <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 tracking-tight">
-              GlassInformer
+              {PortalName}
             </h2>
             <p className="text-xs text-gray-500 uppercase tracking-wider font-sans mt-1">
               Industry news & insights
@@ -112,7 +113,7 @@ const Footer: FC = () => {
           )}
         </div>
         <div className="pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-500 font-sans">
-          <p>© {currentYear} GlassInformer. All rights reserved.</p>
+          <p>© {currentYear} {PortalName}. All rights reserved.</p>
           <p className="text-gray-400">
             {new Date().toLocaleDateString("en-EN", {
               weekday: "long",

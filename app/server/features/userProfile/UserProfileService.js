@@ -1,5 +1,7 @@
 import UserProfileModel from "./UserProfileModel.js";
 import "../../database/models.js";
+import { QueryTypes } from "sequelize";
+import { portal_id } from "../../../GlassInformerSpecificData.js";
 
 const DEFAULT_USER_CURRENT_COMPANY = { id_company: "", userPosition: "" };
 const DEFAULT_EXPERIENCE_ARRAY = [];
@@ -42,15 +44,32 @@ export async function createProfileUser(id_user) {
 }
 
 /**
- * Obtiene todos los usuarios de perfil.
+ * Obtiene todos los usuarios de perfil del portal actual.
+ * Filtra usuarios cuya empresa actual pertenece al portal, o que no tienen empresa asignada.
  * @returns {Promise<object[]>}
  */
 export async function getAllProfileUsers() {
     if (!UserProfileModel.sequelize) {
         return [];
     }
+    let idsInPortal = new Set();
+    try {
+        const companyIds = await UserProfileModel.sequelize.query(
+            `SELECT company_id FROM public.company_portals WHERE portal_id = :portalId`,
+            { replacements: { portalId: portal_id }, type: QueryTypes.SELECT }
+        );
+        idsInPortal = new Set((companyIds || []).map((r) => r.company_id));
+    } catch {
+        // Si company_portals no existe, mostramos todos los usuarios
+    }
     const users = await UserProfileModel.findAll({ order: [["user_name", "ASC"]] });
-    return users.map((u) => toApiFormat(u));
+    const filtered = users.filter((u) => {
+        if (idsInPortal.size === 0) return true;
+        const uc = u.user_current_company || {};
+        const cid = (uc && uc.id_company) ? String(uc.id_company).trim() : "";
+        return !cid || idsInPortal.has(cid);
+    });
+    return filtered.map((u) => toApiFormat(u));
 }
 
 /**

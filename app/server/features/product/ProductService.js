@@ -2,6 +2,7 @@ import ProductModel from "./ProductModel.js";
 import CompanyModel from "../company/CompanyModel.js";
 import "../../database/models.js";
 import { QueryTypes } from "sequelize";
+import { portal_id } from "../../../GlassInformerSpecificData.js";
 
 export function mapProductToApiFormat(product, companyNameOrUndefined) {
     const plain = product.get ? product.get({ plain: true }) : product;
@@ -38,10 +39,10 @@ export async function getAllProducts() {
                         p.main_image_src, p.company AS id_company, p.product_categories_array,
                         c.commercial_name AS company_name
                  FROM public.products p
-                 INNER JOIN public.product_portals pp ON p.product_id = pp.product_id AND pp.portal_id = 1
+                 INNER JOIN public.product_portals pp ON p.product_id = pp.product_id AND pp.portal_id = :portalId
                  LEFT JOIN public.companies c ON p.company = c.company_id
                  ORDER BY p.product_name ASC`,
-                { type: QueryTypes.SELECT }
+                { replacements: { portalId: portal_id }, type: QueryTypes.SELECT }
             );
         } catch (joinErr) {
             if (joinErr.message?.includes("product_portals") || joinErr.message?.includes("does not exist")) {
@@ -100,7 +101,7 @@ export async function getAllProducts() {
 }
 
 /**
- * Returns { inCurrentPortal: true, product } when product is in portal 1.
+ * Returns { inCurrentPortal: true, product } when product is in current portal.
  * Returns { inCurrentPortal: false, portalId, product } when product exists in another portal.
  * Throws when product not found.
  */
@@ -125,7 +126,7 @@ export async function getProductById(idProduct) {
                 { replacements: { productId: idProduct }, type: QueryTypes.SELECT }
             );
         } catch {
-            portalRow = { portal_id: 1 };
+            portalRow = { portal_id };
         }
 
         const mapped = mapProductToApiFormat(product);
@@ -133,7 +134,7 @@ export async function getProductById(idProduct) {
         if (!portalRow) {
             return { inCurrentPortal: false, portalId: null, product: mapped };
         }
-        if (portalRow.portal_id === 1) {
+        if (portalRow.portal_id === portal_id) {
             return { inCurrentPortal: true, product: mapped };
         }
         return { inCurrentPortal: false, portalId: portalRow.portal_id, product: mapped };

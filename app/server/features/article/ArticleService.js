@@ -3,6 +3,7 @@ import ArticleModel from "./ArticleModel.js";
 import "../../database/models.js";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { portal_id } from "../../../GlassInformerSpecificData.js";
 
 // Helper function to get fallback data from JSON
 function getFallbackArticles() {
@@ -12,9 +13,9 @@ function getFallbackArticles() {
         const fileContent = readFileSync(jsonPath, 'utf-8');
         const articles = JSON.parse(fileContent);
         
-        // Filter by portal_id = glassinformer and ensure required fields
+        // Filter by portal_id and ensure required fields
         return articles
-            .filter(article => (article.portal_id ?? null) === 1)
+            .filter(article => (article.portal_id ?? null) === portal_id)
             .map(article => ({
             id_article: article.id_article,
             articleTitle: article.articleTitle,
@@ -74,10 +75,10 @@ export async function getAllArticles() {
                 `SELECT a.id_article, a.article_title, a.article_subtitle, a.article_main_image_url, a.company, a.date, a.portal_id, a.is_article_event, a.event_id,
                         COALESCE(ap.highlight_position, a.highlited_position, a.highlighted_position, '') AS highlited_position
                  FROM public.articles a
-                 LEFT JOIN public.article_publications ap ON a.id_article = ap.article_id AND ap.portal_id = 1
-                 WHERE a.portal_id = 1
+                 LEFT JOIN public.article_publications ap ON a.id_article = ap.article_id AND ap.portal_id = :portalId
+                 WHERE a.portal_id = :portalId
                  ORDER BY a.date DESC`,
-                { type: QueryTypes.SELECT }
+                { replacements: { portalId: portal_id }, type: QueryTypes.SELECT }
             );
             if (rawRows && rawRows.length > 0) {
                 return rawRows.map(transformArticleToApiFormat);
@@ -91,7 +92,7 @@ export async function getAllArticles() {
         }
 
         let articles = await ArticleModel.findAll({
-            where: { portal_id: 1 },
+            where: { portal_id },
             order: [['date', 'DESC']]
         });
 
@@ -101,9 +102,9 @@ export async function getAllArticles() {
                     `SELECT id_article, article_title, article_subtitle, article_main_image_url, company, date, portal_id, is_article_event, event_id,
                             COALESCE(highlited_position, highlighted_position, '') AS highlited_position
                      FROM public.articles
-                     WHERE portal_id = 1
+                     WHERE portal_id = :portalId
                      ORDER BY date DESC`,
-                    { type: QueryTypes.SELECT }
+                    { replacements: { portalId: portal_id }, type: QueryTypes.SELECT }
                 );
                 if (rawRows && rawRows.length > 0) {
                     return rawRows.map(transformArticleToApiFormat);
@@ -141,7 +142,7 @@ export async function getAllArticles() {
 export async function getArticleById(idArticle) {
     try {
         const article = await ArticleModel.findByPk(idArticle);
-        if (!article || article.portal_id !== 1) {
+        if (!article || article.portal_id !== portal_id) {
             throw new Error(`Article with id ${idArticle} not found`);
         }
         

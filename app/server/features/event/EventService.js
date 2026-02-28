@@ -3,6 +3,7 @@ import "../../database/models.js";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { QueryTypes } from "sequelize";
+import { portal_id } from "../../../GlassInformerSpecificData.js";
 
 function getFallbackEvents() {
     try {
@@ -10,7 +11,7 @@ function getFallbackEvents() {
         const fileContent = readFileSync(jsonPath, 'utf-8');
         const events = JSON.parse(fileContent);
         return events
-            .filter((event) => (event.portal_id ?? null) === 1)
+            .filter((event) => (event.portal_id ?? null) === portal_id)
             .map((event) => ({
             id_fair: event.id_fair,
             event_name: event.event_name,
@@ -49,21 +50,21 @@ export async function getAllEvents() {
             return getFallbackEvents();
         }
 
-        // Join with event_portals to filter by portal_id = 1
+        // Join with event_portals to filter by portal_id
         const rows = await EventModel.sequelize.query(
             `SELECT e.id_fair, e.event_name, e.country, e.main_description, e.region,
                     e.start_date, e.end_date, e.location, e.event_main_image
              FROM public.events e
-             INNER JOIN public.event_portals ep ON e.id_fair = ep.event_id AND ep.portal_id = 1
+             INNER JOIN public.event_portals ep ON e.id_fair = ep.event_id AND ep.portal_id = :portalId
              ORDER BY e.start_date ASC`,
-            { type: QueryTypes.SELECT }
+            { replacements: { portalId: portal_id }, type: QueryTypes.SELECT }
         );
 
         if (rows && rows.length > 0) {
             return rows.map((r) => mapEventToApiFormat(r));
         }
 
-        console.warn('No events for portal 1, using fallback data from JSON');
+        console.warn(`No events for portal ${portal_id}, using fallback data from JSON`);
         return getFallbackEvents();
     } catch (error) {
         console.error('Error fetching events from database:', error);
@@ -102,10 +103,10 @@ export async function getEventById(idFair) {
             return found;
         }
 
-        // Validate event belongs to portal 1 via event_portals
+        // Validate event belongs to portal via event_portals
         const [portalRow] = await EventModel.sequelize.query(
-            `SELECT 1 FROM public.event_portals WHERE event_id = :eventId AND portal_id = 1`,
-            { replacements: { eventId: idFair }, type: QueryTypes.SELECT }
+            `SELECT 1 FROM public.event_portals WHERE event_id = :eventId AND portal_id = :portalId`,
+            { replacements: { eventId: idFair, portalId: portal_id }, type: QueryTypes.SELECT }
         );
         if (!portalRow) {
             throw new Error(`Event with id ${idFair} not found`);

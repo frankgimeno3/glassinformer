@@ -1,6 +1,7 @@
 import PublicationModel from "./PublicationModel.js";
 import "../../database/models.js";
 import { QueryTypes } from "sequelize";
+import { portal_id } from "../../../GlassInformerSpecificData.js";
 
 function mapPublicationToApi(row) {
     return {
@@ -20,13 +21,13 @@ export async function getAllPublications() {
             return [];
         }
 
-        // Join with publication_portals to filter by portal_id = 1
+        // Join with publication_portals to filter by portal_id
         const rows = await PublicationModel.sequelize.query(
             `SELECT p.id_publication, p.redirection_link, p.date, p.revista, p.número, p.publication_main_image_url
              FROM public.publications p
-             INNER JOIN public.publication_portals pp ON p.id_publication = pp.publication_id AND pp.portal_id = 1
+             INNER JOIN public.publication_portals pp ON p.id_publication = pp.publication_id AND pp.portal_id = :portalId
              ORDER BY p.date DESC`,
-            { type: QueryTypes.SELECT }
+            { replacements: { portalId: portal_id }, type: QueryTypes.SELECT }
         );
         
         if (rows && rows.length > 0) {
@@ -65,10 +66,10 @@ export async function getPublicationById(idPublication) {
             throw new Error(`Publication with id ${idPublication} not found`);
         }
 
-        // Validate publication belongs to portal 1 via publication_portals
+        // Validate publication belongs to portal via publication_portals
         const [portalRow] = await PublicationModel.sequelize.query(
-            `SELECT 1 FROM public.publication_portals WHERE publication_id = :pubId AND portal_id = 1`,
-            { replacements: { pubId: idPublication }, type: QueryTypes.SELECT }
+            `SELECT 1 FROM public.publication_portals WHERE publication_id = :pubId AND portal_id = :portalId`,
+            { replacements: { pubId: idPublication, portalId: portal_id }, type: QueryTypes.SELECT }
         );
         if (!portalRow) {
             throw new Error(`Publication with id ${idPublication} not found`);

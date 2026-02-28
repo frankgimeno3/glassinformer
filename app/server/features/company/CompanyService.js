@@ -3,6 +3,7 @@ import ProductModel from "../product/ProductModel.js";
 import { mapProductToApiFormat } from "../product/ProductService.js";
 import "../../database/models.js";
 import { QueryTypes } from "sequelize";
+import { portal_id } from "../../../GlassInformerSpecificData.js";
 
 function mapCompanyToApiFormat(company, products = [], options = { includeProducts: false }) {
     const plain = company.get ? company.get({ plain: true }) : company;
@@ -39,9 +40,9 @@ export async function getAllCompanies() {
             rows = await CompanyModel.sequelize.query(
                 `SELECT c.company_id AS id_company, c.commercial_name AS company_name, c.country, c.main_description, c.category AS region
                  FROM public.companies c
-                 INNER JOIN public.company_portals cp ON c.company_id = cp.company_id AND cp.portal_id = 1
+                 INNER JOIN public.company_portals cp ON c.company_id = cp.company_id AND cp.portal_id = :portalId
                  ORDER BY c.commercial_name ASC`,
-                { type: QueryTypes.SELECT }
+                { replacements: { portalId: portal_id }, type: QueryTypes.SELECT }
             );
         } catch (joinErr) {
             if (joinErr.message?.includes("company_portals") || joinErr.message?.includes("does not exist")) {
@@ -72,7 +73,7 @@ export async function getAllCompanies() {
 }
 
 /**
- * Returns { inCurrentPortal: true, company } when company is in portal 1.
+ * Returns { inCurrentPortal: true, company } when company is in current portal.
  * Returns { inCurrentPortal: false, portalId, company } when company exists in another portal.
  * Throws when company not found.
  */
@@ -97,7 +98,7 @@ export async function getCompanyById(idCompany) {
                 { replacements: { companyId: idCompany }, type: QueryTypes.SELECT }
             );
         } catch {
-            portalRow = { portal_id: 1 };
+            portalRow = { portal_id };
         }
 
         const products = company.products || [];
@@ -106,7 +107,7 @@ export async function getCompanyById(idCompany) {
         if (!portalRow) {
             return { inCurrentPortal: false, portalId: null, company: mapped };
         }
-        if (portalRow.portal_id === 1) {
+        if (portalRow.portal_id === portal_id) {
             return { inCurrentPortal: true, company: mapped };
         }
         return { inCurrentPortal: false, portalId: portalRow.portal_id, company: mapped };
