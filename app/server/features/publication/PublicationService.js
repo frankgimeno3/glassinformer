@@ -1,34 +1,45 @@
 import PublicationModel from "./PublicationModel.js";
-// Ensure models are initialized by importing models.js
 import "../../database/models.js";
+import { QueryTypes } from "sequelize";
+
+function mapPublicationToApi(row) {
+    return {
+        id_publication: row.id_publication,
+        redirectionLink: row.redirection_link,
+        date: row.date ? new Date(row.date).toISOString().split('T')[0] : null,
+        revista: row.revista,
+        número: row.número,
+        publication_main_image_url: row.publication_main_image_url || ""
+    };
+}
 
 export async function getAllPublications() {
     try {
-        // Check if model is initialized
         if (!PublicationModel.sequelize) {
             console.warn('PublicationModel not initialized, returning empty array');
             return [];
         }
 
-        const publications = await PublicationModel.findAll({
-            order: [['date', 'DESC']]
-        });
+        // Join with publication_portals to filter by portal_id = 1
+        const rows = await PublicationModel.sequelize.query(
+            `SELECT p.id_publication, p.redirection_link, p.date, p.revista, p.número, p.publication_main_image_url
+             FROM public.publications p
+             INNER JOIN public.publication_portals pp ON p.id_publication = pp.publication_id AND pp.portal_id = 1
+             ORDER BY p.date DESC`,
+            { type: QueryTypes.SELECT }
+        );
         
-        // Transform database format to API format
-        return publications.map(publication => ({
-            id_publication: publication.id_publication,
-            redirectionLink: publication.redirection_link,
-            date: publication.date ? new Date(publication.date).toISOString().split('T')[0] : null,
-            revista: publication.revista,
-            número: publication.número,
-            publication_main_image_url: publication.publication_main_image_url || ""
-        }));
+        if (rows && rows.length > 0) {
+            return rows.map(mapPublicationToApi);
+        }
+        
+        return [];
     } catch (error) {
         console.error('Error fetching publications from database:', error);
         console.error('Error name:', error.name);
         console.error('Error message:', error.message);
         
-        // If it's a connection error, table doesn't exist, or model not initialized, 
+        // If it's a connection error, table doesn't exist, column missing, or model not initialized, 
         // return empty array instead of throwing to prevent frontend crashes
         if (error.name === 'SequelizeConnectionError' || 
             error.name === 'SequelizeDatabaseError' ||
@@ -36,9 +47,10 @@ export async function getAllPublications() {
             error.message?.includes('ETIMEDOUT') ||
             error.message?.includes('ECONNREFUSED') ||
             (error.message?.includes('relation') && error.message?.includes('does not exist')) ||
+            (error.message?.includes('column') && error.message?.includes('does not exist')) ||
             error.message?.includes('not initialized') ||
             error.message?.includes('Model not found')) {
-            console.warn('Database connection issue, returning empty array');
+            console.warn('Database issue, returning empty array');
             return [];
         }
         // For other errors, still throw to maintain error visibility
@@ -52,16 +64,17 @@ export async function getPublicationById(idPublication) {
         if (!publication) {
             throw new Error(`Publication with id ${idPublication} not found`);
         }
+
+        // Validate publication belongs to portal 1 via publication_portals
+        const [portalRow] = await PublicationModel.sequelize.query(
+            `SELECT 1 FROM public.publication_portals WHERE publication_id = :pubId AND portal_id = 1`,
+            { replacements: { pubId: idPublication }, type: QueryTypes.SELECT }
+        );
+        if (!portalRow) {
+            throw new Error(`Publication with id ${idPublication} not found`);
+        }
         
-        // Transform database format to API format
-        return {
-            id_publication: publication.id_publication,
-            redirectionLink: publication.redirection_link,
-            date: publication.date ? new Date(publication.date).toISOString().split('T')[0] : null,
-            revista: publication.revista,
-            número: publication.número,
-            publication_main_image_url: publication.publication_main_image_url || ""
-        };
+        return mapPublicationToApi(publication.get ? publication.get({ plain: true }) : publication);
     } catch (error) {
         console.error('Error fetching publication from database:', error);
         throw error;

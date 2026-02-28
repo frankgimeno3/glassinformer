@@ -1,6 +1,6 @@
 "use client"
-import { FC, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { FC, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import AuthenticationService from "@/apiClient/AuthenticationService";
 
 
@@ -10,6 +10,9 @@ interface LoginProps {
 
 const Login: FC<LoginProps> = ({ }) => {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectParam = searchParams.get("redirect");
+    const redirect = redirectParam && redirectParam.startsWith("/") ? redirectParam : "/logged";
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -27,8 +30,7 @@ const Login: FC<LoginProps> = ({ }) => {
 
             // El AuthenticationService ya guarda los tokens en cookies mediante CookieStorage
             // y el username en localStorage
-            // El middleware detectará las cookies y redirigirá automáticamente
-            router.replace('/logged');
+            router.replace(redirect);
         } catch (e: any) {
             console.error(e);
             setError(e?.message || 'Error al iniciar sesión. Verifica tus credenciales.');
@@ -102,7 +104,7 @@ const Login: FC<LoginProps> = ({ }) => {
             <div className='flex flex-col text-right gap-5 p-5'>
                 <p className='text-xs text-white'>
                     Don't have an account?
-                    <a href='/auth/signup' className=' font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer ml-1'>
+                    <a href={redirectParam ? `/auth/signup?redirect=${encodeURIComponent(redirectParam)}` : '/auth/signup'} className=' font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer ml-1'>
                         Sign up
                     </a>
                 </p>

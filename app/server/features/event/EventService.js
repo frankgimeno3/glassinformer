@@ -2,13 +2,16 @@ import EventModel from "./EventModel.js";
 import "../../database/models.js";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { QueryTypes } from "sequelize";
 
 function getFallbackEvents() {
     try {
         const jsonPath = join(process.cwd(), 'app', 'contents', 'eventsContents.json');
         const fileContent = readFileSync(jsonPath, 'utf-8');
         const events = JSON.parse(fileContent);
-        return events.map((event) => ({
+        return events
+            .filter((event) => (event.portal_id ?? null) === 1)
+            .map((event) => ({
             id_fair: event.id_fair,
             event_name: event.event_name,
             country: event.country || '',
@@ -46,16 +49,22 @@ export async function getAllEvents() {
             return getFallbackEvents();
         }
 
-        const events = await EventModel.findAll({
-            order: [['start_date', 'ASC']]
-        });
+        // Join with event_portals to filter by portal_id = 1
+        const rows = await EventModel.sequelize.query(
+            `SELECT e.id_fair, e.event_name, e.country, e.main_description, e.region,
+                    e.start_date, e.end_date, e.location, e.event_main_image
+             FROM public.events e
+             INNER JOIN public.event_portals ep ON e.id_fair = ep.event_id AND ep.portal_id = 1
+             ORDER BY e.start_date ASC`,
+            { type: QueryTypes.SELECT }
+        );
 
-        if (!events || events.length === 0) {
-            console.warn('Events table empty, using fallback data from JSON');
-            return getFallbackEvents();
+        if (rows && rows.length > 0) {
+            return rows.map((r) => mapEventToApiFormat(r));
         }
 
-        return events.map((event) => mapEventToApiFormat(event));
+        console.warn('No events for portal 1, using fallback data from JSON');
+        return getFallbackEvents();
     } catch (error) {
         console.error('Error fetching events from database:', error);
         if (
@@ -65,10 +74,11 @@ export async function getAllEvents() {
             error.message?.includes('ETIMEDOUT') ||
             error.message?.includes('ECONNREFUSED') ||
             (error.message?.includes('relation') && error.message?.includes('does not exist')) ||
+            (error.message?.includes('column') && error.message?.includes('does not exist')) ||
             error.message?.includes('not initialized') ||
             error.message?.includes('Model not found')
         ) {
-            console.warn('Database connection issue, using fallback data from JSON');
+            console.warn('Database issue, using fallback data from JSON');
             return getFallbackEvents();
         }
         throw error;
@@ -90,6 +100,15 @@ export async function getEventById(idFair) {
             const found = fallback.find((e) => e.id_fair === idFair);
             if (!found) throw new Error(`Event with id ${idFair} not found`);
             return found;
+        }
+
+        // Validate event belongs to portal 1 via event_portals
+        const [portalRow] = await EventModel.sequelize.query(
+            `SELECT 1 FROM public.event_portals WHERE event_id = :eventId AND portal_id = 1`,
+            { replacements: { eventId: idFair }, type: QueryTypes.SELECT }
+        );
+        if (!portalRow) {
+            throw new Error(`Event with id ${idFair} not found`);
         }
 
         return mapEventToApiFormat(event);

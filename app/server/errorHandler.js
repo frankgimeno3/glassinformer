@@ -12,6 +12,10 @@ export function errorHandler(error){
         return NextResponse.json({message: error.message}, {status: 404});
     }
 
+    if (error?.message?.includes('not found')) {
+        return NextResponse.json({message: error.message}, {status: 404});
+    }
+
     if(error instanceof InvalidPasswordException){
         return NextResponse.json({message: error.message}, {status: 400});
     }

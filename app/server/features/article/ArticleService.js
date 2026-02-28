@@ -12,8 +12,10 @@ function getFallbackArticles() {
         const fileContent = readFileSync(jsonPath, 'utf-8');
         const articles = JSON.parse(fileContent);
         
-        // Ensure all articles have required fields and add missing ones
-        return articles.map(article => ({
+        // Filter by portal_id = glassinformer and ensure required fields
+        return articles
+            .filter(article => (article.portal_id ?? null) === 1)
+            .map(article => ({
             id_article: article.id_article,
             articleTitle: article.articleTitle,
             articleSubtitle: article.articleSubtitle || '',
@@ -38,40 +40,81 @@ function getFallbackArticles() {
     }
 }
 
+const { QueryTypes } = require('sequelize');
+
+function transformArticleToApiFormat(row) {
+    const plain = row && typeof row.get === 'function' ? row.get({ plain: true }) : row;
+    return {
+        id_article: plain.id_article,
+        articleTitle: plain.article_title ?? plain.articleTitle,
+        articleSubtitle: plain.article_subtitle ?? plain.articleSubtitle ?? null,
+        article_main_image_url: plain.article_main_image_url ?? null,
+        company: plain.company ?? null,
+        date: plain.date ? new Date(plain.date).toISOString().split('T')[0] : null,
+        portal_id: plain.portal_id ?? null,
+        article_tags_array: [],
+        contents_array: [],
+        highlited_position: plain.highlited_position ?? plain.highlight_position ?? plain.highlighted_position ?? "",
+        is_article_event: plain.is_article_event ?? false,
+        event_id: plain.event_id ?? null,
+        comments_array: []
+    };
+}
+
 export async function getAllArticles() {
     try {
-        // Check if model is initialized
         if (!ArticleModel.sequelize) {
             console.warn('ArticleModel not initialized, using fallback data from JSON');
             return getFallbackArticles();
         }
 
-        const articles = await ArticleModel.findAll({
+        // Prefer join with article_publications to get highlight_position (source of "Main article", "Position1", etc.)
+        try {
+            const rawRows = await ArticleModel.sequelize.query(
+                `SELECT a.id_article, a.article_title, a.article_subtitle, a.article_main_image_url, a.company, a.date, a.portal_id, a.is_article_event, a.event_id,
+                        COALESCE(ap.highlight_position, a.highlited_position, a.highlighted_position, '') AS highlited_position
+                 FROM public.articles a
+                 LEFT JOIN public.article_publications ap ON a.id_article = ap.article_id AND ap.portal_id = 1
+                 WHERE a.portal_id = 1
+                 ORDER BY a.date DESC`,
+                { type: QueryTypes.SELECT }
+            );
+            if (rawRows && rawRows.length > 0) {
+                return rawRows.map(transformArticleToApiFormat);
+            }
+        } catch (joinErr) {
+            if (joinErr.message?.includes('article_publications') || joinErr.message?.includes('does not exist')) {
+                // Fallback: query articles only
+            } else {
+                throw joinErr;
+            }
+        }
+
+        let articles = await ArticleModel.findAll({
+            where: { portal_id: 1 },
             order: [['date', 'DESC']]
         });
-        
-        // If database is empty, use fallback data
+
         if (!articles || articles.length === 0) {
-            console.warn('Database is empty, using fallback data from JSON');
+            try {
+                const rawRows = await ArticleModel.sequelize.query(
+                    `SELECT id_article, article_title, article_subtitle, article_main_image_url, company, date, portal_id, is_article_event, event_id,
+                            COALESCE(highlited_position, highlighted_position, '') AS highlited_position
+                     FROM public.articles
+                     WHERE portal_id = 1
+                     ORDER BY date DESC`,
+                    { type: QueryTypes.SELECT }
+                );
+                if (rawRows && rawRows.length > 0) {
+                    return rawRows.map(transformArticleToApiFormat);
+                }
+            } catch (rawErr) {
+                console.warn('Raw query fallback failed:', rawErr.message);
+            }
             return getFallbackArticles();
         }
-        
-        // Transform database format to API format (DB has no article_tags_array/contents_array; kept in API for compatibility)
-        return articles.map(article => ({
-            id_article: article.id_article,
-            articleTitle: article.article_title,
-            articleSubtitle: article.article_subtitle,
-            article_main_image_url: article.article_main_image_url,
-            company: article.company,
-            date: article.date ? new Date(article.date).toISOString().split('T')[0] : null,
-            portal_id: article.portal_id ?? null,
-            article_tags_array: [],
-            contents_array: [],
-            highlited_position: article.highlited_position ?? "",
-            is_article_event: article.is_article_event ?? false,
-            event_id: article.event_id ?? null,
-            comments_array: []
-        }));
+
+        return articles.map(a => transformArticleToApiFormat(a));
     } catch (error) {
         console.error('Error fetching articles from database:', error);
         console.error('Error name:', error.name);
@@ -98,7 +141,7 @@ export async function getAllArticles() {
 export async function getArticleById(idArticle) {
     try {
         const article = await ArticleModel.findByPk(idArticle);
-        if (!article) {
+        if (!article || article.portal_id !== 1) {
             throw new Error(`Article with id ${idArticle} not found`);
         }
         

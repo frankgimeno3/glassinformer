@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ProductService } from '@/apiClient/ProductService';
 import CompanyContactForm from '../../components/CompanyContactForm';
+import OtherPortalCard from '../../components/OtherPortalCard';
 import AuthenticationService from '@/apiClient/AuthenticationService';
 import apiClient from '@/app/apiClient';
 
@@ -32,6 +33,7 @@ const ProductsPage: FC = () => {
   const [showContactForm, setShowContactForm] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [otherPortal, setOtherPortal] = useState<{ portalId: number | null; product: Product } | null>(null);
 
   useEffect(() => {
     if (!idProduct) {
@@ -41,11 +43,25 @@ const ProductsPage: FC = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const data = await ProductService.getProductById(idProduct);
-        setProduct(data);
+        setOtherPortal(null);
+        const data = await ProductService.getProductById(idProduct) as
+          | Product
+          | { inCurrentPortal: boolean; portalId?: number; product: Product };
+        if (data && typeof data === 'object' && 'inCurrentPortal' in data) {
+          const resp = data as { inCurrentPortal: boolean; portalId?: number; product: Product };
+          if (resp.inCurrentPortal) {
+            setProduct(resp.product);
+          } else {
+            setOtherPortal({ portalId: resp.portalId ?? null, product: resp.product });
+            setProduct(null);
+          }
+        } else {
+          setProduct(data as Product);
+        }
       } catch (error) {
         console.error('Error fetching product:', error);
         setProduct(null);
+        setOtherPortal(null);
       } finally {
         setLoading(false);
       }
@@ -91,16 +107,42 @@ const ProductsPage: FC = () => {
     );
   }
 
-  if (!product) {
+  if (otherPortal) {
     return (
       <div className='min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8'>
         <div className='mx-auto max-w-4xl'>
-          <p className='text-center text-red-500 text-lg'>Product not found</p>
           <button
             onClick={() => router.push('/directory')}
-            className='mt-4 px-4 py-2 bg-blue-950 text-white rounded-xl mx-auto block'
+            className='mb-6 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm'
           >
-            Back to Directory
+            ← Back to Directory
+          </button>
+          <OtherPortalCard
+            type='product'
+            item={otherPortal.product}
+            portalId={otherPortal.portalId}
+            onBack={() => router.push('/directory')}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className='min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center'>
+        <div className='mx-auto max-w-2xl text-center'>
+          <h1 className='text-3xl sm:text-4xl font-serif font-light text-gray-800 tracking-wide mb-6'>
+            No se ha encontrado un producto con ese nombre
+          </h1>
+          <p className='text-gray-600 text-lg mb-10'>
+            El producto que buscas no existe en el directorio. Puedes volver para seguir explorando.
+          </p>
+          <button
+            onClick={() => router.push('/directory')}
+            className='px-8 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors font-medium tracking-wide'
+          >
+            ← Volver al directorio
           </button>
         </div>
       </div>

@@ -22,7 +22,12 @@ const CreateProductDirectory: FC = () => {
   useEffect(() => {
     if (!idCompany) return;
     CompanyService.getCompanyById(idCompany)
-      .then((c) => setCompanyName(c.company_name))
+      .then((data) => {
+        const c = data && typeof data === 'object' && 'company' in data
+          ? (data as { company: { company_name: string } }).company
+          : data as { company_name: string };
+        setCompanyName(c?.company_name ?? '');
+      })
       .catch(() => setCompanyName(''));
   }, [idCompany]);
 

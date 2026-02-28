@@ -1,7 +1,7 @@
 "use client";
 
 import React, { FC, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import AuthenticationService from "@/apiClient/AuthenticationService";
 import { createProfileUser } from "@/apiClient/ProfileUserService";
 
@@ -9,6 +9,8 @@ interface SignupProps {}
 
 const Signup: FC<SignupProps> = ({}) => {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectParam = searchParams.get("redirect");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -62,14 +64,14 @@ const Signup: FC<SignupProps> = ({}) => {
                         Abre el enlace o introduce el código en la página de confirmación para activar tu cuenta.
                     </p>
                     <a
-                        href={`/auth/confirm?email=${encodeURIComponent(pendingEmail)}`}
+                        href={redirectParam ? `/auth/confirm?email=${encodeURIComponent(pendingEmail)}&redirect=${encodeURIComponent(redirectParam)}` : `/auth/confirm?email=${encodeURIComponent(pendingEmail)}`}
                         className="bg-white text-black py-2 rounded hover:bg-gray-300 transition cursor-pointer text-center font-medium"
                     >
                         Confirmar cuenta
                     </a>
                     <p className="text-xs text-white text-center">
                         ¿Ya confirmaste?{" "}
-                        <a href="/auth/login" className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer">
+                        <a href={redirectParam ? `/auth/login?redirect=${encodeURIComponent(redirectParam)}` : "/auth/login"} className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer">
                             Iniciar sesión
                         </a>
                     </p>
@@ -155,7 +157,7 @@ const Signup: FC<SignupProps> = ({}) => {
 
                 <p className="text-xs text-white">
                     Already have an account?{" "}
-                    <a href="/auth/login" className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer ml-1">
+                    <a href={redirectParam ? `/auth/login?redirect=${encodeURIComponent(redirectParam)}` : "/auth/login"} className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer ml-1">
                         Log in
                     </a>
                 </p>

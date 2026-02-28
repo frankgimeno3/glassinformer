@@ -56,23 +56,26 @@ export default function Home() {
   const validArticles = allArticles.filter((a: any) => a && a.id_article && a.articleTitle);
 
   // Artículos destacados para MainNews: "Main article" (izquierda) y "Position1".."Position5" (derecha)
-  const mainArticle = useMemo(
-    () => validArticles.find((a: any) => (a.highlited_position || "").trim() === "Main article") ?? null,
-    [validArticles]
-  );
+  // Fallback: si no hay ninguno con "Main article", usar el primero por fecha
+  const mainArticle = useMemo(() => {
+    const explicit = validArticles.find((a: any) => (a?.highlited_position || "").trim().toLowerCase() === "main article");
+    if (explicit) return explicit;
+    return validArticles.length > 0 ? validArticles[0] : null;
+  }, [validArticles]);
   const secondaryArticles = useMemo(() => {
     const pos = [1, 2, 3, 4, 5].map((n) =>
-      validArticles.find((a: any) => (a.highlited_position || "").trim() === `Position${n}`)
+      validArticles.find((a: any) => (a?.highlited_position || "").trim().toLowerCase() === `position${n}`)
     ).filter(Boolean);
     return pos as any[];
   }, [validArticles]);
-  // Resto de artículos (highlited_position === ""), ordenados por fecha para la rejilla de abajo
-  const restArticles = useMemo(
-    () => validArticles
-      .filter((a: any) => (a.highlited_position || "").trim() === "")
-      .sort((a: any, b: any) => (new Date(b.date).getTime() - new Date(a.date).getTime())),
-    [validArticles]
-  );
+  // Resto de artículos (excluir main y secondary), ordenados por fecha para la rejilla
+  const restArticles = useMemo(() => {
+    const mainId = mainArticle?.id_article;
+    const secondaryIds = new Set(secondaryArticles.map((a: any) => a?.id_article).filter(Boolean));
+    return validArticles
+      .filter((a: any) => a?.id_article !== mainId && !secondaryIds.has(a?.id_article))
+      .sort((a: any, b: any) => (new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()));
+  }, [validArticles, mainArticle, secondaryArticles]);
 
   const BLOCK_SIZE = 6;
   const DEFAULT_MAX_BLOCKS = 4;

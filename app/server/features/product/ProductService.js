@@ -1,7 +1,7 @@
 import ProductModel from "./ProductModel.js";
 import CompanyModel from "../company/CompanyModel.js";
-// Ensure models are initialized (same pattern as ArticleService)
 import "../../database/models.js";
+import { QueryTypes } from "sequelize";
 
 export function mapProductToApiFormat(product, companyNameOrUndefined) {
     const plain = product.get ? product.get({ plain: true }) : product;
@@ -31,32 +31,58 @@ export async function getAllProducts() {
             return [];
         }
 
-        // Same pattern as getAllArticles: simple findAll with order (no include)
-        const products = await ProductModel.findAll({
-            order: [["product_name", "ASC"]],
-        });
+        let rows;
+        try {
+            rows = await ProductModel.sequelize.query(
+                `SELECT p.product_id AS id_product, p.product_name, p.product_description, p.price,
+                        p.main_image_src, p.company AS id_company, p.product_categories_array,
+                        c.commercial_name AS company_name
+                 FROM public.products p
+                 INNER JOIN public.product_portals pp ON p.product_id = pp.product_id AND pp.portal_id = 1
+                 LEFT JOIN public.companies c ON p.company = c.company_id
+                 ORDER BY p.product_name ASC`,
+                { type: QueryTypes.SELECT }
+            );
+        } catch (joinErr) {
+            if (joinErr.message?.includes("product_portals") || joinErr.message?.includes("does not exist")) {
+                const products = await ProductModel.findAll({ order: [["product_name", "ASC"]] });
+                if (!products || products.length === 0) return [];
+                const companyIds = [...new Set(products.map((p) => p.id_company).filter(Boolean))];
+                const companyNameById = new Map();
+                if (companyIds.length > 0) {
+                    const companies = await CompanyModel.findAll({
+                        where: { id_company: companyIds },
+                        attributes: ["id_company", "company_name"],
+                    });
+                    companies.forEach((c) => {
+                        const plain = c.get ? c.get({ plain: true }) : c;
+                        companyNameById.set(plain.id_company, plain.company_name || "");
+                    });
+                }
+                return products.map((p) => {
+                    const plain = p.get ? p.get({ plain: true }) : p;
+                    return mapProductToApiFormat(p, companyNameById.get(plain.id_company) || "");
+                });
+            }
+            throw joinErr;
+        }
 
-        if (!products || products.length === 0) {
+        if (!rows || rows.length === 0) {
             return [];
         }
 
-        // Get company names in one query (avoid include which can fail in some setups)
-        const companyIds = [...new Set(products.map((p) => p.id_company).filter(Boolean))];
-        const companyNameById = new Map();
-        if (companyIds.length > 0) {
-            const companies = await CompanyModel.findAll({
-                where: { id_company: companyIds },
-                attributes: ["id_company", "company_name"],
-            });
-            companies.forEach((c) => {
-                const plain = c.get ? c.get({ plain: true }) : c;
-                companyNameById.set(plain.id_company, plain.company_name || "");
-            });
-        }
-
-        return products.map((p) => {
-            const plain = p.get ? p.get({ plain: true }) : p;
-            return mapProductToApiFormat(p, companyNameById.get(plain.id_company) || "");
+        return rows.map((r) => {
+            const tagsArray = Array.isArray(r.product_categories_array) ? r.product_categories_array : [];
+            return {
+                id_product: r.id_product,
+                product_name: r.product_name,
+                product_description: r.product_description || "",
+                tagsArray,
+                price: r.price != null ? Number(r.price) : null,
+                main_image_src: r.main_image_src || "",
+                id_company: r.id_company,
+                company_name: r.company_name || "",
+            };
         });
     } catch (error) {
         console.error("Error fetching products from database:", error);
@@ -73,6 +99,11 @@ export async function getAllProducts() {
     }
 }
 
+/**
+ * Returns { inCurrentPortal: true, product } when product is in portal 1.
+ * Returns { inCurrentPortal: false, portalId, product } when product exists in another portal.
+ * Throws when product not found.
+ */
 export async function getProductById(idProduct) {
     try {
         if (!ProductModel.sequelize) {
@@ -87,7 +118,25 @@ export async function getProductById(idProduct) {
             throw new Error(`Product with id ${idProduct} not found`);
         }
 
-        return mapProductToApiFormat(product);
+        let portalRow;
+        try {
+            [portalRow] = await ProductModel.sequelize.query(
+                `SELECT portal_id FROM public.product_portals WHERE product_id = :productId`,
+                { replacements: { productId: idProduct }, type: QueryTypes.SELECT }
+            );
+        } catch {
+            portalRow = { portal_id: 1 };
+        }
+
+        const mapped = mapProductToApiFormat(product);
+
+        if (!portalRow) {
+            return { inCurrentPortal: false, portalId: null, product: mapped };
+        }
+        if (portalRow.portal_id === 1) {
+            return { inCurrentPortal: true, product: mapped };
+        }
+        return { inCurrentPortal: false, portalId: portalRow.portal_id, product: mapped };
     } catch (error) {
         console.error("Error fetching product from database:", error);
         throw error;

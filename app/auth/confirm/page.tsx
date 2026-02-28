@@ -14,6 +14,11 @@ const Confirm: FC<ConfirmProps> = ({}) => {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
+    const redirectParam = searchParams.get("redirect");
+    const loginUrl = redirectParam && redirectParam.startsWith("/")
+        ? `/auth/login?confirmed=1&redirect=${encodeURIComponent(redirectParam)}`
+        : "/auth/login?confirmed=1";
+
     useEffect(() => {
         const q = searchParams.get("email");
         if (q) setEmail(decodeURIComponent(q));
@@ -33,7 +38,7 @@ const Confirm: FC<ConfirmProps> = ({}) => {
         setLoading(true);
         try {
             await AuthenticationService.confirmSignUp(email.trim(), code.trim());
-            router.replace("/auth/login?confirmed=1");
+            router.replace(loginUrl);
         } catch (e: any) {
             console.error(e);
             setError(e?.message || "Error al confirmar. Comprueba el código y vuelve a intentarlo.");
@@ -89,7 +94,7 @@ const Confirm: FC<ConfirmProps> = ({}) => {
                 </button>
 
                 <p className="text-xs text-white text-center">
-                    <a href="/auth/login" className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer">
+                    <a href={loginUrl} className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer">
                         Volver a iniciar sesión
                     </a>
                 </p>

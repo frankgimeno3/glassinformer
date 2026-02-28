@@ -5,6 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { CompanyService } from "@/apiClient/CompanyService";
 import CompanyContactForm from "../../components/CompanyContactForm";
+import CompanyProductsTable from "../../components/CompanyProductsTable";
+import CompanyNotFoundView from "../../components/CompanyNotFoundView";
+import OtherPortalCard from "../../components/OtherPortalCard";
 import AuthenticationService from "@/apiClient/AuthenticationService";
 import apiClient from "@/app/apiClient";
 
@@ -47,6 +50,7 @@ const CompanyProfile: FC = () => {
   const [loading, setLoading] = useState(true);
   const [isLogged, setIsLogged] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [otherPortal, setOtherPortal] = useState<{ portalId: number | null; company: CompanyItem } | null>(null);
 
   useEffect(() => {
     if (!idCompany) {
@@ -56,14 +60,30 @@ const CompanyProfile: FC = () => {
     const fetchCompany = async () => {
       try {
         setLoading(true);
-        const data = await CompanyService.getCompanyById(idCompany);
-        setCompany(data);
-        setProducts(data?.products ?? []);
+        setOtherPortal(null);
+        const data = await CompanyService.getCompanyById(idCompany) as
+          | CompanyItem
+          | { inCurrentPortal: boolean; portalId?: number; company: CompanyItem };
+        if (data && typeof data === "object" && "inCurrentPortal" in data) {
+          const resp = data as { inCurrentPortal: boolean; portalId?: number; company: CompanyItem };
+          if (resp.inCurrentPortal) {
+            setCompany(resp.company);
+            setProducts(resp.company?.products ?? []);
+          } else {
+            setOtherPortal({ portalId: resp.portalId ?? null, company: resp.company });
+            setCompany(null);
+            setProducts([]);
+          }
+        } else {
+          setCompany(data as CompanyItem);
+          setProducts((data as CompanyItem)?.products ?? []);
+        }
       } catch (error: unknown) {
         const err = error as { message?: string; data?: unknown; status?: number };
         console.error("Error fetching company:", err?.message ?? err?.data ?? error);
         setCompany(null);
         setProducts([]);
+        setOtherPortal(null);
       } finally {
         setLoading(false);
       }
@@ -109,19 +129,30 @@ const CompanyProfile: FC = () => {
     );
   }
 
-  if (!company) {
+  if (otherPortal) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
-          <p className="text-center text-red-500 text-lg">Company not found</p>
           <button
             onClick={() => router.push("/directory")}
-            className="mt-4 px-4 py-2 bg-blue-950 text-white rounded-xl mx-auto block"
+            className="mb-6 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm"
           >
-            Back to Directory
+            ← Back to Directory
           </button>
+          <OtherPortalCard
+            type="company"
+            item={otherPortal.company}
+            portalId={otherPortal.portalId}
+            onBack={() => router.push("/directory")}
+          />
         </div>
       </div>
+    );
+  }
+
+  if (!company) {
+    return (
+      <CompanyNotFoundView idCompany={idCompany || ""} isLogged={isLogged} />
     );
   }
 
@@ -217,37 +248,7 @@ const CompanyProfile: FC = () => {
           {products.length === 0 ? (
             <p className="text-gray-500">No products available for this company.</p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {products.map((product) => (
-                <Link
-                  key={product.id_product}
-                  href={`/directory/products/${product.id_product}`}
-                  className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow cursor-pointer border border-gray-200"
-                >
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {product.product_name}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                    {product.product_description}
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    {product.tagsArray.slice(0, 3).map((tag, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                    {product.tagsArray.length > 3 && (
-                      <span className="text-xs text-gray-500">
-                        +{product.tagsArray.length - 3}
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <CompanyProductsTable products={products} />
           )}
         </div>
 

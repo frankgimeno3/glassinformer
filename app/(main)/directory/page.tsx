@@ -62,9 +62,13 @@ const Directory: FC<DirectoryProps> = () => {
     const id = user.userCurrentCompany.id_company;
     let cancelled = false;
     CompanyService.getCompanyById(id)
-      .then((company) => {
+      .then((data) => {
         if (cancelled) return;
-        setUserCompanies([{ id_company: company.id_company, company_name: company.company_name }]);
+        const company = data && typeof data === 'object' && 'company' in data
+          ? (data as { company: { id_company: string; company_name: string } }).company
+          : data as { id_company: string; company_name: string };
+        if (company?.id_company)
+          setUserCompanies([{ id_company: company.id_company, company_name: company.company_name }]);
       })
       .catch(() => {
         if (!cancelled) setUserCompanies([]);

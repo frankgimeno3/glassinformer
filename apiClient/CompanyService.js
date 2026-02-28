@@ -21,4 +21,9 @@ export class CompanyService {
         const response = await apiClient.post("/api/v1/companies", data);
         return response.data;
     }
+
+    static async requestCompanyCreation(data) {
+        const response = await apiClient.post("/api/v1/companies/request", data);
+        return response.data;
+    }
 }
