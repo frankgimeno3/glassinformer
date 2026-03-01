@@ -28,7 +28,7 @@ const MainNews: FC<MainNewsProps> = ({ mainArticle, secondaryArticles }) => {
   if (!hasMain && !hasSecondary) return null;
 
   return (
-    <div className="flex flex-row justify-between gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="flex flex-col lg:flex-row justify-between gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Main featured article */}
       {hasMain && (
         <div className="flex flex-col flex-[2]">
@@ -95,11 +95,11 @@ const MainNews: FC<MainNewsProps> = ({ mainArticle, secondaryArticles }) => {
           {secondaryArticles.map((article) => (
             <article
               key={article.id_article}
-              className="group flex flex-row gap-4 p-4 bg-white border border-gray-200 hover:border-gray-300 transition-all duration-300"
+              className="group flex flex-col lg:flex-row gap-4 p-4 bg-white border border-gray-200 hover:border-gray-300 transition-all duration-300"
             >
               <Link
                 href={`/articles/${article.id_article}`}
-                className="relative shrink-0 w-24 h-24 md:w-28 md:h-28 overflow-hidden bg-gray-100"
+                className="relative shrink-0 w-full aspect-video lg:w-28 lg:h-28 overflow-hidden bg-gray-100"
               >
                 <Image
                   src={article.article_main_image_url || "/file.svg"}

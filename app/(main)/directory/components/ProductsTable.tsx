@@ -104,14 +104,11 @@ const ProductsTable: FC = () => {
               <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                 Product
               </th>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+              <th className='hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                 Description
               </th>
               <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                 Company
-              </th>
-              <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                Price
               </th>
               <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                 Categories
@@ -121,7 +118,7 @@ const ProductsTable: FC = () => {
           <tbody className='bg-white divide-y divide-gray-200'>
             {paginatedProducts.length === 0 ? (
               <tr>
-                <td colSpan={5} className='px-6 py-4 text-center text-gray-500'>
+                <td colSpan={4} className='px-6 py-4 text-center text-gray-500'>
                   No products found
                 </td>
               </tr>
@@ -152,14 +149,11 @@ const ProductsTable: FC = () => {
                       </Link>
                     </div>
                   </td>
-                  <td className='px-6 py-4 text-sm text-gray-900 max-w-md truncate'>
+                  <td className='hidden lg:table-cell px-6 py-4 text-sm text-gray-900 max-w-md truncate'>
                     {product.product_description}
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
                     {product.company_name}
-                  </td>
-                  <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
-                    {product.price != null ? `€${Number(product.price).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '—'}
                   </td>
                   <td className='px-6 py-4 text-sm text-gray-900'>
                     <div className='flex flex-wrap gap-1'>

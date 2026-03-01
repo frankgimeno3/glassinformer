@@ -38,7 +38,7 @@ const Footer: FC = () => {
   return (
     <footer className="flex flex-col shadow-xl bg-white border-t border-gray-200 mt-auto">
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-12 py-10">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-gray-200 pb-8">
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-6 border-b border-gray-200 pb-8">
           <Link
             href="/"
             className="flex flex-col hover:opacity-80 transition-opacity"
@@ -50,7 +50,7 @@ const Footer: FC = () => {
               Industry news & insights
             </p>
           </Link>
-          <nav className="flex flex-row items-center gap-6 text-sm text-gray-500 uppercase tracking-wider font-sans">
+          <nav className="flex flex-col lg:flex-row items-center gap-4 lg:gap-6 text-sm text-gray-500 uppercase tracking-wider font-sans">
             <Link href="/articles" className="hover:text-gray-900 transition-colors">
               Articles
             </Link>
