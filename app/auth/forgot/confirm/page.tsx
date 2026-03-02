@@ -1,12 +1,12 @@
 "use client";
 
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import AuthenticationService from "@/apiClient/AuthenticationService";
 
 interface ForgotConfirmProps {}
 
-const ForgotConfirm: FC<ForgotConfirmProps> = ({}) => {
+const ForgotConfirmContent: FC<ForgotConfirmProps> = ({}) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [email, setEmail] = useState("");
@@ -192,4 +192,21 @@ const ForgotConfirm: FC<ForgotConfirmProps> = ({}) => {
     );
 };
 
-export default ForgotConfirm;
+const FallbackForm = () => (
+    <div className="flex flex-col bg-white items-center justify-center min-h-screen">
+        <div className="flex flex-col gap-4 bg-gray-900 p-8 rounded shadow-md w-full max-w-md">
+            <div className="h-8 bg-gray-700 rounded animate-pulse" />
+            <div className="h-4 bg-gray-700 rounded w-3/4 animate-pulse" />
+            <div className="h-10 bg-gray-700 rounded animate-pulse" />
+            <div className="h-10 bg-gray-700 rounded animate-pulse" />
+        </div>
+    </div>
+);
+
+export default function ForgotConfirmPage() {
+    return (
+        <Suspense fallback={<FallbackForm />}>
+            <ForgotConfirmContent />
+        </Suspense>
+    );
+}

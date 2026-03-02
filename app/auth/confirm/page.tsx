@@ -1,12 +1,12 @@
 "use client";
 
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import AuthenticationService from "@/apiClient/AuthenticationService";
 
 interface ConfirmProps {}
 
-const Confirm: FC<ConfirmProps> = ({}) => {
+const ConfirmContent: FC<ConfirmProps> = ({}) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [email, setEmail] = useState("");
@@ -103,4 +103,21 @@ const Confirm: FC<ConfirmProps> = ({}) => {
     );
 };
 
-export default Confirm;
+export default function ConfirmPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="flex flex-col bg-white items-center justify-center min-h-screen">
+                    <div className="flex flex-col gap-4 bg-gray-900 p-8 rounded shadow-md w-full max-w-md">
+                        <div className="h-8 bg-gray-700 rounded animate-pulse" />
+                        <div className="h-4 bg-gray-700 rounded w-3/4 animate-pulse" />
+                        <div className="h-10 bg-gray-700 rounded animate-pulse" />
+                        <div className="h-10 bg-gray-700 rounded animate-pulse" />
+                    </div>
+                </div>
+            }
+        >
+            <ConfirmContent />
+        </Suspense>
+    );
+}
