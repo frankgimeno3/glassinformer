@@ -11,9 +11,9 @@ type MagazineEntry = { magazineName: string; issues: MagazineIssue[] };
 const MAGAZINES = magazinesData as MagazineEntry[];
 
 const OPTIONS = [
-  { key: 'single', label: 'Single page advertisement', priceUsd: 800, tooltip: 'One full page in the magazine.' },
-  { key: 'double', label: 'Double page advertisement', priceUsd: 1400, tooltip: 'Two facing pages (spread) in the magazine.' },
-  { key: 'advertorial', label: 'Advertorial', priceUsd: 800, tooltip: 'Editorial-style paid content, one page.' },
+  { key: 'single', label: 'Single page advertisement', priceUsd: 800, tooltip: 'One full page in the magazine.', onlyWhenCoverAvailable: false },
+  { key: 'double', label: 'Double page advertisement', priceUsd: 1400, tooltip: 'Two facing pages (spread) in the magazine.', onlyWhenCoverAvailable: false },
+  { key: 'advertorial', label: 'Advertorial', priceUsd: 800, tooltip: 'Editorial-style paid content, one page.', onlyWhenCoverAvailable: false },
   { key: 'cover', label: 'Cover page', priceUsd: 3000, tooltip: 'Front or back cover placement (limited availability).', onlyWhenCoverAvailable: true },
 ] as const;
 
