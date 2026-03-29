@@ -129,6 +129,7 @@ const LoggedNav: FC = () => {
           {/* Botones de navegación - visibles solo en PC (≥1024px) */}
           <div className="hidden lg:flex flex-row items-center gap-5 text-sm text-gray-500 uppercase tracking-wider font-sans">
             <BasicButton textContent="Mediakit" urlRedirection="/mediakit" />
+            <BasicButton textContent="Contact" urlRedirection="/contact" />
             <BasicButton textContent="My Companies" urlRedirection="/logged/companies" />
             <BasicButton textContent="My Profile" urlRedirection="/logged/profiles/me" />
             <BasicButton textContent="Settings" urlRedirection="/logged/settings" />
@@ -193,6 +194,12 @@ const LoggedNav: FC = () => {
                     className="py-4 text-left font-serif text-xl text-gray-900 hover:text-gray-600 transition-colors border-b border-gray-100"
                   >
                     Mediakit
+                  </button>
+                  <button
+                    onClick={() => handleNavClick("/contact")}
+                    className="py-4 text-left font-serif text-xl text-gray-900 hover:text-gray-600 transition-colors border-b border-gray-100"
+                  >
+                    Contact
                   </button>
                   <button
                     onClick={() => handleNavClick("/logged/companies")}

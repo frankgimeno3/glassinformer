@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "../globals.css";
 import TopBanner from "../general_components/banners/TopBanner";
+import MidBanner from "../general_components/banners/MidBanner";
 import RightBanner from "../general_components/banners/RightBanner";
 import Link from "next/link";
 import AppNav from "../general_components/navs/AppNav";
@@ -27,7 +28,7 @@ export default function LoggedLayout({
       </div>
       <div className="flex flex-row bg-gray-100 min-h-screen text-gray-600 pt-78">
         {/* Contenedor principal - 80% en PC, 100% en móvil/tablet */}
-        <div className="w-full lg:w-[80%] flex-shrink-0 px-12 mt-8">
+        <div className="w-full lg:w-[80%] flex-shrink-0 px-12 mt-8 lg:mt-0">
           <div className="flex flex-col">
             {/* Navegación - oculta en móvil/tablet, visible en PC (≥1024px) */}
             <div className='hidden lg:flex flex-row text-sm text-gray-500 uppercase tracking-wider font-sans text-white bg-white mb-4'>
@@ -44,6 +45,7 @@ export default function LoggedLayout({
                 Events
               </Link>
             </div>
+            <MidBanner />
             <div className="pt-12">
             {children}
             </div>

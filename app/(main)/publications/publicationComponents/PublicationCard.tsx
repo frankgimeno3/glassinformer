@@ -1,18 +1,11 @@
 "use client";
 
 import { memo } from "react";
+import { useRouter } from "next/navigation";
 import PublicationFlipbook from "./PublicationFlipbook";
+import type { Publication } from "./publicationListUtils";
 
-export interface Publication {
-  id?: string;
-  number: number;
-  title: string;
-  description: string;
-  redirection_link: string;
-  year: number;
-  publicationDate: string;
-  publicationMainImageUrl?: string;
-}
+export type { Publication };
 
 function formatPublicationDate(isoDate: string): string {
   if (!isoDate) return "";
@@ -29,6 +22,8 @@ interface PublicationCardProps {
 }
 
 const PublicationCard = memo<PublicationCardProps>(({ publication }) => {
+  const router = useRouter();
+
   const cardContent = (
     <>
       <PublicationFlipbook title={publication.title} imageUrl={publication.publicationMainImageUrl} />
@@ -50,6 +45,12 @@ const PublicationCard = memo<PublicationCardProps>(({ publication }) => {
   const contentWrapperClass = "flex flex-col flex-1 min-h-0 cursor-pointer";
 
   const handleClick = () => {
+    if (publication.id) {
+      router.push(
+        `/publications/informer/${encodeURIComponent(publication.id)}`
+      );
+      return;
+    }
     const raw = (publication.redirection_link ?? "").trim();
     if (!raw) return;
     const url = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;

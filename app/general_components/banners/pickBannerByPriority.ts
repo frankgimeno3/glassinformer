@@ -8,6 +8,10 @@ export interface BannerItem {
   /** External URL for the banner click (e.g. https://www.vidrioperfil.com/es-es/) */
   bannerRedirection: string;
   bannerPriority: number;
+  /** Optional: white/light logo centered on the dark panel (PNG/SVG). */
+  sponsorLogoSrc?: string;
+  /** Optional: small logo top-right on the photo area. */
+  cornerLogoSrc?: string;
 }
 
 /**

@@ -66,6 +66,9 @@ const Footer: FC = () => {
             <Link href="/mediakit" className="hover:text-gray-900 transition-colors">
               Mediakit
             </Link>
+            <Link href="/contact" className="hover:text-gray-900 transition-colors">
+              Contact
+            </Link>
             {isLogged === true ? (
               <button
                 type="button"

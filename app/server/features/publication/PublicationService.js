@@ -1,16 +1,241 @@
 import PublicationModel from "./PublicationModel.js";
 import "../../database/models.js";
 import { QueryTypes } from "sequelize";
-import { portal_id } from "../../../GlassInformerSpecificData.js";
+import {
+    portal_id,
+    publicationPortalDbValue,
+    publicationCoverUrlTemplate,
+} from "../../../GlassInformerSpecificData.js";
+
+/** Resolved physical column names (null until first successful resolve). */
+let publicationColumnsCached = null;
+let publicationColumnsInFlight = null;
+
+/** How we bind publications to the current portal (publication_portals join vs publications.portal_id). */
+let publicationPortalBindingCached = null;
+let publicationPortalBindingInFlight = null;
+
+function pgQuoteIdent(name) {
+    return `"${String(name).replace(/"/g, '""')}"`;
+}
+
+function pickColumn(existingSet, candidates) {
+    for (const c of candidates) {
+        if (existingSet.has(c)) return c;
+    }
+    return null;
+}
+
+/** Filter on publications.portal (or legacy revista) using GlassInformerSpecificData.publicationPortalDbValue. */
+function buildPublicationPortalStringWhereClause(brandPhysicalCol, tableAlias, q) {
+    const v = (publicationPortalDbValue ?? '').trim();
+    if (!v) return '';
+    return ` AND LOWER(TRIM(${tableAlias}.${q(brandPhysicalCol)})) = LOWER(TRIM(:publicationPortalDbValue)) `;
+}
+
+/**
+ * If RDS has a varchar `portal` column and we filter by publicationPortalDbValue, that already scopes rows.
+ * INNER JOIN publication_portals then drops every row when the junction table is empty or out of sync — skip join in that case.
+ */
+function hasPublicationsPortalVarcharColumn(cols) {
+    return String(cols.revista || '').toLowerCase() === 'portal';
+}
+
+function shouldJoinPublicationPortalsTable(binding, cols) {
+    if (binding.kind !== 'junction') return false;
+    const portalKey = (publicationPortalDbValue ?? '').trim();
+    if (!portalKey) return true;
+    if (hasPublicationsPortalVarcharColumn(cols)) return false;
+    return true;
+}
+
+function buildPublicationCoverFromTemplate(row) {
+    const t = (publicationCoverUrlTemplate || '').trim();
+    if (!t) return '';
+    if (t.includes('{id_magazine}')) {
+        const mid = row.id_magazine == null ? '' : String(row.id_magazine).trim();
+        if (!mid) return '';
+    }
+    const n = row.pub_numero ?? row.número ?? row.numero ?? '';
+    const safe = (v) => encodeURIComponent(v == null ? '' : String(v));
+    return t
+        .replace(/\{id_magazine\}/g, safe(row.id_magazine))
+        .replace(/\{id_publication\}/g, safe(row.id_publication))
+        .replace(/\{número\}/g, safe(n))
+        .replace(/\{issue_number\}/g, safe(row.pub_issue_number))
+        .replace(/\{edition_name\}/g, safe(row.edition_name));
+}
+
+async function resolvePublicationPortalBinding(sequelize) {
+    if (publicationPortalBindingCached) return publicationPortalBindingCached;
+    if (!publicationPortalBindingInFlight) {
+        publicationPortalBindingInFlight = (async () => {
+            const [existsRow] = await sequelize.query(
+                `SELECT EXISTS (
+                    SELECT 1 FROM information_schema.tables
+                    WHERE table_schema = 'public' AND table_name = 'publication_portals'
+                ) AS ex`,
+                { type: QueryTypes.SELECT }
+            );
+            if (!existsRow?.ex) {
+                return { kind: 'no_junction' };
+            }
+            const rows = await sequelize.query(
+                `SELECT column_name FROM information_schema.columns
+                 WHERE table_schema = 'public' AND table_name = 'publication_portals'`,
+                { type: QueryTypes.SELECT }
+            );
+            const set = new Set(rows.map((r) => r.column_name));
+            const publicationIdCol = pickColumn(set, ['publication_id', 'id_publication']);
+            const portalIdCol = pickColumn(set, ['portal_id', 'id_portal']);
+            if (!publicationIdCol || !portalIdCol) {
+                return { kind: 'no_junction' };
+            }
+            return { kind: 'junction', publicationIdCol, portalIdCol };
+        })();
+    }
+    try {
+        publicationPortalBindingCached = await publicationPortalBindingInFlight;
+        return publicationPortalBindingCached;
+    } catch (e) {
+        publicationPortalBindingInFlight = null;
+        throw e;
+    }
+}
+
+/**
+ * Maps logical publication fields to actual RDS column names (cached per process).
+ * Supports schemas where e.g. link lives in `url` or `link` instead of `redirection_link`.
+ */
+async function resolvePublicationsPhysicalColumns(sequelize) {
+    if (publicationColumnsCached) return publicationColumnsCached;
+    if (!publicationColumnsInFlight) {
+        publicationColumnsInFlight = (async () => {
+            const rows = await sequelize.query(
+                `SELECT column_name
+                 FROM information_schema.columns
+                 WHERE table_schema = 'public' AND table_name = 'publications'`,
+                { type: QueryTypes.SELECT }
+            );
+            const set = new Set(rows.map((r) => r.column_name));
+
+            const id_publication = pickColumn(set, ['id_publication', 'id']);
+            const redirection_link = pickColumn(set, [
+                'redirection_link',
+                'redirectionLink',
+                'redirectionlink',
+                'external_link',
+                'publication_url',
+                'publication_link',
+                'external_url',
+                'url',
+                'link',
+            ]);
+            const date = pickColumn(set, [
+                'date',
+                'publication_date',
+                'pub_date',
+                'published_at',
+            ]);
+            // RDS may use `portal` (magazine key per row) or legacy `revista`.
+            const revista = pickColumn(set, [
+                'portal',
+                'revista',
+                'title',
+                'magazine_name',
+                'magazine',
+                'name',
+            ]);
+            const numero = pickColumn(set, [
+                'número',
+                'numero',
+                'number',
+                'issue_number',
+                'num',
+                'issue',
+            ]);
+            const publication_main_image_url = pickColumn(set, [
+                'publication_main_image_url',
+                'main_image_url',
+                'cover_image_url',
+                'image_url',
+                'thumbnail_url',
+            ]);
+            const portal_id_col = pickColumn(set, ['portal_id', 'id_portal']);
+            const id_magazine = pickColumn(set, ['id_magazine', 'magazine_id']);
+            const issue_number = pickColumn(set, ['issue_number', 'issue_num', 'issue']);
+            const edition_name = pickColumn(set, ['edition_name', 'edition_label']);
+
+            // Link column is optional: some schemas (e.g. GlassInformer RDS) store no URL on publications.
+            if (!id_publication || !date || !revista || !numero) {
+                const found = [...set].sort().join(', ');
+                throw new Error(
+                    `[PublicationService] publications column mapping incomplete (columns in DB: ${found || 'none'}). ` +
+                        'Need id_publication, date, portal|revista|title, and issue (número|issue_number|…).'
+                );
+            }
+
+            return {
+                id_publication,
+                redirection_link,
+                date,
+                revista,
+                numero,
+                publication_main_image_url,
+                portal_id_col,
+                id_magazine,
+                issue_number,
+                edition_name,
+            };
+        })();
+    }
+    try {
+        publicationColumnsCached = await publicationColumnsInFlight;
+        return publicationColumnsCached;
+    } catch (e) {
+        publicationColumnsInFlight = null;
+        throw e;
+    }
+}
+
+function publicationSelectListSql(cols) {
+    const q = pgQuoteIdent;
+    const img = cols.publication_main_image_url
+        ? `p.${q(cols.publication_main_image_url)}`
+        : `NULL::varchar`;
+    const link = cols.redirection_link
+        ? `p.${q(cols.redirection_link)}`
+        : `NULL::varchar`;
+    const idMag = cols.id_magazine ? `p.${q(cols.id_magazine)}` : `NULL::varchar`;
+    const issueNum = cols.issue_number ? `p.${q(cols.issue_number)}` : `NULL::integer`;
+    const edition = cols.edition_name ? `p.${q(cols.edition_name)}` : `NULL::varchar`;
+    return `
+        p.${q(cols.id_publication)} AS id_publication,
+        ${link} AS redirection_link,
+        p.${q(cols.date)} AS date,
+        p.${q(cols.revista)} AS revista,
+        p.${q(cols.numero)} AS pub_numero,
+        ${img} AS publication_main_image_url,
+        ${idMag} AS id_magazine,
+        ${issueNum} AS pub_issue_number,
+        ${edition} AS edition_name
+    `;
+}
 
 function mapPublicationToApi(row) {
+    const link = row.redirection_link;
+    let publication_main_image_url = (row.publication_main_image_url || '').trim();
+    if (!publication_main_image_url) {
+        publication_main_image_url = buildPublicationCoverFromTemplate(row);
+    }
+    const edition = row.edition_name == null ? '' : String(row.edition_name).trim();
     return {
         id_publication: row.id_publication,
-        redirectionLink: row.redirection_link,
+        redirectionLink: link == null || link === '' ? '' : String(link),
         date: row.date ? new Date(row.date).toISOString().split('T')[0] : null,
-        revista: row.revista,
-        número: row.número,
-        publication_main_image_url: row.publication_main_image_url || ""
+        revista: edition || row.revista,
+        número: row.pub_numero ?? row.número ?? row.numero ?? '',
+        publication_main_image_url,
     };
 }
 
@@ -21,13 +246,45 @@ export async function getAllPublications() {
             return [];
         }
 
-        // Join with publication_portals to filter by portal_id
+        const cols = await resolvePublicationsPhysicalColumns(PublicationModel.sequelize);
+        const q = pgQuoteIdent;
+        const binding = await resolvePublicationPortalBinding(PublicationModel.sequelize);
+
+        let joinSql = '';
+        let portalWhereSql = '';
+        if (shouldJoinPublicationPortalsTable(binding, cols)) {
+            joinSql =
+                ` INNER JOIN public.publication_portals pp ON p.${q(cols.id_publication)} = pp.${q(binding.publicationIdCol)} ` +
+                `AND pp.${q(binding.portalIdCol)} = :portalId `;
+        } else if (cols.portal_id_col) {
+            portalWhereSql = ` AND p.${q(cols.portal_id_col)} = :portalId `;
+        } else {
+            const scopedByPortalVarchar =
+                (publicationPortalDbValue ?? '').trim() !== '' && hasPublicationsPortalVarcharColumn(cols);
+            if (!scopedByPortalVarchar) {
+                console.warn(
+                    '[PublicationService] No junction join, no publications.portal_id, and no portal varchar scope; check publicationPortalDbValue and schema.'
+                );
+            }
+        }
+
+        const portalStringSql = buildPublicationPortalStringWhereClause(cols.revista, 'p', q);
+
         const rows = await PublicationModel.sequelize.query(
-            `SELECT p.id_publication, p.redirection_link, p.date, p.revista, p.número, p.publication_main_image_url
+            `SELECT ${publicationSelectListSql(cols)}
              FROM public.publications p
-             INNER JOIN public.publication_portals pp ON p.id_publication = pp.publication_id AND pp.portal_id = :portalId
-             ORDER BY p.date DESC`,
-            { replacements: { portalId: portal_id }, type: QueryTypes.SELECT }
+             ${joinSql}
+             WHERE 1=1
+             ${portalWhereSql}
+             ${portalStringSql}
+             ORDER BY p.${q(cols.date)} DESC`,
+            {
+                replacements: {
+                    portalId: portal_id,
+                    publicationPortalDbValue: (publicationPortalDbValue ?? '').trim(),
+                },
+                type: QueryTypes.SELECT,
+            }
         );
         
         if (rows && rows.length > 0) {
@@ -50,7 +307,8 @@ export async function getAllPublications() {
             (error.message?.includes('relation') && error.message?.includes('does not exist')) ||
             (error.message?.includes('column') && error.message?.includes('does not exist')) ||
             error.message?.includes('not initialized') ||
-            error.message?.includes('Model not found')) {
+            error.message?.includes('Model not found') ||
+            error.message?.includes('[PublicationService] publications column mapping incomplete')) {
             console.warn('Database issue, returning empty array');
             return [];
         }
@@ -61,21 +319,48 @@ export async function getAllPublications() {
 
 export async function getPublicationById(idPublication) {
     try {
-        const publication = await PublicationModel.findByPk(idPublication);
-        if (!publication) {
+        if (!PublicationModel.sequelize) {
+            throw new Error('PublicationModel not initialized');
+        }
+
+        const cols = await resolvePublicationsPhysicalColumns(PublicationModel.sequelize);
+        const q = pgQuoteIdent;
+        const binding = await resolvePublicationPortalBinding(PublicationModel.sequelize);
+
+        let joinSql = '';
+        let portalWhereSql = '';
+        if (shouldJoinPublicationPortalsTable(binding, cols)) {
+            joinSql =
+                ` INNER JOIN public.publication_portals pp ON p.${q(cols.id_publication)} = pp.${q(binding.publicationIdCol)} ` +
+                `AND pp.${q(binding.portalIdCol)} = :portalId `;
+        } else if (cols.portal_id_col) {
+            portalWhereSql = ` AND p.${q(cols.portal_id_col)} = :portalId `;
+        }
+
+        const portalStringSql = buildPublicationPortalStringWhereClause(cols.revista, 'p', q);
+
+        const rows = await PublicationModel.sequelize.query(
+            `SELECT ${publicationSelectListSql(cols)}
+             FROM public.publications p
+             ${joinSql}
+             WHERE p.${q(cols.id_publication)} = :id
+             ${portalWhereSql}
+             ${portalStringSql}`,
+            {
+                replacements: {
+                    id: idPublication,
+                    portalId: portal_id,
+                    publicationPortalDbValue: (publicationPortalDbValue ?? '').trim(),
+                },
+                type: QueryTypes.SELECT,
+            }
+        );
+        const row = rows?.[0];
+        if (!row) {
             throw new Error(`Publication with id ${idPublication} not found`);
         }
 
-        // Validate publication belongs to portal via publication_portals
-        const [portalRow] = await PublicationModel.sequelize.query(
-            `SELECT 1 FROM public.publication_portals WHERE publication_id = :pubId AND portal_id = :portalId`,
-            { replacements: { pubId: idPublication, portalId: portal_id }, type: QueryTypes.SELECT }
-        );
-        if (!portalRow) {
-            throw new Error(`Publication with id ${idPublication} not found`);
-        }
-        
-        return mapPublicationToApi(publication.get ? publication.get({ plain: true }) : publication);
+        return mapPublicationToApi(row);
     } catch (error) {
         console.error('Error fetching publication from database:', error);
         throw error;

@@ -1,8 +1,11 @@
 'use client';
 
 import CommentsSection from "../article_components/CommentsSection";
-import RelatedContent from "../article_components/RelatedContent";
 import DeleteArticleModal from "../article_components/DeleteArticleModal";
+import MidBanner, {
+  type MidBannerVariant,
+} from "@/app/general_components/banners/MidBanner";
+import { articlePageRelatedMidVariant } from "@/app/GlassInformerSpecificData";
 import ArticleLoadingState from "../article_components/ArticleLoadingState";
 import ArticleErrorState from "../article_components/ArticleErrorState";
 import ArticleHero from "../article_components/ArticleHero";
@@ -67,7 +70,12 @@ export default function Article() {
       <div className="w-full">
         <CommentsSection idArticle={articleId} />
       </div>
-      <RelatedContent />
+      <div className="w-full px-6 md:px-8">
+        <MidBanner
+          variant={articlePageRelatedMidVariant as MidBannerVariant}
+          excludeArticleId={articleId}
+        />
+      </div>
 
       <DeleteArticleModal
         open={deleteModalOpen}

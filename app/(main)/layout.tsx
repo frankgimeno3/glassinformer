@@ -26,7 +26,7 @@ export default function MainLayout({
       </div>
       <div className="flex flex-row bg-gray-100 min-h-screen text-gray-600 pt-78">
         {/* Contenedor principal - 7/10 en desktop/tablet, 100% en móvil */}
-        <div className="w-full lg:w-[80%] flex-shrink-0 px-12 mt-8">
+        <div className="w-full lg:w-[80%] flex-shrink-0 px-12 mt-8 lg:mt-0">
           <div className="flex flex-col">
             {/* Navegación - oculta en móvil/tablet, visible en PC (≥1024px) */}
             <div className='hidden lg:flex flex-row text-sm text-gray-500 uppercase tracking-wider font-sans text-white bg-white mb-4'>

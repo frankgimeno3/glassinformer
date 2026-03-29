@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "../globals.css";
 import Link from "next/link";
 import TopBanner from "../general_components/banners/TopBanner";
+import MidBanner from "../general_components/banners/MidBanner";
 import AppNav from "../general_components/navs/AppNav";
 import RightBanner from "../general_components/banners/RightBanner";
 import Footer from "../general_components/navs/footers/Footer";
@@ -25,7 +26,7 @@ export default function AuthLayout({
         <AppNav />
       </div>
       <div className="flex flex-row bg-gray-100 min-h-screen text-gray-600 pt-78">
-        <div className="w-full lg:w-[80%] flex-shrink-0 px-12 mt-8">
+        <div className="w-full lg:w-[80%] flex-shrink-0 px-12 mt-8 lg:mt-0">
           <div className="flex flex-col">
             {/* Navegación - oculta en móvil/tablet, visible en PC (≥1024px) */}
             <div className="hidden lg:flex flex-row text-sm text-gray-500 uppercase tracking-wider font-sans text-white bg-white mb-4">
@@ -42,6 +43,7 @@ export default function AuthLayout({
                 Events
               </Link>
             </div>
+            <MidBanner />
             {children}
             <Footer />
           </div>
