@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { PortalName, portal_id as currentPortalId } from "@/app/GlassInformerSpecificData";
 import {
   pickNBannersByPriority,
@@ -31,8 +32,14 @@ const RELATED_RAIL_CARD =
   `group flex flex-row items-stretch gap-3.5 rounded-lg bg-white p-3 shadow-sm ring-1 ring-neutral-200/90 sm:gap-4 ${RAIL_HOVER}`;
 const RELATED_RAIL_TITLE =
   "line-clamp-3 text-[0.88rem] font-semibold uppercase leading-snug tracking-wide text-gray-800 sm:text-[0.95rem]";
+const RELATED_PRODUCT_TITLE =
+  "line-clamp-3 text-left text-[0.88rem] font-normal leading-snug text-gray-800 sm:text-[0.95rem]";
+const RELATED_ARTICLE_TITLE =
+  "line-clamp-3 text-[0.88rem] font-normal leading-snug text-gray-800 sm:text-[0.95rem]";
 const RELATED_RAIL_TAG =
   "inline-flex max-w-full items-center rounded-md bg-blue-950 px-2 py-1 text-[0.74rem] font-normal uppercase tracking-wide text-white sm:text-[0.82rem]";
+const RELATED_PRODUCT_TAG =
+  "inline-flex max-w-full items-center self-start rounded-md bg-blue-950 px-2 py-1 text-[0.74rem] font-normal uppercase tracking-wide text-white sm:text-[0.82rem]";
 const RELATED_RAIL_THUMB =
   "relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-neutral-100 sm:h-[5.5rem] sm:w-[5.5rem]";
 const RELATED_THUMB_SIZES = "(max-width: 1280px) 88px, 96px";
@@ -224,10 +231,6 @@ function RelatedProductCard({ product }: { product: ApiProduct }) {
       href={`/directory/products/${encodeURIComponent(product.id_product)}`}
       className={RELATED_RAIL_CARD}
     >
-      <div className="flex min-w-0 flex-1 flex-col items-end justify-center gap-1.5 text-right">
-        <p className={RELATED_RAIL_TITLE}>{title}</p>
-        <span className={RELATED_RAIL_TAG}>{tag}</span>
-      </div>
       <div className={RELATED_RAIL_THUMB}>
         <Image
           src={src}
@@ -237,6 +240,10 @@ function RelatedProductCard({ product }: { product: ApiProduct }) {
           sizes={RELATED_THUMB_SIZES}
           unoptimized
         />
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col items-start justify-center gap-1.5 text-left">
+        <p className={RELATED_PRODUCT_TITLE}>{title}</p>
+        <span className={RELATED_PRODUCT_TAG}>{tag}</span>
       </div>
     </Link>
   );
@@ -267,7 +274,7 @@ function RelatedArticleCard({ article }: { article: ApiArticle }) {
       className={RELATED_RAIL_CARD}
     >
       <div className="flex min-w-0 flex-1 flex-col items-end justify-center gap-1.5 text-right">
-        <p className={RELATED_RAIL_TITLE}>{title}</p>
+        <p className={RELATED_ARTICLE_TITLE}>{title}</p>
         <span className={RELATED_RAIL_TAG}>{portalTag}</span>
       </div>
       <div className={RELATED_RAIL_THUMB}>
@@ -303,6 +310,7 @@ export default function RightBanner() {
   const [publications, setPublications] = useState<ApiPublication[]>([]);
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [articles, setArticles] = useState<ApiArticle[]>([]);
+  const pathname = usePathname();
 
   useEffect(() => {
     const parseJson = async <T,>(res: Response): Promise<T | null> => {
@@ -328,8 +336,8 @@ export default function RightBanner() {
   }, []);
 
   const rightBanners = useMemo(
-    () => pickNBannersByPriority(banners, "right", 4),
-    [banners]
+    () => pickNBannersByPriority(banners, "right", 4, pathname),
+    [banners, pathname]
   );
 
   const featuredPublication = publications[0] ?? null;
@@ -382,7 +390,7 @@ export default function RightBanner() {
   }
 
   return (
-    <div className="sticky top-28 flex w-full flex-col gap-4 pr-2 pt-5">
+    <div className="sticky top-28 mb-6 flex w-full flex-col gap-4 pr-2 pb-6 pt-5">
       {slots}
     </div>
   );

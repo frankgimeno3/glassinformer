@@ -2,6 +2,17 @@
 
 import React, { FC, useState } from "react";
 import AuthenticationService from "@/apiClient/AuthenticationService";
+import {
+    AUTH_AUX_TEXT,
+    AUTH_CARD,
+    AUTH_ERROR,
+    AUTH_FORM,
+    AUTH_INPUT,
+    AUTH_PAGE_SHELL,
+    AUTH_PRIMARY_BUTTON,
+    AUTH_TEXT,
+    AUTH_TITLE,
+} from "../_components/authFormStyles";
 
 interface ForgotProps {}
 
@@ -34,30 +45,29 @@ const Forgot: FC<ForgotProps> = ({}) => {
 
     if (success && pendingEmail) {
         return (
-            <div className="flex flex-col bg-white items-center justify-center min-h-screen">
-                <div className="flex flex-col gap-4 bg-gray-900 p-8 rounded shadow-md w-full max-w-md">
-                    <h2 className="text-2xl text-white font-semibold mb-4 text-center">
-                        Revisa tu correo
+            <div className={AUTH_PAGE_SHELL}>
+                <div className={`${AUTH_CARD} ${AUTH_FORM}`}>
+                    <h2 className={AUTH_TITLE}>
+                        Check your inbox
                     </h2>
-                    <p className="text-gray-300 text-center">
-                        Te hemos enviado un código de restablecimiento a{" "}
+                    <p className={AUTH_TEXT}>
+                        We have sent a reset code to{" "}
                         <strong className="text-white">{pendingEmail}</strong>.
-                        Introduce el código y tu nueva contraseña en la siguiente
-                        página.
+                        Enter the code and your new password on the next page.
                     </p>
                     <a
                         href={`/auth/forgot/confirm?email=${encodeURIComponent(pendingEmail)}`}
-                        className="bg-white text-black py-2 rounded hover:bg-gray-300 transition cursor-pointer text-center font-medium"
+                        className={`${AUTH_PRIMARY_BUTTON} text-center`}
                     >
-                        Introducir código y nueva contraseña
+                        Enter code and new password
                     </a>
-                    <p className="text-xs text-white text-center">
-                        ¿Recordaste tu contraseña?{" "}
+                    <p className={AUTH_AUX_TEXT}>
+                        Remembered your password?{" "}
                         <a
                             href="/auth/login"
                             className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer"
                         >
-                            Iniciar sesión
+                            Log in
                         </a>
                     </p>
                 </div>
@@ -66,31 +76,30 @@ const Forgot: FC<ForgotProps> = ({}) => {
     }
 
     return (
-        <div className="flex flex-col bg-white items-center justify-center min-h-screen">
+        <div className={AUTH_PAGE_SHELL}>
             <form
                 onSubmit={handleForgot}
-                className="flex flex-col gap-4 bg-gray-900 p-8 rounded shadow-md w-full max-w-md"
+                className={`${AUTH_CARD} ${AUTH_FORM}`}
             >
-                <h2 className="text-2xl text-white font-semibold mb-4 text-center">
-                    He olvidado mi contraseña
+                <h2 className={AUTH_TITLE}>
+                    I forgot my password
                 </h2>
 
-                <p className="text-sm text-gray-300 text-center mb-2">
-                    Introduce tu email y te enviaremos un código para restablecer
-                    tu contraseña.
+                <p className={AUTH_TEXT}>
+                    Enter your email and we will send you a code to reset your password.
                 </p>
 
                 <input
                     type="email"
-                    placeholder="Introduce tu email"
+                    placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400"
+                    className={AUTH_INPUT}
                     required
                 />
 
                 {error && (
-                    <div className="flex flex-col text-red-500 text-sm text-center">
+                    <div className={AUTH_ERROR}>
                         <p>{error}</p>
                     </div>
                 )}
@@ -98,18 +107,18 @@ const Forgot: FC<ForgotProps> = ({}) => {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="bg-white text-black py-2 rounded hover:bg-gray-300 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={AUTH_PRIMARY_BUTTON}
                 >
-                    {loading ? "Enviando…" : "Enviar código"}
+                    {loading ? "Sending…" : "Send code"}
                 </button>
 
-                <p className="text-xs text-white text-center">
-                    ¿Recordaste tu contraseña?{" "}
+                <p className={AUTH_AUX_TEXT}>
+                    Remembered your password?{" "}
                     <a
                         href="/auth/login"
                         className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer ml-1"
                     >
-                        Iniciar sesión
+                        Log in
                     </a>
                 </p>
             </form>

@@ -51,8 +51,8 @@ export default function MediakitPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8">
-      <h1 className="text-center text-4xl sm:text-5xl font-bold text-gray-900 pb-4">Mediakit</h1>
+    <div className="min-h-screen bg-gray-900 px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+      <h1 className="pb-4 text-center text-4xl font-bold text-white sm:text-5xl">Mediakit</h1>
 
       <MediakitIntro onCartBelowClick={() => setCartBlinkTrigger((t) => t + 1)} />
 
@@ -65,7 +65,7 @@ export default function MediakitPage() {
 
       <MediakitTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className="max-w-4xl mx-auto">
+      <div className="mx-auto max-w-4xl">
         {activeTab === 'news-portal' && (
           <NewsPortalTab
             pricedItems={pricedItems}

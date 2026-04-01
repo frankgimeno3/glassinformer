@@ -1,0 +1,11 @@
+.flipbook-layout {
+  /* Lienzo tipo “visor” independiente del resto del sitio */
+  background: radial-gradient(
+      ellipse 90% 75% at 50% 42%,
+      #3f3f46 0%,
+      #2a2a2e 42%,
+      #18181b 100%
+    )
+    fixed;
+  font-family: var(--font-magazine), Georgia, "Times New Roman", serif;
+}

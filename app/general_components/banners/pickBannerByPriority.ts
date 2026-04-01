@@ -34,15 +34,47 @@ function weight(b: BannerItem): number {
   return Math.pow(PRIORITY_WEIGHT_FACTOR, b.bannerPriority);
 }
 
+function normalizeRoute(route: string | null | undefined): string {
+  const raw = (route ?? "").trim();
+  if (!raw || raw === "/") return "/";
+  const withoutQuery = raw.split(/[?#]/, 1)[0] ?? raw;
+  const withLeadingSlash = withoutQuery.startsWith("/")
+    ? withoutQuery
+    : `/${withoutQuery}`;
+  return withLeadingSlash.replace(/\/+$/, "") || "/";
+}
+
+function matchesBannerRoute(
+  bannerRoute: string | null | undefined,
+  currentRoute: string | null | undefined
+): boolean {
+  const normalizedBannerRoute = normalizeRoute(bannerRoute);
+  if (normalizedBannerRoute === "/") {
+    return normalizeRoute(bannerRoute) === "/" || !(bannerRoute ?? "").trim();
+  }
+  return normalizedBannerRoute === normalizeRoute(currentRoute);
+}
+
+function filterBanners(
+  banners: BannerItem[],
+  bannerType: BannerType,
+  currentRoute?: string
+): BannerItem[] {
+  return banners.filter(
+    (b) => b.bannerType === bannerType && matchesBannerRoute(b.bannerRoute, currentRoute)
+  );
+}
+
 /**
  * Picks one banner with weighted random: high > medium > low (noticeable difference).
  * Priority from DB appearance_weight (high→2, medium→1, low→0).
  */
 export function pickBannerByPriority(
   banners: BannerItem[],
-  bannerType: BannerType
+  bannerType: BannerType,
+  currentRoute?: string
 ): BannerItem | null {
-  const filtered = shuffle(banners.filter((b) => b.bannerType === bannerType));
+  const filtered = shuffle(filterBanners(banners, bannerType, currentRoute));
   if (filtered.length === 0) return null;
   if (filtered.length === 1) return filtered[0];
 
@@ -64,9 +96,10 @@ export function pickBannerByPriority(
 export function pickNBannersByPriority(
   banners: BannerItem[],
   bannerType: BannerType,
-  n: number
+  n: number,
+  currentRoute?: string
 ): BannerItem[] {
-  const pool = [...banners.filter((b) => b.bannerType === bannerType)];
+  const pool = [...filterBanners(banners, bannerType, currentRoute)];
   if (pool.length === 0) return [];
   const count = Math.min(n, pool.length);
   const result: BannerItem[] = [];

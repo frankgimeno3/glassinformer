@@ -32,7 +32,7 @@ const MainNews: FC<MainNewsProps> = ({ mainArticle, secondaryArticles }) => {
       {/* Main featured article */}
       {hasMain && (
         <div className="flex flex-col flex-[2]">
-          <article className="group flex flex-col bg-white border border-gray-200 hover:border-gray-300 transition-all duration-300 overflow-hidden">
+          <article className="group flex flex-col overflow-hidden border border-gray-200 bg-white transition-[box-shadow,border-color] duration-1000 ease-out hover:border-gray-300 hover:shadow-xl">
             <Link
               href={`/articles/${mainArticle!.id_article}`}
               className="relative w-full aspect-[16/9] min-h-[280px] overflow-hidden bg-gray-100 block"
@@ -95,11 +95,11 @@ const MainNews: FC<MainNewsProps> = ({ mainArticle, secondaryArticles }) => {
           {secondaryArticles.map((article) => (
             <article
               key={article.id_article}
-              className="group flex flex-col lg:flex-row gap-4 p-4 bg-white border border-gray-200 hover:border-gray-300 transition-all duration-300"
+              className="group flex flex-col gap-4 border border-gray-200 bg-white p-4 transition-[box-shadow,border-color] duration-1000 ease-out hover:border-gray-300 hover:shadow-lg lg:flex-row"
             >
               <Link
                 href={`/articles/${article.id_article}`}
-                className="relative shrink-0 w-full aspect-video lg:w-28 lg:h-28 overflow-hidden bg-gray-100"
+                className="relative w-full shrink-0 overflow-hidden bg-gray-100 transition-shadow duration-1000 ease-out group-hover:shadow-lg lg:h-28 lg:w-28"
               >
                 <Image
                   src={article.article_main_image_url || "/file.svg"}

@@ -2,6 +2,19 @@
 import { FC, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AuthenticationService from "@/apiClient/AuthenticationService";
+import {
+    AUTH_AUX_TEXT,
+    AUTH_CARD,
+    AUTH_ERROR,
+    AUTH_FORM,
+    AUTH_ICON_BUTTON,
+    AUTH_INPUT,
+    AUTH_PAGE_SHELL,
+    AUTH_PRIMARY_BUTTON,
+    AUTH_SKELETON_CARD,
+    AUTH_SKELETON_SHELL,
+    AUTH_TITLE,
+} from "../_components/authFormStyles";
 
 
 interface LoginProps {
@@ -19,7 +32,7 @@ const LoginContent: FC<LoginProps> = ({ }) => {
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
 
-    // El middleware maneja la redirección automáticamente, no necesitamos verificar aquí
+    // Middleware handles redirects automatically; no extra check needed here.
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -33,44 +46,44 @@ const LoginContent: FC<LoginProps> = ({ }) => {
             router.replace(redirect);
         } catch (e: any) {
             console.error(e);
-            setError(e?.message || 'Error al iniciar sesión. Verifica tus credenciales.');
+            setError(e?.message || 'Login failed. Please verify your credentials.');
         }
     };
 
     return (
-        <div className='flex flex-col bg-white items-center justify-center min-h-screen'>
+        <div className={AUTH_PAGE_SHELL}>
             <form
                 onSubmit={handleLogin}
-                className="flex flex-col gap-4 bg-gray-900 p-8 rounded shadow-md w-full max-w-md"
+                className={`${AUTH_CARD} ${AUTH_FORM}`}
             >
-                <h2 className="text-2xl text-white font-semibold mb-4 text-center">
-                    Ingrese email y contraseña
+                <h2 className={AUTH_TITLE}>
+                    Enter your email and password
                 </h2>
 
                 <input
                     type="text"
-                    placeholder="Introduzca su email"
+                    placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400"
+                    className={AUTH_INPUT}
                     required
                 />
 
                 <div className="relative">
                     <input
                         type={showPassword ? 'text' : 'password'}
-                        placeholder="Introduzca su contraseña"
+                        placeholder="Enter your password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400 w-full pr-10"
+                        className={`${AUTH_INPUT} pr-12`}
                         required
                     />
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-gray-200"
+                        className={AUTH_ICON_BUTTON}
                         tabIndex={-1}
-                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                         {showPassword ? (
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -87,7 +100,7 @@ const LoginContent: FC<LoginProps> = ({ }) => {
                 </div>
 
                 {error && (
-                    <div className="flex flex-col text-red-500 text-sm text-center">
+                    <div className={AUTH_ERROR}>
                         <p>ERROR:</p>
                         <p>{error}</p>
                     </div>
@@ -95,21 +108,21 @@ const LoginContent: FC<LoginProps> = ({ }) => {
 
                 <button
                     type="submit"
-                    className="bg-white text-black py-2 rounded hover:bg-gray-300 transition cursor-pointer"
+                    className={AUTH_PRIMARY_BUTTON}
                 >
-                    Identificarse
+                    Log in
                 </button>
 
 
-            <div className='flex flex-col text-right gap-5 p-5'>
-                <p className='text-xs text-white'>
+            <div className='flex flex-col gap-4 pt-2'>
+                <p className={AUTH_AUX_TEXT}>
                     Don't have an account?
                     <a href={redirectParam ? `/auth/signup?redirect=${encodeURIComponent(redirectParam)}` : '/auth/signup'} className=' font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer ml-1'>
                         Sign up
                     </a>
                 </p>
-                <div className='flex flex-col text-right gap-5 p-5'>
-                    <p className='text-xs text-white'>
+                <div className='flex flex-col gap-4'>
+                    <p className={AUTH_AUX_TEXT}>
                         Forgot your password?
                         <a href='/auth/forgot' className=' font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer ml-1'>
                             Reset password
@@ -124,12 +137,12 @@ const LoginContent: FC<LoginProps> = ({ }) => {
 };
 
 const FallbackForm = () => (
-    <div className='flex flex-col bg-white items-center justify-center min-h-screen'>
-        <div className="flex flex-col gap-4 bg-gray-900 p-8 rounded shadow-md w-full max-w-md">
+    <div className={AUTH_SKELETON_SHELL}>
+        <div className={AUTH_SKELETON_CARD}>
             <div className="h-8 bg-gray-700 rounded animate-pulse" />
             <div className="h-4 bg-gray-700 rounded w-3/4 animate-pulse" />
-            <div className="h-10 bg-gray-700 rounded animate-pulse" />
-            <div className="h-10 bg-gray-700 rounded animate-pulse" />
+            <div className="h-12 bg-gray-700 rounded animate-pulse" />
+            <div className="h-12 bg-gray-700 rounded animate-pulse" />
         </div>
     </div>
 );

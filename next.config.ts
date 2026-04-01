@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60,
     remotePatterns: [
+      { protocol: "https", hostname: "djjo025o2wqll.cloudfront.net", pathname: "/**" },
       { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
       { protocol: "https", hostname: "source.unsplash.com", pathname: "/**" },
       { protocol: "https", hostname: "unsplash.com", pathname: "/**" },

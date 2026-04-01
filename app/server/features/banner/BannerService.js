@@ -2,12 +2,19 @@ import BannerModel from "./BannerModel.js";
 import "../../database/models.js";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { normalizeBannerImageSrc } from "../../../general_components/banners/normalizeBannerImageSrc.js";
 
 function getFallbackBanners() {
     try {
         const jsonPath = join(process.cwd(), "app", "contents", "bannersContents.json");
         const fileContent = readFileSync(jsonPath, "utf-8");
-        return JSON.parse(fileContent);
+        const parsed = JSON.parse(fileContent);
+        return Array.isArray(parsed)
+            ? parsed.map((banner) => ({
+                ...banner,
+                bannerSrc: normalizeBannerImageSrc(banner.bannerSrc),
+            }))
+            : [];
     } catch (error) {
         console.error("Error reading fallback banners from JSON:", error);
         return [];
@@ -27,7 +34,7 @@ function toApiFormat(row) {
     return {
         id_banner: row.id,
         bannerType: row.position_type,
-        bannerSrc: row.src,
+        bannerSrc: normalizeBannerImageSrc(row.src),
         bannerRoute: row.route ?? "/",
         bannerRedirection: row.redirect_url ?? row.banner_redirection ?? "",
         bannerPriority: weightToPriority(row.appearance_weight),

@@ -16,7 +16,7 @@ const TABS: { id: TabId; label: string }[] = [
 
 const MediakitTabs: FC<MediakitTabsProps> = ({ activeTab, onTabChange }) => {
   return (
-    <div className="flex flex-wrap gap-2 border-b border-gray-200 mb-6 justify-center">
+    <div className="mb-6 flex flex-wrap justify-center gap-2 border-b border-white/10 pb-2">
       {TABS.map((tab) => (
         <button
           key={tab.id}
@@ -24,8 +24,8 @@ const MediakitTabs: FC<MediakitTabsProps> = ({ activeTab, onTabChange }) => {
           onClick={() => onTabChange(tab.id)}
           className={`px-4 py-2.5 rounded-t-lg font-medium transition-colors ${
             activeTab === tab.id
-              ? 'bg-blue-600 text-white border-b-2 border-blue-600'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-b-2 border-transparent'
+              ? 'border-b-2 border-white bg-white text-black'
+              : 'border-b-2 border-transparent bg-black text-gray-300 hover:bg-gray-800'
           }`}
         >
           {tab.label}

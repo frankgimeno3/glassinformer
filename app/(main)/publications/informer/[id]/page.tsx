@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import PublicationViewer from "../../_components/PublicationViewer";
+import { notFound } from "next/navigation";
+import InformerPhaseFlow from "../_components/InformerPhaseFlow";
 import { getPublicationForPage } from "../../_lib/getPublicationForPage";
 
 type PageProps = {
@@ -28,5 +29,26 @@ export async function generateMetadata({
 
 export default async function InformerPublicationPage({ params }: PageProps) {
   const { id } = await params;
-  return <PublicationViewer id={id} variant="informer" />;
+  const pub = await getPublicationForPage(id);
+  if (!pub) notFound();
+
+  const rawNum = pub["número"] ?? (pub as { numero?: unknown }).numero;
+  const numero =
+    rawNum != null && String(rawNum).trim() !== ""
+      ? String(rawNum).trim()
+      : null;
+  const date =
+    pub.date != null && String(pub.date).trim() !== ""
+      ? String(pub.date).trim()
+      : null;
+
+  return (
+    <InformerPhaseFlow
+      publicationId={id}
+      revista={String(pub.revista ?? "").trim() || "Publicación"}
+      numero={numero}
+      date={date}
+      flipbookHref={`/publications/flipbook/${encodeURIComponent(id)}/0`}
+    />
+  );
 }

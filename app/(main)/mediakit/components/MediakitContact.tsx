@@ -75,14 +75,14 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
   return (
     <>
       <div ref={contactRef} className="mx-auto max-w-4xl mt-16 sm:mt-20">
-        <h2 className="text-center text-3xl sm:text-4xl font-bold text-gray-900 mb-8 sm:mb-12">Contact us</h2>
+        <h2 className="mb-8 text-center text-3xl font-bold text-white sm:mb-12 sm:text-4xl">Contact us</h2>
         <form
           onSubmit={handleSubmit}
-          className="bg-white/90 backdrop-blur-sm border border-gray-200 shadow-xl p-6 sm:p-8 lg:p-10 rounded-2xl"
+          className="rounded-2xl border border-white/10 bg-transparent p-6 sm:p-8 lg:p-10"
         >
           <div className="space-y-6">
             <div>
-              <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="name" className="mb-2 block text-sm font-semibold text-white">
                 Full contact name <span className="text-red-500">*</span>
               </label>
               <input
@@ -92,13 +92,13 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
                 value={formData.name}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-white text-gray-900"
+                className="w-full rounded-lg border border-gray-700 bg-black px-4 py-3 text-white outline-none transition-all duration-200 focus:border-gray-500"
                 placeholder="Enter your full name"
               />
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="email" className="mb-2 block text-sm font-semibold text-white">
                 Contact email <span className="text-red-500">*</span>
               </label>
               <input
@@ -108,18 +108,18 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
                 value={formData.email}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-white text-gray-900"
+                className="w-full rounded-lg border border-gray-700 bg-black px-4 py-3 text-white outline-none transition-all duration-200 focus:border-gray-500"
                 placeholder="your.email@example.com"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="mb-2 block text-sm font-semibold text-white">
                 Contact phone number <span className="text-red-500">*</span>
               </label>
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="sm:w-48">
-                  <label htmlFor="phonePrefix" className="block text-xs text-gray-600 mb-1">
+                  <label htmlFor="phonePrefix" className="mb-1 block text-xs text-gray-300">
                     Country prefix
                   </label>
                   <select
@@ -127,7 +127,7 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
                     name="phonePrefix"
                     value={formData.phonePrefix}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-white text-gray-900"
+                    className="w-full rounded-lg border border-gray-700 bg-black px-4 py-3 text-white outline-none transition-all duration-200 focus:border-gray-500"
                   >
                     {phonePrefixes.map((prefix) => (
                       <option key={prefix.code} value={prefix.code}>
@@ -137,7 +137,7 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
                   </select>
                 </div>
                 <div className="flex-1">
-                  <label htmlFor="phone" className="block text-xs text-gray-600 mb-1">
+                  <label htmlFor="phone" className="mb-1 block text-xs text-gray-300">
                     Phone number
                   </label>
                   <input
@@ -147,7 +147,7 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
                     value={formData.phone}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-white text-gray-900"
+                    className="w-full rounded-lg border border-gray-700 bg-black px-4 py-3 text-white outline-none transition-all duration-200 focus:border-gray-500"
                     placeholder="123456789"
                   />
                 </div>
@@ -155,7 +155,7 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
             </div>
 
             <div>
-              <label htmlFor="interest" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="interest" className="mb-2 block text-sm font-semibold text-white">
                 What are you interested in? <span className="text-red-500">*</span>
               </label>
               <select
@@ -164,7 +164,7 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
                 value={formData.interest}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-white text-gray-900"
+                className="w-full rounded-lg border border-gray-700 bg-black px-4 py-3 text-white outline-none transition-all duration-200 focus:border-gray-500"
               >
                 <option value="">Select an option</option>
                 {interestOptions.map((option) => (
@@ -176,7 +176,7 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
             </div>
 
             <div>
-              <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="message" className="mb-2 block text-sm font-semibold text-white">
                 Message – Request description <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -186,7 +186,7 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
                 onChange={handleInputChange}
                 required
                 rows={6}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-white text-gray-900 resize-y"
+                className="w-full resize-y rounded-lg border border-gray-700 bg-black px-4 py-3 text-white outline-none transition-all duration-200 focus:border-gray-500"
                 placeholder="Please describe your request..."
               />
             </div>
@@ -201,12 +201,12 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
                 required
                 className="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
               />
-              <label htmlFor="acceptedTerms" className="text-sm text-gray-700 cursor-pointer">
+              <label htmlFor="acceptedTerms" className="cursor-pointer text-sm text-gray-300">
                 I accept the{' '}
                 <button
                   type="button"
                   onClick={() => setShowTermsModal(true)}
-                  className="text-blue-600 hover:text-blue-800 underline font-medium"
+                  className="font-medium text-indigo-400 underline hover:text-indigo-300"
                 >
                   terms and conditions
                 </button>
@@ -219,8 +219,8 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
               disabled={!isFormValid()}
               className={`w-full py-4 px-6 rounded-lg font-semibold text-white transition-all duration-200 ${
                 isFormValid()
-                  ? 'bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl cursor-pointer transform hover:scale-[1.02]'
-                  : 'bg-gray-400 cursor-not-allowed'
+                  ? 'cursor-pointer bg-white text-black hover:bg-gray-300'
+                  : 'cursor-not-allowed bg-gray-500 text-gray-200'
               }`}
             >
               Send

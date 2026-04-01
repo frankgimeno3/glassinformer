@@ -8,14 +8,14 @@ interface MediakitIntroProps {
 
 const MediakitIntro: FC<MediakitIntroProps> = ({ onCartBelowClick }) => {
   return (
-    <p className="text-justify text-gray-600 max-w-2xl mx-auto mb-6">
+    <p className="mx-auto mb-6 max-w-3xl text-justify text-sm leading-6 text-gray-300 sm:text-base">
       Browse what we offer by tab. Whatever you select in each tab will be added to{' '}
       <span
         role="button"
         tabIndex={0}
         onKeyDown={(e) => e.key === 'Enter' && onCartBelowClick?.()}
         onClick={onCartBelowClick}
-        className="text-blue-900 font-bold cursor-pointer hover:underline"
+        className="cursor-pointer font-bold text-indigo-400 hover:underline"
       >
         the cart below
       </span>

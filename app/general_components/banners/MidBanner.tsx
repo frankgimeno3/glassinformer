@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { normalizeBannerImageSrc } from "./normalizeBannerImageSrc";
 import {
   pickBannerByPriority,
   shuffle,
@@ -12,6 +13,8 @@ import {
 const BANNERS_API = "/api/v1/banners";
 const ARTICLES_API = "/api/v1/articles";
 const PRODUCTS_API = "/api/v1/products";
+const BANNER_HOVER =
+  "transition-opacity duration-200 ease-out hover:opacity-[0.88]";
 
 const ROW_COUNT = 4;
 
@@ -102,10 +105,10 @@ function MidBannerFull({
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="relative block h-full min-h-[168px] w-full"
+        className={`relative block h-full min-h-[168px] w-full ${BANNER_HOVER}`}
       >
         <Image
-          src={banner.bannerSrc}
+          src={normalizeBannerImageSrc(banner.bannerSrc)}
           alt=""
           fill
           className="object-cover object-center"
@@ -157,10 +160,10 @@ function MidBannerRowSlot({ banner }: { banner: BannerItem }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="relative block aspect-[4/3] w-full min-h-0 overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm transition hover:border-blue-950/40 hover:shadow-md"
+      className={`relative block aspect-[4/3] w-full min-h-0 overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm transition hover:border-blue-950/40 hover:shadow-md ${BANNER_HOVER}`}
     >
       <Image
-        src={banner.bannerSrc}
+        src={normalizeBannerImageSrc(banner.bannerSrc)}
         alt=""
         fill
         className="object-cover object-center"

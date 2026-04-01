@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { normalizeBannerImageSrc } from "./normalizeBannerImageSrc";
 
 type BannerImageFitWidthProps = {
   src: string;
@@ -23,7 +24,7 @@ export function BannerImageFitWidth({
 }: BannerImageFitWidthProps) {
   return (
     <Image
-      src={src}
+      src={normalizeBannerImageSrc(src)}
       alt={alt}
       width={1200}
       height={628}

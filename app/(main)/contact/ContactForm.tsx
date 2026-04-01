@@ -26,18 +26,18 @@ const ContactForm: FC = () => {
   };
 
   const inputClass =
-    "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-white text-gray-900";
+    "w-full rounded-lg border border-gray-700 bg-black px-4 py-3 text-base text-white placeholder-gray-400 outline-none transition-all duration-200 focus:border-gray-500";
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white border border-gray-200 shadow-xl p-6 sm:p-8 rounded-2xl"
+      className="rounded-2xl bg-transparent p-0"
     >
       <div className="space-y-6">
         <div>
           <label
             htmlFor="contact-name"
-            className="block text-sm font-semibold text-gray-700 mb-2"
+            className="mb-2 block text-sm font-semibold text-white"
           >
             Name <span className="text-red-500">*</span>
           </label>
@@ -56,7 +56,7 @@ const ContactForm: FC = () => {
         <div>
           <label
             htmlFor="contact-email"
-            className="block text-sm font-semibold text-gray-700 mb-2"
+            className="mb-2 block text-sm font-semibold text-white"
           >
             Email <span className="text-red-500">*</span>
           </label>
@@ -75,7 +75,7 @@ const ContactForm: FC = () => {
         <div>
           <label
             htmlFor="contact-subject"
-            className="block text-sm font-semibold text-gray-700 mb-2"
+            className="mb-2 block text-sm font-semibold text-white"
           >
             Subject <span className="text-red-500">*</span>
           </label>
@@ -94,7 +94,7 @@ const ContactForm: FC = () => {
         <div>
           <label
             htmlFor="contact-message"
-            className="block text-sm font-semibold text-gray-700 mb-2"
+            className="mb-2 block text-sm font-semibold text-white"
           >
             Message <span className="text-red-500">*</span>
           </label>
@@ -110,11 +110,11 @@ const ContactForm: FC = () => {
           />
         </div>
 
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-300">
           By sending this form, you acknowledge our{" "}
           <Link
             href="/legal/privacy-policy"
-            className="text-blue-600 hover:text-blue-800 underline font-medium"
+            className="font-medium text-indigo-400 underline hover:text-indigo-300"
           >
             privacy policy
           </Link>
@@ -123,7 +123,7 @@ const ContactForm: FC = () => {
 
         <button
           type="submit"
-          className="w-full py-4 px-6 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer"
+          className="w-full cursor-pointer rounded-lg bg-white px-6 py-4 font-semibold text-black transition-all duration-200 hover:bg-gray-300"
         >
           Send message
         </button>

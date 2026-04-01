@@ -3,15 +3,15 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { normalizeBannerImageSrc } from "./normalizeBannerImageSrc";
 import {
   pickNBannersByPriority,
   type BannerItem,
 } from "./pickBannerByPriority";
 
 const BANNERS_API = "/api/v1/banners";
-
-/** Leaderboard strip height (~90px), aligned with common ad rail layouts */
-const INNER_H = "h-[84px] sm:h-[92px]";
+const BANNER_HOVER =
+  "transition-opacity duration-200 ease-out hover:opacity-[0.88]";
 
 function TopBannerSlot({
   banner,
@@ -30,18 +30,19 @@ function TopBannerSlot({
         ? "(max-width: 768px) 100vw, min(1200px, 100vw)"
         : "(max-width: 768px) 58vw, 720px";
   return (
-    <div className={`relative min-h-0 min-w-0 ${flexClass}`}>
+    <div className={`relative flex min-h-0 min-w-0 justify-center ${flexClass}`}>
       <Link
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className={`relative block h-full w-full overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-neutral-200/90`}
+        className={`inline-flex w-fit max-w-[65%] items-center justify-center rounded-lg bg-white p-2 shadow-sm ring-1 ring-neutral-200/90 sm:p-3 ${BANNER_HOVER}`}
       >
         <Image
-          src={banner.bannerSrc}
+          src={normalizeBannerImageSrc(banner.bannerSrc)}
           alt=""
-          fill
-          className="object-cover object-center"
+          width={1200}
+          height={260}
+          className="block h-auto w-auto max-w-full object-contain object-center"
           sizes={sizes}
           unoptimized
         />
@@ -69,9 +70,7 @@ export default function TopBanner() {
         className={`w-full shrink-0 bg-[#f2f2f2] py-1.5 sm:py-2`}
         aria-hidden
       >
-        <div
-          className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${INNER_H}`}
-        />
+        <div className="mx-auto min-h-[48px] max-w-7xl px-4 sm:min-h-[56px] sm:px-6 lg:px-8" />
       </div>
     );
   }
@@ -79,7 +78,7 @@ export default function TopBanner() {
   return (
     <div className="w-full shrink-0 bg-[#f2f2f2] py-1.5 sm:py-2">
       <div
-        className={`mx-auto flex max-w-7xl items-stretch gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8 ${INNER_H}`}
+        className="mx-auto flex max-w-7xl items-center gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8"
       >
         {banners.map((banner, i) => {
           const pair = banners.length === 2;

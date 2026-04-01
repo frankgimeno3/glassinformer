@@ -5,8 +5,8 @@ export default function SearchLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <>
-      <MidBanner />
       {children}
+      <MidBanner />
     </>
   );
 }

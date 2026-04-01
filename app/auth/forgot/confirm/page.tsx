@@ -3,6 +3,20 @@
 import React, { FC, useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import AuthenticationService from "@/apiClient/AuthenticationService";
+import {
+    AUTH_AUX_TEXT,
+    AUTH_CARD,
+    AUTH_ERROR,
+    AUTH_FORM,
+    AUTH_ICON_BUTTON,
+    AUTH_INPUT,
+    AUTH_PAGE_SHELL,
+    AUTH_PRIMARY_BUTTON,
+    AUTH_SKELETON_CARD,
+    AUTH_SKELETON_SHELL,
+    AUTH_TEXT,
+    AUTH_TITLE,
+} from "../../_components/authFormStyles";
 
 interface ForgotConfirmProps {}
 
@@ -27,19 +41,19 @@ const ForgotConfirmContent: FC<ForgotConfirmProps> = ({}) => {
         setError(null);
 
         if (!email.trim()) {
-            setError("Introduce tu email.");
+            setError("Enter your email.");
             return;
         }
         if (!code.trim()) {
-            setError("Introduce el código que te hemos enviado por email.");
+            setError("Enter the code we sent to your email.");
             return;
         }
         if (newPassword.length < 8) {
-            setError("La contraseña debe tener al menos 8 caracteres.");
+            setError("Password must be at least 8 characters long.");
             return;
         }
         if (newPassword !== confirmPassword) {
-            setError("Las contraseñas no coinciden.");
+            setError("Passwords do not match.");
             return;
         }
 
@@ -55,7 +69,7 @@ const ForgotConfirmContent: FC<ForgotConfirmProps> = ({}) => {
             console.error(e);
             setError(
                 e?.message ||
-                    "Error al restablecer la contraseña. Comprueba el código (puede haber expirado) e inténtalo de nuevo."
+                    "Password reset failed. Check the code, which may have expired, and try again."
             );
         } finally {
             setLoading(false);
@@ -63,17 +77,16 @@ const ForgotConfirmContent: FC<ForgotConfirmProps> = ({}) => {
     };
 
     return (
-        <div className="flex flex-col bg-white items-center justify-center min-h-screen">
+        <div className={AUTH_PAGE_SHELL}>
             <form
                 onSubmit={handleConfirm}
-                className="flex flex-col gap-4 bg-gray-900 p-8 rounded shadow-md w-full max-w-md"
+                className={`${AUTH_CARD} ${AUTH_FORM}`}
             >
-                <h2 className="text-2xl text-white font-semibold mb-4 text-center">
-                    Nueva contraseña
+                <h2 className={AUTH_TITLE}>
+                    New password
                 </h2>
-                <p className="text-gray-300 text-sm text-center">
-                    Introduce el código que te hemos enviado por email y tu nueva
-                    contraseña.
+                <p className={AUTH_TEXT}>
+                    Enter the code we sent to your email and your new password.
                 </p>
 
                 <input
@@ -81,16 +94,16 @@ const ForgotConfirmContent: FC<ForgotConfirmProps> = ({}) => {
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400"
+                    className={AUTH_INPUT}
                     required
                 />
 
                 <input
                     type="text"
-                    placeholder="Código de verificación"
+                    placeholder="Verification code"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400"
+                    className={AUTH_INPUT}
                     required
                     autoComplete="one-time-code"
                 />
@@ -98,22 +111,22 @@ const ForgotConfirmContent: FC<ForgotConfirmProps> = ({}) => {
                 <div className="relative">
                     <input
                         type={showPassword ? "text" : "password"}
-                        placeholder="Nueva contraseña"
+                        placeholder="New password"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400 w-full pr-10"
+                        className={`${AUTH_INPUT} pr-12`}
                         required
                         minLength={8}
                     />
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-2 flex items-center text-gray-400 hover:text-gray-200"
+                        className={AUTH_ICON_BUTTON}
                         tabIndex={-1}
                         aria-label={
                             showPassword
-                                ? "Ocultar contraseña"
-                                : "Mostrar contraseña"
+                                ? "Hide password"
+                                : "Show password"
                         }
                     >
                         {showPassword ? (
@@ -157,16 +170,16 @@ const ForgotConfirmContent: FC<ForgotConfirmProps> = ({}) => {
 
                 <input
                     type={showPassword ? "text" : "password"}
-                    placeholder="Confirmar nueva contraseña"
+                    placeholder="Confirm new password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400 w-full"
+                    className={AUTH_INPUT}
                     required
                     minLength={8}
                 />
 
                 {error && (
-                    <div className="flex flex-col text-red-500 text-sm text-center">
+                    <div className={AUTH_ERROR}>
                         <p>{error}</p>
                     </div>
                 )}
@@ -174,17 +187,17 @@ const ForgotConfirmContent: FC<ForgotConfirmProps> = ({}) => {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="bg-white text-black py-2 rounded hover:bg-gray-300 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={AUTH_PRIMARY_BUTTON}
                 >
-                    {loading ? "Guardando…" : "Restablecer contraseña"}
+                    {loading ? "Saving…" : "Reset password"}
                 </button>
 
-                <p className="text-xs text-white text-center">
+                <p className={AUTH_AUX_TEXT}>
                     <a
                         href="/auth/login"
                         className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer"
                     >
-                        Volver a iniciar sesión
+                        Back to login
                     </a>
                 </p>
             </form>
@@ -193,12 +206,12 @@ const ForgotConfirmContent: FC<ForgotConfirmProps> = ({}) => {
 };
 
 const FallbackForm = () => (
-    <div className="flex flex-col bg-white items-center justify-center min-h-screen">
-        <div className="flex flex-col gap-4 bg-gray-900 p-8 rounded shadow-md w-full max-w-md">
+    <div className={AUTH_SKELETON_SHELL}>
+        <div className={AUTH_SKELETON_CARD}>
             <div className="h-8 bg-gray-700 rounded animate-pulse" />
             <div className="h-4 bg-gray-700 rounded w-3/4 animate-pulse" />
-            <div className="h-10 bg-gray-700 rounded animate-pulse" />
-            <div className="h-10 bg-gray-700 rounded animate-pulse" />
+            <div className="h-12 bg-gray-700 rounded animate-pulse" />
+            <div className="h-12 bg-gray-700 rounded animate-pulse" />
         </div>
     </div>
 );

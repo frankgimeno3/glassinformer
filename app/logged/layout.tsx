@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import "../globals.css";
-import TopBanner from "../general_components/banners/TopBanner";
 import MidBanner from "../general_components/banners/MidBanner";
 import RightBanner from "../general_components/banners/RightBanner";
 import Link from "next/link";
-import AppNav from "../general_components/navs/AppNav";
+import SiteHeader from "../general_components/navs/SiteHeader";
 import Footer from "../general_components/navs/footers/Footer";
 import { PortalName, companyDescription } from "../GlassInformerSpecificData";
 
@@ -20,13 +19,8 @@ export default function LoggedLayout({
 }>) {
   return (
     <div className="flex flex-col">
-      <div className="fixed top-0 left-0 right-0 z-50">
-        <div className="bg-gray-100 w-full">
-          <TopBanner />
-        </div>
-        <AppNav />
-      </div>
-      <div className="flex flex-row bg-gray-100 min-h-screen text-gray-600 pt-78">
+      <SiteHeader />
+      <div className="flex min-h-screen flex-row bg-gray-100 pt-4 text-gray-600">
         {/* Contenedor principal - 80% en PC, 100% en móvil/tablet */}
         <div className="w-full lg:w-[80%] flex-shrink-0 px-12 mt-8 lg:mt-0">
           <div className="flex flex-col">

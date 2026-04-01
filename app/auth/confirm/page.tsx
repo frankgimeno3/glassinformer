@@ -3,6 +3,19 @@
 import React, { FC, useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import AuthenticationService from "@/apiClient/AuthenticationService";
+import {
+    AUTH_AUX_TEXT,
+    AUTH_CARD,
+    AUTH_ERROR,
+    AUTH_FORM,
+    AUTH_INPUT,
+    AUTH_PAGE_SHELL,
+    AUTH_PRIMARY_BUTTON,
+    AUTH_SKELETON_CARD,
+    AUTH_SKELETON_SHELL,
+    AUTH_TEXT,
+    AUTH_TITLE,
+} from "../_components/authFormStyles";
 
 interface ConfirmProps {}
 
@@ -28,11 +41,11 @@ const ConfirmContent: FC<ConfirmProps> = ({}) => {
         e.preventDefault();
         setError(null);
         if (!email.trim()) {
-            setError("Introduce tu email.");
+            setError("Enter your email.");
             return;
         }
         if (!code.trim()) {
-            setError("Introduce el código de verificación.");
+            setError("Enter the verification code.");
             return;
         }
         setLoading(true);
@@ -41,23 +54,23 @@ const ConfirmContent: FC<ConfirmProps> = ({}) => {
             router.replace(loginUrl);
         } catch (e: any) {
             console.error(e);
-            setError(e?.message || "Error al confirmar. Comprueba el código y vuelve a intentarlo.");
+            setError(e?.message || "Confirmation failed. Check the code and try again.");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="flex flex-col bg-white items-center justify-center min-h-screen">
+        <div className={AUTH_PAGE_SHELL}>
             <form
                 onSubmit={handleConfirm}
-                className="flex flex-col gap-4 bg-gray-900 p-8 rounded shadow-md w-full max-w-md"
+                className={`${AUTH_CARD} ${AUTH_FORM}`}
             >
-                <h2 className="text-2xl text-white font-semibold mb-4 text-center">
-                    Confirmar correo
+                <h2 className={AUTH_TITLE}>
+                    Confirm email
                 </h2>
-                <p className="text-gray-300 text-sm text-center">
-                    Introduce el código que te hemos enviado por email.
+                <p className={AUTH_TEXT}>
+                    Enter the code we sent to your email.
                 </p>
 
                 <input
@@ -65,22 +78,22 @@ const ConfirmContent: FC<ConfirmProps> = ({}) => {
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400"
+                    className={AUTH_INPUT}
                     required
                 />
 
                 <input
                     type="text"
-                    placeholder="Código de verificación"
+                    placeholder="Verification code"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    className="p-2 rounded bg-black border border-gray-700 text-white placeholder-gray-400"
+                    className={AUTH_INPUT}
                     required
                     autoComplete="one-time-code"
                 />
 
                 {error && (
-                    <div className="flex flex-col text-red-500 text-sm text-center">
+                    <div className={AUTH_ERROR}>
                         <p>{error}</p>
                     </div>
                 )}
@@ -88,14 +101,14 @@ const ConfirmContent: FC<ConfirmProps> = ({}) => {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="bg-white text-black py-2 rounded hover:bg-gray-300 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={AUTH_PRIMARY_BUTTON}
                 >
-                    {loading ? "Confirmando…" : "Confirmar cuenta"}
+                    {loading ? "Confirming…" : "Confirm account"}
                 </button>
 
-                <p className="text-xs text-white text-center">
+                <p className={AUTH_AUX_TEXT}>
                     <a href={loginUrl} className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer">
-                        Volver a iniciar sesión
+                        Back to login
                     </a>
                 </p>
             </form>
@@ -107,12 +120,12 @@ export default function ConfirmPage() {
     return (
         <Suspense
             fallback={
-                <div className="flex flex-col bg-white items-center justify-center min-h-screen">
-                    <div className="flex flex-col gap-4 bg-gray-900 p-8 rounded shadow-md w-full max-w-md">
+                <div className={AUTH_SKELETON_SHELL}>
+                    <div className={AUTH_SKELETON_CARD}>
                         <div className="h-8 bg-gray-700 rounded animate-pulse" />
                         <div className="h-4 bg-gray-700 rounded w-3/4 animate-pulse" />
-                        <div className="h-10 bg-gray-700 rounded animate-pulse" />
-                        <div className="h-10 bg-gray-700 rounded animate-pulse" />
+                        <div className="h-12 bg-gray-700 rounded animate-pulse" />
+                        <div className="h-12 bg-gray-700 rounded animate-pulse" />
                     </div>
                 </div>
             }
