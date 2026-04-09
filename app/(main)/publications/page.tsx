@@ -1,21 +1,21 @@
-export { dynamic } from "./informer/page";
+import { Suspense } from "react";
+import { getAllPublications } from "@/app/server/features/publication/PublicationService.js";
+import PublicationsListClient from "./publications_components/list/PublicationsListClient";
+import PublicationsLoadingSkeleton from "./publications_components/list/PublicationsLoadingSkeleton";
+import { normalizePublicationFromApi } from "./publications_components/list/publicationListUtils";
 
-import { redirect } from "next/navigation";
-import InformerPublicationsPage from "./informer/page";
+export const dynamic = "force-dynamic";
 
-type PageProps = {
-  searchParams?: Promise<{ id?: string | string[] }>;
-};
+export default async function PublicationsPage() {
+  const rows = await getAllPublications();
+  const list = Array.isArray(rows) ? rows : [];
+  const initialPublications = list
+    .map(normalizePublicationFromApi)
+    .filter((p): p is NonNullable<typeof p> => p != null);
 
-export default async function PublicationsPage({ searchParams }: PageProps) {
-  const q = searchParams ? await searchParams : {};
-  const rawId = q.id;
-  const idParam = Array.isArray(rawId) ? rawId[0] : rawId;
-  const id = idParam?.trim();
-
-  if (id) {
-    redirect(`/publications/informer/${encodeURIComponent(id)}`);
-  }
-
-  return <InformerPublicationsPage />;
+  return (
+    <Suspense fallback={<PublicationsLoadingSkeleton />}>
+      <PublicationsListClient initialPublications={initialPublications} />
+    </Suspense>
+  );
 }

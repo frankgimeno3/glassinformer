@@ -1,7 +1,7 @@
-import { createFlipbookModel } from "@/app/(flipbook)/publications/flipbook/_lib/flipbook-data";
-import type { FlipbookModel } from "@/app/(flipbook)/publications/flipbook/_lib/flipbook-data";
+import { createFlipbookModel } from "@/app/(main)/publications/flipbook/flipbook_lib/flipbook-data";
+import type { FlipbookModel } from "@/app/(main)/publications/flipbook/flipbook_lib/flipbook-data";
+import { getPublicationForPage } from "@/app/(main)/publications/_lib/getPublicationForPage";
 import { buildFlipbookFromPublication } from "./informerToFlipbook";
-import { getPublicationForPage } from "./getPublicationForPage";
 
 export async function loadFlipbookModelForPublicationId(
   id: string

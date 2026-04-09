@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { canOptimizeRemoteImageSrc } from "@/app/lib/remoteImage";
 import { normalizeBannerImageSrc } from "./normalizeBannerImageSrc";
 
 type BannerImageFitWidthProps = {
@@ -22,14 +23,15 @@ export function BannerImageFitWidth({
   sizes,
   priority,
 }: BannerImageFitWidthProps) {
+  const normalized = normalizeBannerImageSrc(src);
   return (
     <Image
-      src={normalizeBannerImageSrc(src)}
+      src={normalized}
       alt={alt}
       width={1200}
       height={628}
       sizes={sizes}
-      unoptimized
+      unoptimized={!canOptimizeRemoteImageSrc(normalized)}
       priority={priority}
       className={`block h-auto w-full max-w-full ${className}`.trim()}
     />

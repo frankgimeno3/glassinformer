@@ -1,3 +1,5 @@
+import { rewriteDeprecatedSourceUnsplashUrl } from "../../lib/remoteImage";
+
 function safeDecodeRepeated(value) {
   let current = value;
   for (let i = 0; i < 5; i += 1) {
@@ -32,12 +34,13 @@ export function normalizeBannerImageSrc(src) {
   try {
     const url = new URL(normalizedInput, "http://localhost");
     const normalizedPathname = normalizePathname(url.pathname);
-    const normalized =
+    let normalized =
       url.origin === "http://localhost" && normalizedInput.startsWith("/")
         ? `${normalizedPathname}${url.search}${url.hash}`
         : `${url.protocol}//${url.host}${normalizedPathname}${url.search}${url.hash}`;
+    normalized = rewriteDeprecatedSourceUnsplashUrl(normalized);
     return normalized;
   } catch {
-    return normalizedInput;
+    return rewriteDeprecatedSourceUnsplashUrl(normalizedInput);
   }
 }

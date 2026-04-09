@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { canOptimizeRemoteImageSrc } from "@/app/lib/remoteImage";
 import { normalizeBannerImageSrc } from "./normalizeBannerImageSrc";
 import {
   pickNBannersByPriority,
@@ -29,6 +30,7 @@ function TopBannerSlot({
       : slot === "full"
         ? "(max-width: 768px) 100vw, min(1200px, 100vw)"
         : "(max-width: 768px) 58vw, 720px";
+  const bannerSrc = normalizeBannerImageSrc(banner.bannerSrc);
   return (
     <div className={`relative flex min-h-0 min-w-0 justify-center ${flexClass}`}>
       <Link
@@ -38,13 +40,13 @@ function TopBannerSlot({
         className={`inline-flex w-fit max-w-[65%] items-center justify-center rounded-lg bg-white p-2 shadow-sm ring-1 ring-neutral-200/90 sm:p-3 ${BANNER_HOVER}`}
       >
         <Image
-          src={normalizeBannerImageSrc(banner.bannerSrc)}
+          src={bannerSrc}
           alt=""
           width={1200}
           height={260}
           className="block h-auto w-auto max-w-full object-contain object-center"
           sizes={sizes}
-          unoptimized
+          unoptimized={!canOptimizeRemoteImageSrc(bannerSrc)}
         />
       </Link>
     </div>

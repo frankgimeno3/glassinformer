@@ -1,9 +1,5 @@
 import {DataTypes} from "sequelize";
-import {TimeLogTypeEnum} from "../features/timeLog/TimeLogTypeEnum.js";
-import TimeLogModel from "../features/timeLog/TimeLogModel.js";
 import Database from "./database.js";
-import {ModificationStatusEnum} from "../features/modification/ModificationStatusEnum.js";
-import ModificationModel from "../features/modification/ModificationModel.js";
 import ArticleModel from "../features/article/ArticleModel.js";
 import CommentModel from "../features/comment/CommentModel.js";
 import ContentModel from "../features/content/ContentModel.js";
@@ -17,49 +13,6 @@ import {defineAssociations} from "./associations.js";
 
 const database = Database.getInstance();
 const sequelize = database.getSequelize();
-
-TimeLogModel.init({
-    id: {type: DataTypes.BIGINT, primaryKey: true, unique: true, autoIncrement: true},
-    createdBy: {type: DataTypes.STRING, allowNull: false},
-    ip: {type: DataTypes.STRING},
-    type: {type: DataTypes.ENUM(...Object.values(TimeLogTypeEnum)), allowNull: false},
-    date: {type: DataTypes.DATE, allowNull: false},
-    comment: {type: DataTypes.TEXT},
-}, {
-    sequelize,
-    modelName: 'timeLog',
-    underscored: true,
-    indexes: [
-        {fields: ['created_by']},
-        {fields: ['type']},
-        {fields: ['created_at']}
-    ]
-});
-
-ModificationModel.init({
-    id: {type: DataTypes.BIGINT, primaryKey: true, unique: true, autoIncrement: true},
-    timeLogId: {type: DataTypes.BIGINT, allowNull: false},
-    status: {type: DataTypes.ENUM(...Object.values(ModificationStatusEnum)), allowNull: false},
-    oldType: {type: DataTypes.ENUM(...Object.values(TimeLogTypeEnum)), allowNull: false},
-    newType: {type: DataTypes.ENUM(...Object.values(TimeLogTypeEnum)), allowNull: false},
-    oldDate: {type: DataTypes.DATE},
-    newDate: {type: DataTypes.DATE},
-    comment: {type: DataTypes.TEXT},
-    createdBy: {type: DataTypes.STRING, allowNull: false},
-    reviewedBy: {type: DataTypes.STRING},
-    reviewedAt: {type: DataTypes.DATE},
-}, {
-    sequelize,
-    modelName: 'modification',
-    underscored: true,
-    indexes: [
-        { fields: ['time_log_id'] },
-        { fields: ['created_by'] },
-        { fields: ['reviewed_by'] },
-        { fields: ['status'] },
-        { fields: ['reviewed_at'] },
-    ]
-});
 
 ArticleModel.init({
     id_article: {
@@ -77,20 +30,26 @@ ArticleModel.init({
     article_main_image_url: {
         type: DataTypes.STRING
     },
-    company: {
-        type: DataTypes.STRING
+    article_company_names_array: {
+        type: DataTypes.ARRAY(DataTypes.TEXT),
+        allowNull: false,
+        defaultValue: []
+    },
+    article_company_id_array: {
+        type: DataTypes.ARRAY(DataTypes.TEXT),
+        allowNull: false,
+        defaultValue: []
     },
     date: {
         type: DataTypes.DATE,
-        allowNull: false
-    },
-    portal_id: {
-        type: DataTypes.INTEGER,
-        allowNull: true
+        allowNull: false,
+        field: "article_date"
     },
     highlited_position: {
         type: DataTypes.STRING,
-        defaultValue: ""
+        allowNull: true,
+        defaultValue: "",
+        field: "article_highlited_position"
     },
     is_article_event: {
         type: DataTypes.BOOLEAN,
@@ -98,43 +57,36 @@ ArticleModel.init({
     },
     event_id: {
         type: DataTypes.STRING,
-        allowNull: true
+        allowNull: true,
+        defaultValue: "",
+        field: "article_event_id"
     }
-    // comments_array: add this column in RDS first, then uncomment:
-    // comments_array: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] }
 }, {
     sequelize,
     modelName: 'article',
+    tableName: 'articles_db',
     underscored: true,
+    timestamps: true,
+    createdAt: 'article_created_at',
+    updatedAt: 'article_updated_at',
     indexes: [
         {fields: ['article_title']},
         {fields: ['date']},
-        {fields: ['company']},
         {fields: ['is_article_event']},
-        {fields: ['event_id']},
-        {fields: ['portal_id']}
+        {fields: ['event_id']}
     ]
 });
 
 EventModel.init({
-    id_fair: {
-        type: DataTypes.STRING,
-        primaryKey: true,
-        unique: true
-    },
+    id_fair: { type: DataTypes.STRING, primaryKey: true, unique: true, field: "event_id" },
     event_name: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    country: {
-        type: DataTypes.STRING
-    },
-    main_description: {
-        type: DataTypes.TEXT
-    },
-    region: {
-        type: DataTypes.STRING
-    },
+    country: { type: DataTypes.STRING, field: "event_country" },
+    location: { type: DataTypes.STRING, field: "event_location" },
+    main_description: { type: DataTypes.TEXT, field: "event_main_description" },
+    region: { type: DataTypes.STRING, field: "event_region" },
     start_date: {
         type: DataTypes.DATEONLY,
         allowNull: false
@@ -143,20 +95,22 @@ EventModel.init({
         type: DataTypes.DATEONLY,
         allowNull: false
     },
-    location: {
-        type: DataTypes.STRING
-    },
     event_main_image: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        field: "event_main_image_src"
     }
 }, {
     sequelize,
     modelName: 'event',
     underscored: true,
+    tableName: 'events',
+    timestamps: true,
+    createdAt: 'event_created_at',
+    updatedAt: 'event_updated_at',
     indexes: [
         { fields: ['event_name'] },
-        { fields: ['start_date'] },
-        { fields: ['region'] }
+        { fields: ['event_start_date'] },
+        { fields: ['event_region'] }
     ]
 });
 
@@ -170,24 +124,28 @@ CompanyModel.init({
     company_name: {
         type: DataTypes.STRING,
         allowNull: false,
-        field: "commercial_name"
+        field: "company_commercial_name"
     },
     country: {
         type: DataTypes.STRING,
-        allowNull: true
+        allowNull: true,
+        field: "company_country"
     },
     main_description: {
         type: DataTypes.TEXT,
-        allowNull: true
+        allowNull: true,
+        field: "company_main_description"
     },
     category: {
         type: DataTypes.STRING,
-        allowNull: true
+        allowNull: true,
+        field: "company_category"
     }
 }, {
     sequelize,
     modelName: 'company',
     underscored: true,
+    tableName: "companies_db",
     timestamps: false,
     indexes: [
         { fields: ['country'] }
@@ -210,11 +168,13 @@ ProductModel.init({
     },
     price: {
         type: DataTypes.DECIMAL(12, 2),
-        allowNull: true
+        allowNull: true,
+        field: "product_price"
     },
     main_image_src: {
         type: DataTypes.STRING(255),
-        allowNull: true
+        allowNull: true,
+        field: "product_main_image_src"
     },
     product_categories_array: {
         type: DataTypes.ARRAY(DataTypes.STRING),
@@ -225,12 +185,13 @@ ProductModel.init({
     id_company: {
         type: DataTypes.STRING,
         allowNull: false,
-        field: "company"
+        field: "company_id"
     }
 }, {
     sequelize,
     modelName: 'product',
     underscored: true,
+    tableName: "products_db",
     indexes: [
         { fields: ['product_name'] },
         { fields: ['id_company'] }
@@ -241,22 +202,40 @@ ContentModel.init({
     content_id: {
         type: DataTypes.STRING,
         primaryKey: true,
-        unique: true
+        unique: true,
+        field: "article_content_id"
+    },
+    article_id: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        references: { model: 'article', key: 'id_article' }
+    },
+    position: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: "article_content_position"
     },
     content_type: {
         type: DataTypes.ENUM('text_image', 'image_text', 'just_image', 'just_text'),
-        allowNull: false
+        allowNull: false,
+        field: "article_content_type"
     },
     content_content: {
         type: DataTypes.JSONB,
-        allowNull: false
+        allowNull: false,
+        field: "article_content_content"
     }
 }, {
     sequelize,
     modelName: 'content',
+    tableName: "article_contents",
     underscored: true,
+    timestamps: true,
+    createdAt: "article_created_at",
+    updatedAt: "article_updated_at",
     indexes: [
-        {fields: ['content_type']}
+        { fields: ['content_type'] },
+        { fields: ['article_id', 'position'] }
     ]
 });
 
@@ -290,6 +269,7 @@ PublicationModel.init({
     sequelize,
     modelName: 'publication',
     underscored: true,
+    tableName: "publications_db",
     indexes: [
         {fields: ['date']},
         {fields: ['revista']}
@@ -345,90 +325,120 @@ UserProfileModel.init({
 });
 
 BannerModel.init({
-    id: {
+    id_banner: {
         type: DataTypes.STRING(255),
         primaryKey: true,
-        unique: true
+        unique: true,
+        field: "id_banner"
     },
-    src: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    route: {
-        type: DataTypes.STRING,
-        defaultValue: "/"
-    },
-    banner_redirection: {
+    banner_image_src: {
         type: DataTypes.STRING(2048),
-        defaultValue: ""
+        allowNull: false,
+        field: "banner_image_src"
     },
-    position_type: {
-        type: DataTypes.STRING,
-        allowNull: false
+    banner_route: {
+        type: DataTypes.STRING(512),
+        allowNull: false,
+        defaultValue: "/",
+        field: "banner_route"
     },
-    page_type: {
-        type: DataTypes.STRING,
-        allowNull: false
+    banner_redirection_url: {
+        type: DataTypes.STRING(2048),
+        allowNull: false,
+        defaultValue: "",
+        field: "banner_redirection_url"
+    },
+    banner_position_type: {
+        type: DataTypes.STRING(32),
+        allowNull: false,
+        field: "banner_position_type"
+    },
+    banner_page_type: {
+        type: DataTypes.STRING(32),
+        allowNull: false,
+        field: "banner_page_type"
     },
     portal_id: {
         type: DataTypes.INTEGER,
-        allowNull: true
+        allowNull: true,
+        field: "portal_id"
     },
-    appearance_weight: {
-        type: DataTypes.STRING(16),
-        allowNull: true
+    banner_starting_date: {
+        type: DataTypes.DATEONLY,
+        allowNull: false,
+        field: "banner_starting_date"
+    },
+    banner_ending_date: {
+        type: DataTypes.DATEONLY,
+        allowNull: false,
+        field: "banner_ending_date"
+    },
+    banner_appearence_weight: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 2,
+        field: "banner_appearence_weight"
+    },
+    banner_position: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        field: "banner_position"
     }
 }, {
     sequelize,
     modelName: 'banner',
-    tableName: 'banners',
+    tableName: 'portal_banners',
     underscored: true,
     timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
+    createdAt: 'banner_created_at',
+    updatedAt: 'banner_updated_at',
     indexes: [
-        { fields: ['position_type'] },
-        { fields: ['page_type'] },
+        { fields: ['banner_position_type'] },
+        { fields: ['banner_page_type'] },
         { fields: ['portal_id'] }
     ]
 });
 
 CommentModel.init({
-    id_comment: {
-        type: DataTypes.STRING,
-        primaryKey: true,
-        unique: true
-    },
-    id_article: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        references: { model: 'articles', key: 'id_article' }
-    },
-    id_timestamp: {
-        type: DataTypes.DATE,
-        allowNull: false
-    },
-    comment_id_user: {
+    article_comment_id: {
         type: DataTypes.STRING(255),
-        allowNull: false,
-        references: { model: 'users', key: 'id_user' }
+        primaryKey: true,
+        unique: true,
+        field: "article_comment_id"
     },
-    comment_content: {
+    article_comment_timestamp: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        field: "article_comment_timestamp"
+    },
+    article_comment_user_id: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        field: "article_comment_user_id"
+    },
+    article_comment_content: {
         type: DataTypes.TEXT,
-        allowNull: false
+        allowNull: false,
+        field: "article_comment_content"
+    },
+    article_portals_id: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        field: "article_portals_id"
     }
 }, {
     sequelize,
     modelName: 'comment',
-    tableName: 'comments',
+    tableName: 'article_comments',
     underscored: true,
     timestamps: false,
     indexes: [
-        { fields: ['id_article'] },
-        { fields: ['id_timestamp'] }
+        { fields: ['article_portals_id'] },
+        { fields: ['article_comment_timestamp'] }
     ]
 });
 
 defineAssociations();
 
-export { TimeLogModel, ModificationModel, ArticleModel, ContentModel, EventModel, PublicationModel, CompanyModel, ProductModel, BannerModel, UserProfileModel, CommentModel };
+export { ArticleModel, ContentModel, EventModel, PublicationModel, CompanyModel, ProductModel, BannerModel, UserProfileModel, CommentModel };

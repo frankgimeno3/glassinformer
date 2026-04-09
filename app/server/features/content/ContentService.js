@@ -1,3 +1,4 @@
+import { QueryTypes } from "sequelize";
 import ContentModel from "./ContentModel.js";
 // Ensure models are initialized by importing models.js
 import "../../database/models.js";
@@ -5,7 +6,7 @@ import "../../database/models.js";
 export async function getAllContents() {
     try {
         const contents = await ContentModel.findAll({
-            order: [['created_at', 'DESC']]
+            order: [["createdAt", "DESC"]]
         });
         
         // Transform database format to API format
@@ -17,6 +18,34 @@ export async function getAllContents() {
     } catch (error) {
         console.error('Error fetching contents from database:', error);
         throw error;
+    }
+}
+
+/** Bloques de contenido enlazados al artículo (migración 011 / mismo esquema que plynium_central_panel). */
+export async function getContentsByArticleId(articleId) {
+    if (!ContentModel.sequelize) return [];
+    try {
+        const rows = await ContentModel.sequelize.query(
+            `SELECT article_content_id AS content_id, article_content_type AS content_type, article_content_content AS content_content
+             FROM article_contents
+             WHERE article_id = :articleId
+             ORDER BY article_content_position ASC NULLS LAST, article_content_id ASC`,
+            { replacements: { articleId }, type: QueryTypes.SELECT }
+        );
+        return (rows || []).map((c) => ({
+            content_id: c.content_id,
+            content_type: c.content_type,
+            content_content: c.content_content
+        }));
+    } catch (e) {
+        const msg = String(e?.message ?? "");
+        if (
+            msg.includes("article_id") && msg.includes("does not exist") ||
+            msg.includes("article_content_position") && msg.includes("does not exist")
+        ) {
+            return [];
+        }
+        throw e;
     }
 }
 

@@ -1,29 +1,21 @@
 "use client";
 
 import { memo } from "react";
-import { useRouter } from "next/navigation";
 import PublicationFlipbook from "./PublicationFlipbook";
-import type { Publication } from "./publicationListUtils";
+import {
+  formatPublicationDate,
+  type Publication,
+} from "./publicationListUtils";
 
 export type { Publication };
 
-function formatPublicationDate(isoDate: string): string {
-  if (!isoDate) return "";
-  const d = new Date(isoDate);
-  return d.toLocaleDateString("en-US", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
-
 interface PublicationCardProps {
   publication: Publication;
+  onOpenChooser?: (publication: Publication) => void;
 }
 
-const PublicationCard = memo<PublicationCardProps>(({ publication }) => {
-  const router = useRouter();
-
+const PublicationCard = memo<PublicationCardProps>(
+  ({ publication, onOpenChooser }) => {
   const cardContent = (
     <>
       <PublicationFlipbook title={publication.title} imageUrl={publication.publicationMainImageUrl} />
@@ -46,10 +38,10 @@ const PublicationCard = memo<PublicationCardProps>(({ publication }) => {
 
   const handleClick = () => {
     if (publication.id) {
-      router.push(
-        `/publications/informer/${encodeURIComponent(publication.id)}`
-      );
-      return;
+      if (onOpenChooser) {
+        onOpenChooser(publication);
+        return;
+      }
     }
     const raw = (publication.redirection_link ?? "").trim();
     if (!raw) return;
@@ -70,7 +62,8 @@ const PublicationCard = memo<PublicationCardProps>(({ publication }) => {
       </div>
     </div>
   );
-});
+  }
+);
 
 PublicationCard.displayName = "PublicationCard";
 

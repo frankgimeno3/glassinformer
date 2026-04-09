@@ -1,13 +1,13 @@
 "use client";
 
 import { memo } from "react";
+import Image from "next/image";
+import { canOptimizeRemoteImageSrc } from "@/app/lib/remoteImage";
 
 interface PublicationFlipbookProps {
   title: string;
   imageUrl?: string;
 }
-
-const PAGE_OFFSET = "0.25rem";
 
 const PublicationFlipbook = memo<PublicationFlipbookProps>(({ title, imageUrl }) => {
   return (
@@ -16,17 +16,10 @@ const PublicationFlipbook = memo<PublicationFlipbookProps>(({ title, imageUrl })
       style={{ perspective: "1200px" }}
     >
       {/* Back pages (visible when flipping the cover) */}
- 
-            <div
-        className="absolute top-0 left-1 h-full w-full rounded-xs bg-gray-100 border border-gray-200 z-3"
-      />
-            <div
-          className="absolute top-0 left-2 h-full w-full rounded-xs bg-gray-100 border border-gray-200 z-2"
-      />
-            <div
-        className="absolute top-0 left-3 h-full w-full rounded-xs bg-gray-100 border border-gray-200 z-1"
-      />
-       
+
+      <div className="absolute top-0 left-1 h-full w-full rounded-xs bg-gray-100 border border-gray-200 z-3" />
+      <div className="absolute top-0 left-2 h-full w-full rounded-xs bg-gray-100 border border-gray-200 z-2" />
+      <div className="absolute top-0 left-3 h-full w-full rounded-xs bg-gray-100 border border-gray-200 z-1" />
 
       {/* Cover: rotates from the left edge on hover */}
       <div
@@ -34,20 +27,24 @@ const PublicationFlipbook = memo<PublicationFlipbookProps>(({ title, imageUrl })
         style={{ transformStyle: "preserve-3d" }}
       >
         <div
-          className="w-full h-full flex items-center justify-center text-base sm:text-lg px-2 rounded-r-xs shadow-lg overflow-hidden bg-gray-900"
+          className="relative w-full h-full flex items-center justify-center text-base sm:text-lg px-2 rounded-r-xs shadow-lg overflow-hidden bg-gray-900"
           style={{
             backfaceVisibility: "hidden",
             boxShadow: "2px 2px 12px rgba(0,0,0,0.2)",
-            ...(imageUrl
-              ? {
-                  backgroundImage: `url(${imageUrl})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }
-              : {}),
           }}
         >
-          {imageUrl ? null : <span className="text-white">{title}</span>}
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt=""
+              fill
+              className="object-cover object-center"
+              sizes="(max-width: 1280px) 30vw, 200px"
+              unoptimized={!canOptimizeRemoteImageSrc(imageUrl)}
+            />
+          ) : (
+            <span className="text-white">{title}</span>
+          )}
         </div>
       </div>
     </div>

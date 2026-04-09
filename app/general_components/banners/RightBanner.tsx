@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { canOptimizeRemoteImageSrc } from "@/app/lib/remoteImage";
 import { PortalName, portal_id as currentPortalId } from "@/app/GlassInformerSpecificData";
 import {
   pickNBannersByPriority,
@@ -11,7 +12,7 @@ import {
   type BannerItem,
 } from "./pickBannerByPriority";
 import { BannerImageFitWidth } from "./BannerImageFitWidth";
-import PublicationFlipbook from "@/app/(main)/publications/publicationComponents/PublicationFlipbook";
+import PublicationFlipbook from "@/app/(main)/publications/publications_components/list/PublicationFlipbook";
 
 const BANNERS_API = "/api/v1/banners";
 const PUBLICATIONS_API = "/api/v1/publications";
@@ -238,7 +239,7 @@ function RelatedProductCard({ product }: { product: ApiProduct }) {
           fill
           className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
           sizes={RELATED_THUMB_SIZES}
-          unoptimized
+          unoptimized={!canOptimizeRemoteImageSrc(src)}
         />
       </div>
       <div className="flex min-w-0 flex-1 flex-col items-start justify-center gap-1.5 text-left">
@@ -284,7 +285,7 @@ function RelatedArticleCard({ article }: { article: ApiArticle }) {
           fill
           className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
           sizes={RELATED_THUMB_SIZES}
-          unoptimized
+          unoptimized={!canOptimizeRemoteImageSrc(src)}
         />
       </div>
     </Link>

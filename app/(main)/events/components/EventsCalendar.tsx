@@ -1,7 +1,9 @@
 'use client';
 
 import React, { FC, useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { canOptimizeRemoteImageSrc } from '@/app/lib/remoteImage';
 import { EventService } from '@/apiClient/EventService';
 
 function useIsMini() {
@@ -317,11 +319,16 @@ const EventsCalendar: FC = () => {
                       className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow flex gap-3"
                     >
                       {event.event_main_image && (
-                        <img
-                          src={event.event_main_image}
-                          alt={event.event_name}
-                          className="w-14 h-14 flex-shrink-0 rounded-lg object-cover"
-                        />
+                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg">
+                          <Image
+                            src={event.event_main_image}
+                            alt={event.event_name}
+                            fill
+                            sizes="56px"
+                            className="object-cover"
+                            unoptimized={!canOptimizeRemoteImageSrc(event.event_main_image)}
+                          />
+                        </div>
                       )}
                       <div className="min-w-0 flex-1">
                         <h4
@@ -391,11 +398,16 @@ const EventsCalendar: FC = () => {
                     }`}
                   >
                     {event.event_main_image && (
-                      <img
-                        src={event.event_main_image}
-                        alt={event.event_name}
-                        className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-lg object-cover"
-                      />
+                      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg sm:h-20 sm:w-20">
+                        <Image
+                          src={event.event_main_image}
+                          alt={event.event_name}
+                          fill
+                          sizes="80px"
+                          className="object-cover"
+                          unoptimized={!canOptimizeRemoteImageSrc(event.event_main_image)}
+                        />
+                      </div>
                     )}
                     <div className="min-w-0 flex-1">
                       <h3

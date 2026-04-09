@@ -38,10 +38,10 @@ export async function getAllCompanies() {
         let rows;
         try {
             rows = await CompanyModel.sequelize.query(
-                `SELECT c.company_id AS id_company, c.commercial_name AS company_name, c.country, c.main_description, c.category AS region
-                 FROM public.companies c
+                `SELECT c.company_id AS id_company, c.company_commercial_name AS company_name, c.company_country AS country, c.company_main_description AS main_description, c.company_category AS region
+                 FROM public.companies_db c
                  INNER JOIN public.company_portals cp ON c.company_id = cp.company_id AND cp.portal_id = :portalId
-                 ORDER BY c.commercial_name ASC`,
+                 ORDER BY c.company_commercial_name ASC`,
                 { replacements: { portalId: portal_id }, type: QueryTypes.SELECT }
             );
         } catch (joinErr) {

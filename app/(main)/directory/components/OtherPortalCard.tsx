@@ -1,7 +1,8 @@
 'use client';
 
 import React, { FC } from 'react';
-import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { canOptimizeRemoteImageSrc } from '@/app/lib/remoteImage';
 
 export interface OtherPortalProductCardProps {
   type: 'product';
@@ -31,7 +32,6 @@ export interface OtherPortalCompanyCardProps {
 type OtherPortalCardProps = OtherPortalProductCardProps | OtherPortalCompanyCardProps;
 
 const OtherPortalCard: FC<OtherPortalCardProps> = ({ type, item, portalId, onBack }) => {
-  const router = useRouter();
   const portalLabel = portalId != null ? `Portal ${portalId}` : 'another portal';
 
   const handleRedirect = () => {
@@ -60,11 +60,18 @@ const OtherPortalCard: FC<OtherPortalCardProps> = ({ type, item, portalId, onBac
             <>
               <div className="flex gap-4 mb-4">
                 {(item as OtherPortalProductCardProps['item']).main_image_src ? (
-                  <img
-                    src={(item as OtherPortalProductCardProps['item']).main_image_src}
-                    alt={(item as OtherPortalProductCardProps['item']).product_name}
-                    className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
-                  />
+                  <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg">
+                    <Image
+                      src={(item as OtherPortalProductCardProps['item']).main_image_src!}
+                      alt={(item as OtherPortalProductCardProps['item']).product_name}
+                      fill
+                      sizes="96px"
+                      className="object-cover"
+                      unoptimized={!canOptimizeRemoteImageSrc(
+                        (item as OtherPortalProductCardProps['item']).main_image_src!
+                      )}
+                    />
+                  </div>
                 ) : (
                   <div className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 flex-shrink-0">
                     —

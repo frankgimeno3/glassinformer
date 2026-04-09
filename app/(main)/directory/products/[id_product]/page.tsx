@@ -1,8 +1,10 @@
 'use client';
 
 import React, { FC, useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { canOptimizeRemoteImageSrc } from '@/app/lib/remoteImage';
 import { ProductService } from '@/apiClient/ProductService';
 import CompanyContactForm from '../../components/CompanyContactForm';
 import OtherPortalCard from '../../components/OtherPortalCard';
@@ -176,11 +178,15 @@ const ProductsPage: FC = () => {
         {/* Product image and main info */}
         <div className='grid grid-cols-1 md:grid-cols-3 gap-8 mb-8'>
           {product.main_image_src ? (
-            <div className='md:col-span-1'>
-              <img
+            <div className="relative md:col-span-1 aspect-square w-full overflow-hidden rounded-lg shadow-md">
+              <Image
                 src={product.main_image_src}
                 alt={product.product_name}
-                className='w-full rounded-lg shadow-md object-cover aspect-square'
+                fill
+                sizes="(max-width: 768px) 100vw, 360px"
+                className="object-cover"
+                priority
+                unoptimized={!canOptimizeRemoteImageSrc(product.main_image_src)}
               />
             </div>
           ) : null}

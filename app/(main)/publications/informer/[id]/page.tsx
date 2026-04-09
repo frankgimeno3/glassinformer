@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import InformerPhaseFlow from "../_components/InformerPhaseFlow";
+import InformerPhaseFlow from "../informer_components/InformerPhaseFlow";
 import { getPublicationForPage } from "../../_lib/getPublicationForPage";
 
 type PageProps = {

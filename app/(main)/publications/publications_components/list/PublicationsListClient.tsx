@@ -1,10 +1,12 @@
 "use client";
 
-import { FC, useState, useMemo } from "react";
+import { FC, useState, useMemo, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import PublicationFilter, {
   type PublicationFilterState,
 } from "./PublicationFilter";
 import PublicationCard from "./PublicationCard";
+import PublicationChooserModal from "./PublicationChooserModal";
 import type { Publication } from "./publicationListUtils";
 
 const ITEMS_PER_PAGE = 24;
@@ -16,17 +18,41 @@ const DEFAULT_FILTER: PublicationFilterState = {
   dateTo: "",
 };
 
-interface PublicationsInformerListClientProps {
+interface PublicationsListClientProps {
   initialPublications: Publication[];
 }
 
-const PublicationsInformerListClient: FC<
-  PublicationsInformerListClientProps
-> = ({ initialPublications }) => {
+const PublicationsListClient: FC<PublicationsListClientProps> = ({
+  initialPublications,
+}) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState<PublicationFilterState>(DEFAULT_FILTER);
 
   const typedData = initialPublications;
+
+  const idFromUrl = searchParams.get("id")?.trim() ?? "";
+
+  const chosenPublication = useMemo(() => {
+    if (!idFromUrl) return null;
+    return typedData.find((p) => p.id === idFromUrl) ?? null;
+  }, [idFromUrl, typedData]);
+
+  const openChooser = useCallback(
+    (publication: Publication) => {
+      if (!publication.id) return;
+      router.replace(
+        `/publications?id=${encodeURIComponent(publication.id)}`,
+        { scroll: false }
+      );
+    },
+    [router]
+  );
+
+  const closeChooser = useCallback(() => {
+    router.replace("/publications", { scroll: false });
+  }, [router]);
 
   const availableNumbers = useMemo(() => {
     const nums = [...new Set(typedData.map((p) => p.number))].sort(
@@ -133,6 +159,11 @@ const PublicationsInformerListClient: FC<
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8">
+      <PublicationChooserModal
+        publication={chosenPublication}
+        open={chosenPublication != null}
+        onClose={closeChooser}
+      />
       <h1 className="text-center text-4xl sm:text-5xl font-bold text-gray-900 pb-6 sm:pb-8">
         Publications
       </h1>
@@ -175,7 +206,10 @@ const PublicationsInformerListClient: FC<
                   key={publication.id ?? `pub-${index}`}
                   className="w-full flex justify-center min-w-0"
                 >
-                  <PublicationCard publication={publication} />
+                  <PublicationCard
+                    publication={publication}
+                    onOpenChooser={openChooser}
+                  />
                 </div>
               );
             })}
@@ -216,4 +250,4 @@ const PublicationsInformerListClient: FC<
   );
 };
 
-export default PublicationsInformerListClient;
+export default PublicationsListClient;

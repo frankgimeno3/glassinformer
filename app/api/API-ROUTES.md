@@ -86,7 +86,6 @@ Full table is in [Route table](#route-table).
 | **v1/products/[id]** | GET, PUT, DELETE | createEndpoint | ProductService: get, update, delete. |
 | **v1/publications** | GET, POST | createEndpoint | PublicationService: list, create. |
 | **v1/publications/[id]** | GET, PUT, DELETE | createEndpoint | PublicationService: get, update, delete. |
-| **v1/publications/migrate** | POST | createEndpoint | PublicationService: migrate. |
 | **v1/banners** | GET | createEndpoint | BannerService: list. |
 | **v1/users** | POST | createEndpoint | UserProfileService: create (e.g. after signup). |
 | **v1/users/[id]** | GET, PUT | createEndpoint | UserProfileService: get, update. |

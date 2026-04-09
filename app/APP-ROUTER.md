@@ -116,6 +116,30 @@
 | **auth** | `app/auth/` | Login, signup, confirm, forgot (unauthenticated). Uses apiClient/AuthenticationService; after confirm, create profile via POST /api/v1/users. |
 | **logged** | `app/logged/` | Protected: dashboard, companies, profiles, settings. Requires valid session (proxy). |
 
+### `app/(main)/` shell
+
+| Path | Role |
+|------|------|
+| `_components/MainLayoutClient.tsx` | Client shell for the (main) group: full portal chrome **except** on `/publications/flipbook`, where it renders children only. |
+
+### `app/(main)/publications/` layout
+
+| Path | Role |
+|------|------|
+| `page.tsx`, `layout.tsx`, `loading.tsx` | `/publications` list (server + Suspense). `layout` wraps with `PublicationsLayoutClient`. |
+| `publications_components/PublicationsLayoutClient.tsx` | Appends `MidBanner` except on `/publications/flipbook`. |
+| `informer/page.tsx` | Re-exports the list for `/publications/informer` (same UI). |
+| `informer/[id]/` | Informer reader for one publication. |
+| `publications_components/list/` | List UI: cards, filter, modal, flipbook thumbnail, loading skeleton, `publicationListUtils`. |
+| `publications_components/` (shared) | `InvalidPublicationUrl`, `PublicationViewer`. |
+| `_lib/getPublicationForPage.ts` | Shared cached publication fetch (list, informer route, flipbook route). |
+| `informer/informer_components/` | `InformerPhaseFlow`. |
+| `informer/informer_lib/` | `mockInformerData` (informer UI; also imported by flipbook bridge). |
+| `flipbook/` | Routes under `/publications/flipbook/...`. |
+| `flipbook/flipbook_components/` | `FlipbookView`, `FlipbookNav`. |
+| `flipbook/flipbook_lib/` | `flipbook-data`, spread cache, mocks, `loadFlipbookModel`, `informerToFlipbook`. |
+| `flipbook/flipbook_types/` | Flipbook TypeScript types. |
+
 ---
 
 ## Gotchas

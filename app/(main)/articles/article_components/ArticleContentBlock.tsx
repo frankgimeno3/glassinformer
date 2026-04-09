@@ -1,3 +1,5 @@
+import Image from "next/image";
+import { canOptimizeRemoteImageSrc } from "@/app/lib/remoteImage";
 import ArticleHtmlBlock from "./ArticleHtmlBlock";
 
 export interface ContentItem {
@@ -35,40 +37,60 @@ export default function ArticleContentBlock({ contentId, contentData }: ArticleC
   }
 
   if (content_type === "just_image") {
+    const src = content_content?.center ?? "";
+    if (!src) return null;
     return (
       <div className="w-full flex justify-start">
-        <img
-          src={content_content?.center}
+        <Image
+          src={src}
           alt="content image"
-          className="w-full max-w-4xl rounded-lg object-contain"
+          width={1200}
+          height={800}
+          className="w-full max-w-4xl h-auto rounded-lg object-contain"
+          sizes="(max-width: 896px) 100vw, 896px"
+          unoptimized={!canOptimizeRemoteImageSrc(src)}
         />
       </div>
     );
   }
 
   if (content_type === "text_image") {
+    const src = content_content?.right ?? "";
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         <div className="min-w-0">
           <ArticleHtmlBlock html={content_content?.left} />
         </div>
-        <img
-          src={content_content?.right}
-          alt="content image"
-          className="w-full max-w-2xl rounded-lg object-contain"
-        />
+        {src ? (
+          <Image
+            src={src}
+            alt="content image"
+            width={800}
+            height={600}
+            className="w-full max-w-2xl h-auto rounded-lg object-contain"
+            sizes="(max-width: 768px) 100vw, 42vw"
+            unoptimized={!canOptimizeRemoteImageSrc(src)}
+          />
+        ) : null}
       </div>
     );
   }
 
   if (content_type === "image_text") {
+    const src = content_content?.left ?? "";
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        <img
-          src={content_content?.left}
-          alt="content image"
-          className="w-full max-w-2xl rounded-lg object-contain"
-        />
+        {src ? (
+          <Image
+            src={src}
+            alt="content image"
+            width={800}
+            height={600}
+            className="w-full max-w-2xl h-auto rounded-lg object-contain"
+            sizes="(max-width: 768px) 100vw, 42vw"
+            unoptimized={!canOptimizeRemoteImageSrc(src)}
+          />
+        ) : null}
         <div className="min-w-0">
           <ArticleHtmlBlock html={content_content?.right} />
         </div>

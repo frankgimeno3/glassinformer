@@ -2,14 +2,14 @@ import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { getPublicationForPage } from "@/app/(main)/publications/_lib/getPublicationForPage";
-import { loadFlipbookModelForPublicationId } from "@/app/(main)/publications/_lib/loadFlipbookModel";
-import { resolveParagraphsForPage } from "../../_lib/flipbook-data";
+import { loadFlipbookModelForPublicationId } from "@/app/(main)/publications/flipbook/flipbook_lib/loadFlipbookModel";
+import { resolveParagraphsForPage } from "../../flipbook_lib/flipbook-data";
 import FlipbookView, {
   FlipbookLoadingSpinner,
   type FlipbookViewProps,
   type ArticleIndexEntry,
-} from "../../_components/FlipbookView";
-import type { FlipbookPage, Company } from "../../_types/flipbook";
+} from "../../flipbook_components/FlipbookView";
+import type { FlipbookPage, Company } from "../../flipbook_types/flipbook";
 
 interface PageWithCompany {
   page: FlipbookPage;

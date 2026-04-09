@@ -3,7 +3,8 @@
 import React, { FC, useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 
-const DEFAULT_AVATAR_SRC = "https://source.unsplash.com/WMRI9HvAwV4/256x256";
+const DEFAULT_AVATAR_SRC =
+  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=256&h=256&fit=crop&q=80";
 
 interface UserCard {
   id_user: string;

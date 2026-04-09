@@ -1,5 +1,5 @@
 "use client"
-import { FC, useState, Suspense } from 'react';
+import { FC, useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AuthenticationService from "@/apiClient/AuthenticationService";
 import {
@@ -31,8 +31,29 @@ const LoginContent: FC<LoginProps> = ({ }) => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
+    const [sessionChecked, setSessionChecked] = useState(false);
 
-    // Middleware handles redirects automatically; no extra check needed here.
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const ok = await AuthenticationService.isAuthenticated();
+                if (cancelled) return;
+                if (ok) {
+                    router.replace(redirect);
+                    return;
+                }
+            } catch {
+                /* ignore */
+            }
+            if (!cancelled) {
+                setSessionChecked(true);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [router, redirect]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -49,6 +70,19 @@ const LoginContent: FC<LoginProps> = ({ }) => {
             setError(e?.message || 'Login failed. Please verify your credentials.');
         }
     };
+
+    if (!sessionChecked) {
+        return (
+            <div className={AUTH_SKELETON_SHELL}>
+                <div className={AUTH_SKELETON_CARD}>
+                    <div className="h-8 bg-gray-700 rounded animate-pulse" />
+                    <div className="h-4 bg-gray-700 rounded w-3/4 animate-pulse" />
+                    <div className="h-12 bg-gray-700 rounded animate-pulse" />
+                    <div className="h-12 bg-gray-700 rounded animate-pulse" />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={AUTH_PAGE_SHELL}>

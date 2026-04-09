@@ -3,6 +3,16 @@
  * Accepts both camelCase (PublicationService map) and snake_case.
  */
 
+export function formatPublicationDate(isoDate: string): string {
+  if (!isoDate) return "";
+  const d = new Date(isoDate);
+  return d.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 export interface Publication {
   id?: string;
   number: number;

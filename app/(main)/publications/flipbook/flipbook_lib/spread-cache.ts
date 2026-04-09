@@ -1,4 +1,4 @@
-import type { FlipbookPage, Company } from "../_types/flipbook";
+import type { FlipbookPage, Company } from "../flipbook_types/flipbook";
 
 export interface SpreadPayload {
   viewData: Array<{

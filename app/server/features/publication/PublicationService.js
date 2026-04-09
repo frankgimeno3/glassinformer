@@ -114,7 +114,7 @@ async function resolvePublicationsPhysicalColumns(sequelize) {
             const rows = await sequelize.query(
                 `SELECT column_name
                  FROM information_schema.columns
-                 WHERE table_schema = 'public' AND table_name = 'publications'`,
+                 WHERE table_schema = 'public' AND table_name IN ('publications_db', 'publications')`,
                 { type: QueryTypes.SELECT }
             );
             const set = new Set(rows.map((r) => r.column_name));
@@ -272,7 +272,7 @@ export async function getAllPublications() {
 
         const rows = await PublicationModel.sequelize.query(
             `SELECT ${publicationSelectListSql(cols)}
-             FROM public.publications p
+             FROM public.publications_db p
              ${joinSql}
              WHERE 1=1
              ${portalWhereSql}
@@ -341,7 +341,7 @@ export async function getPublicationById(idPublication) {
 
         const rows = await PublicationModel.sequelize.query(
             `SELECT ${publicationSelectListSql(cols)}
-             FROM public.publications p
+             FROM public.publications_db p
              ${joinSql}
              WHERE p.${q(cols.id_publication)} = :id
              ${portalWhereSql}
@@ -381,29 +381,7 @@ export async function createPublication(publicationData) {
         const dbConfig = PublicationModel.sequelize.config;
         console.log(`[PublicationService] [${requestId}] Database: ${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`);
         console.log(`[PublicationService] [${requestId}] Creating publication with data:`, JSON.stringify(publicationData, null, 2));
-        
-        // Check if publication_main_image_url column exists, if not, add it
-        try {
-            const [results] = await PublicationModel.sequelize.query(`
-                SELECT column_name 
-                FROM information_schema.columns 
-                WHERE table_name = 'publications' 
-                AND column_name = 'publication_main_image_url'
-            `);
-            
-            if (results.length === 0) {
-                console.log(`[PublicationService] [${requestId}] Column 'publication_main_image_url' does not exist, adding it...`);
-                await PublicationModel.sequelize.query(`
-                    ALTER TABLE publications 
-                    ADD COLUMN publication_main_image_url VARCHAR(255)
-                `);
-                console.log(`[PublicationService] [${requestId}] Column 'publication_main_image_url' added successfully`);
-            }
-        } catch (migrationError) {
-            // If migration fails, log but continue - the column might already exist or there's a different issue
-            console.warn(`[PublicationService] [${requestId}] Could not check/add column:`, migrationError.message);
-        }
-        
+
         // Transform API format to database format
         const publication = await PublicationModel.create({
             id_publication: publicationData.id_publication,
@@ -430,44 +408,7 @@ export async function createPublication(publicationData) {
         console.error(`[PublicationService] [${requestId}] Error name:`, error.name);
         console.error(`[PublicationService] [${requestId}] Error message:`, error.message);
         console.error(`[PublicationService] [${requestId}] Error stack:`, error.stack);
-        
-        // Check if error is about missing publication_main_image_url column
-        if (error.message?.includes('publication_main_image_url') && error.message?.includes('does not exist')) {
-            console.log(`[PublicationService] [${requestId}] Column missing, attempting to add it...`);
-            try {
-                await PublicationModel.sequelize.query(`
-                    ALTER TABLE publications 
-                    ADD COLUMN publication_main_image_url VARCHAR(255)
-                `);
-                console.log(`[PublicationService] [${requestId}] Column added, retrying publication creation...`);
-                
-                // Retry creating the publication
-                const publication = await PublicationModel.create({
-                    id_publication: publicationData.id_publication,
-                    redirection_link: publicationData.redirectionLink,
-                    date: publicationData.date,
-                    revista: publicationData.revista,
-                    número: publicationData.número,
-                    publication_main_image_url: publicationData.publication_main_image_url || ""
-                });
-                
-                console.log(`[PublicationService] [${requestId}] Publication created successfully after migration:`, publication.toJSON());
-                
-                // Transform database format to API format
-                return {
-                    id_publication: publication.id_publication,
-                    redirectionLink: publication.redirection_link,
-                    date: publication.date ? new Date(publication.date).toISOString().split('T')[0] : null,
-                    revista: publication.revista,
-                    número: publication.número,
-                    publication_main_image_url: publication.publication_main_image_url || ""
-                };
-            } catch (retryError) {
-                console.error(`[PublicationService] [${requestId}] Failed to add column or retry:`, retryError.message);
-                throw new Error(`Database error: Could not add missing column. ${retryError.message}`);
-            }
-        }
-        
+
         // Log connection details if it's a connection error
         if (error.name === 'SequelizeConnectionError' || error.message?.includes('ETIMEDOUT')) {
             const dbConfig = PublicationModel.sequelize?.config;

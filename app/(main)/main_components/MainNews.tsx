@@ -1,6 +1,7 @@
 import React, { FC } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { canOptimizeRemoteImageSrc } from "@/app/lib/remoteImage";
 
 function companyToId(company: string | undefined): string {
   if (!company) return "";
@@ -43,7 +44,11 @@ const MainNews: FC<MainNewsProps> = ({ mainArticle, secondaryArticles }) => {
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                 sizes="(max-width: 768px) 100vw, 66vw"
-                unoptimized
+                unoptimized={
+                  !canOptimizeRemoteImageSrc(
+                    mainArticle!.article_main_image_url || "/file.svg"
+                  )
+                }
               />
             </Link>
             <div className="flex flex-col p-6 md:p-8 space-y-4">
@@ -106,8 +111,12 @@ const MainNews: FC<MainNewsProps> = ({ mainArticle, secondaryArticles }) => {
                   alt={article.articleTitle}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  sizes="112px"
-                  unoptimized
+                  sizes="(max-width: 1024px) 100vw, 112px"
+                  unoptimized={
+                    !canOptimizeRemoteImageSrc(
+                      article.article_main_image_url || "/file.svg"
+                    )
+                  }
                 />
               </Link>
               <div className="flex flex-col min-w-0 flex-1 justify-center">

@@ -34,7 +34,8 @@ interface CompanyEntry {
 }
 
 /** Default avatar when user has no image URL (Unsplash: black & white street sign – WMRI9HvAwV4) */
-const DEFAULT_AVATAR_SRC = "https://source.unsplash.com/WMRI9HvAwV4/256x256";
+const DEFAULT_AVATAR_SRC =
+  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=256&h=256&fit=crop&q=80";
 
 const ExperienceCard: FC<{ item: ExperienceItem }> = ({ item }) => (
   <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">

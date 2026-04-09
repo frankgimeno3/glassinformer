@@ -1,6 +1,7 @@
 import ProductModel from "./ProductModel.js";
 import CompanyModel from "../company/CompanyModel.js";
 import "../../database/models.js";
+import { rewriteDeprecatedSourceUnsplashUrl } from "../../../lib/remoteImage";
 import { QueryTypes } from "sequelize";
 import { portal_id } from "../../../GlassInformerSpecificData.js";
 
@@ -19,7 +20,7 @@ export function mapProductToApiFormat(product, companyNameOrUndefined) {
         product_description: plain.product_description || "",
         tagsArray,
         price: plain.price != null ? Number(plain.price) : null,
-        main_image_src: plain.main_image_src || "",
+        main_image_src: rewriteDeprecatedSourceUnsplashUrl(plain.main_image_src || ""),
         id_company: plain.id_company,
         company_name: companyName || "",
     };
@@ -35,12 +36,12 @@ export async function getAllProducts() {
         let rows;
         try {
             rows = await ProductModel.sequelize.query(
-                `SELECT p.product_id AS id_product, p.product_name, p.product_description, p.price,
-                        p.main_image_src, p.company AS id_company, p.product_categories_array,
-                        c.commercial_name AS company_name
-                 FROM public.products p
+                `SELECT p.product_id AS id_product, p.product_name, p.product_description, p.product_price AS price,
+                        p.product_main_image_src AS main_image_src, p.company_id AS id_company, p.product_categories_array,
+                        c.company_commercial_name AS company_name
+                 FROM public.products_db p
                  INNER JOIN public.product_portals pp ON p.product_id = pp.product_id AND pp.portal_id = :portalId
-                 LEFT JOIN public.companies c ON p.company = c.company_id
+                 LEFT JOIN public.companies_db c ON p.company_id = c.company_id
                  ORDER BY p.product_name ASC`,
                 { replacements: { portalId: portal_id }, type: QueryTypes.SELECT }
             );
@@ -80,7 +81,7 @@ export async function getAllProducts() {
                 product_description: r.product_description || "",
                 tagsArray,
                 price: r.price != null ? Number(r.price) : null,
-                main_image_src: r.main_image_src || "",
+                main_image_src: rewriteDeprecatedSourceUnsplashUrl(r.main_image_src || ""),
                 id_company: r.id_company,
                 company_name: r.company_name || "",
             };

@@ -2,6 +2,7 @@ import EventModel from "./EventModel.js";
 import "../../database/models.js";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { rewriteDeprecatedSourceUnsplashUrl } from "../../../lib/remoteImage";
 import { QueryTypes } from "sequelize";
 import { portal_id } from "../../../GlassInformerSpecificData.js";
 
@@ -21,7 +22,7 @@ function getFallbackEvents() {
             start_date: event.start_date || '',
             end_date: event.end_date || '',
             location: event.location || '',
-            event_main_image: event.event_main_image || ''
+            event_main_image: rewriteDeprecatedSourceUnsplashUrl(event.event_main_image || '')
         }));
     } catch (error) {
         console.error('Error reading fallback events from JSON:', error);
@@ -39,7 +40,7 @@ function mapEventToApiFormat(event) {
         start_date: event.start_date ? String(event.start_date).split('T')[0] : '',
         end_date: event.end_date ? String(event.end_date).split('T')[0] : '',
         location: event.location || '',
-        event_main_image: event.event_main_image || ''
+        event_main_image: rewriteDeprecatedSourceUnsplashUrl(event.event_main_image || '')
     };
 }
 
@@ -52,11 +53,19 @@ export async function getAllEvents() {
 
         // Join with event_portals to filter by portal_id
         const rows = await EventModel.sequelize.query(
-            `SELECT e.id_fair, e.event_name, e.country, e.main_description, e.region,
-                    e.start_date, e.end_date, e.location, e.event_main_image
+            `SELECT
+                    e.event_id AS id_fair,
+                    e.event_name,
+                    e.event_country AS country,
+                    e.event_main_description AS main_description,
+                    e.event_region AS region,
+                    e.event_start_date AS start_date,
+                    e.event_end_date AS end_date,
+                    e.event_location AS location,
+                    e.event_main_image_src AS event_main_image
              FROM public.events e
-             INNER JOIN public.event_portals ep ON e.id_fair = ep.event_id AND ep.portal_id = :portalId
-             ORDER BY e.start_date ASC`,
+             INNER JOIN public.event_portals ep ON e.event_id = ep.event_id AND ep.portal_id = :portalId
+             ORDER BY e.event_start_date ASC`,
             { replacements: { portalId: portal_id }, type: QueryTypes.SELECT }
         );
 

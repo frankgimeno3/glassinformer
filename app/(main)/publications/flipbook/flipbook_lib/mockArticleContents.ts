@@ -1,7 +1,7 @@
 import type {
   ArticleContentBlock,
   ArticleTextFlow,
-} from "../_types/flipbook";
+} from "../flipbook_types/flipbook";
 
 const IMG = {
   glass: "https://images.unsplash.com/photo-1513475382583-d06e58bcb0e0?w=800&q=80",

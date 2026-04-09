@@ -1,7 +1,9 @@
 'use client';
 
 import React, { FC, useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { canOptimizeRemoteImageSrc } from '@/app/lib/remoteImage';
 import { ProductService } from '@/apiClient/ProductService';
 
 interface Product {
@@ -131,11 +133,16 @@ const ProductsTable: FC = () => {
                   <td className='px-6 py-4 whitespace-nowrap'>
                     <div className='flex items-center gap-3'>
                       {product.main_image_src ? (
-                        <img
-                          src={product.main_image_src}
-                          alt={product.product_name}
-                          className='h-10 w-10 rounded object-cover'
-                        />
+                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded">
+                          <Image
+                            src={product.main_image_src}
+                            alt={product.product_name}
+                            fill
+                            sizes="40px"
+                            className="object-cover"
+                            unoptimized={!canOptimizeRemoteImageSrc(product.main_image_src)}
+                          />
+                        </div>
                       ) : (
                         <div className='h-10 w-10 rounded bg-gray-200 flex items-center justify-center text-gray-400 text-xs'>
                           —

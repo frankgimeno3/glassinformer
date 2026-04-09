@@ -1,3 +1,4 @@
+/** RDS schema: SQL migrations live under plynium_central_panel/server/database/migrations in this monorepo. */
 import {Sequelize} from "sequelize";
 import * as fs from "node:fs";
 import path from "node:path";

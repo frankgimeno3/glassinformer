@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
-import { loadFlipbookModelForPublicationId } from "@/app/(main)/publications/_lib/loadFlipbookModel";
-import { resolveParagraphsForPage } from "@/app/(flipbook)/publications/flipbook/_lib/flipbook-data";
-import type { FlipbookPage, Company } from "@/app/(flipbook)/publications/flipbook/_types/flipbook";
+import { loadFlipbookModelForPublicationId } from "@/app/(main)/publications/flipbook/flipbook_lib/loadFlipbookModel";
+import { resolveParagraphsForPage } from "@/app/(main)/publications/flipbook/flipbook_lib/flipbook-data";
+import type { FlipbookPage, Company } from "@/app/(main)/publications/flipbook/flipbook_types/flipbook";
 
 interface PageWithCompany {
   page: FlipbookPage;

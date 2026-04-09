@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {TimeLogNotFound} from "./features/timeLog/TimeLogError.js";
+import {TimeLogNotFound, TimeLoggingDisabled} from "./features/timeLog/TimeLogError.js";
 import {
     InvalidParameterException,
     InvalidPasswordException,
@@ -10,6 +10,10 @@ export function errorHandler(error){
 
     if(error instanceof TimeLogNotFound){
         return NextResponse.json({message: error.message}, {status: 404});
+    }
+
+    if (error instanceof TimeLoggingDisabled) {
+        return NextResponse.json({ message: error.message }, { status: 501 });
     }
 
     if (error?.message?.includes('not found')) {

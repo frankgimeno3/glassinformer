@@ -16,7 +16,7 @@ import {
   mockInformerPublicationMeta,
   mockInformerTopics,
   type InformerSlide,
-} from "../_lib/mockInformerData";
+} from "../informer_lib/mockInformerData";
 
 type PublicationHeaderProps = {
   publicationId: string;

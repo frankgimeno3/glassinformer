@@ -1,7 +1,9 @@
 'use client';
 
 import React, { FC, useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
+import { canOptimizeRemoteImageSrc } from '@/app/lib/remoteImage';
 import { EventService } from '@/apiClient/EventService';
 import EventContactForm from '../EventContactForm';
 
@@ -97,11 +99,17 @@ const IdEvent: FC = () => {
       <div className="max-w-4xl mx-auto w-full">
         <div className="flex flex-wrap items-start gap-4 mb-6">
           {event.event_main_image && (
-            <img
-              src={event.event_main_image}
-              alt={event.event_name}
-              className="w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0 rounded-lg object-cover border border-gray-200"
-            />
+            <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-gray-200 sm:h-32 sm:w-32">
+              <Image
+                src={event.event_main_image}
+                alt={event.event_name}
+                fill
+                sizes="128px"
+                className="object-cover"
+                priority
+                unoptimized={!canOptimizeRemoteImageSrc(event.event_main_image)}
+              />
+            </div>
           )}
           <h1 className="text-4xl font-bold text-gray-900 flex-1 min-w-0">{event.event_name}</h1>
         </div>

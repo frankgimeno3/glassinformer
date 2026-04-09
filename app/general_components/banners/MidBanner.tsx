@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { canOptimizeRemoteImageSrc } from "@/app/lib/remoteImage";
 import { normalizeBannerImageSrc } from "./normalizeBannerImageSrc";
 import {
   pickBannerByPriority,
@@ -96,6 +97,7 @@ function MidBannerFull({
   const href = banner.bannerRedirection || banner.bannerRoute || "/";
   const sponsorLogo = banner.sponsorLogoSrc;
   const cornerLogo = banner.cornerLogoSrc;
+  const mainSrc = normalizeBannerImageSrc(banner.bannerSrc);
 
   return (
     <div
@@ -108,12 +110,12 @@ function MidBannerFull({
         className={`relative block h-full min-h-[168px] w-full ${BANNER_HOVER}`}
       >
         <Image
-          src={normalizeBannerImageSrc(banner.bannerSrc)}
+          src={mainSrc}
           alt=""
           fill
           className="object-cover object-center"
           sizes="(max-width: 768px) 100vw, min(1200px, 100vw)"
-          unoptimized
+          unoptimized={!canOptimizeRemoteImageSrc(mainSrc)}
           priority={false}
         />
         <div className="pointer-events-none absolute left-2 top-2 z-[2] flex max-w-[min(92%,28rem)] flex-wrap items-center gap-2 sm:left-3 sm:top-2.5">
@@ -131,7 +133,7 @@ function MidBannerFull({
                 fill
                 className="object-contain object-left drop-shadow-md"
                 sizes="140px"
-                unoptimized
+                unoptimized={!canOptimizeRemoteImageSrc(sponsorLogo)}
               />
             </div>
           ) : null}
@@ -144,7 +146,7 @@ function MidBannerFull({
               fill
               className="object-contain object-right object-top drop-shadow-[0_1px_8px_rgba(0,0,0,0.85)]"
               sizes="144px"
-              unoptimized
+              unoptimized={!canOptimizeRemoteImageSrc(cornerLogo)}
             />
           </div>
         ) : null}
@@ -155,6 +157,7 @@ function MidBannerFull({
 
 function MidBannerRowSlot({ banner }: { banner: BannerItem }) {
   const href = banner.bannerRedirection || banner.bannerRoute || "/";
+  const rowSrc = normalizeBannerImageSrc(banner.bannerSrc);
   return (
     <Link
       href={href}
@@ -163,12 +166,12 @@ function MidBannerRowSlot({ banner }: { banner: BannerItem }) {
       className={`relative block aspect-[4/3] w-full min-h-0 overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm transition hover:border-blue-950/40 hover:shadow-md ${BANNER_HOVER}`}
     >
       <Image
-        src={normalizeBannerImageSrc(banner.bannerSrc)}
+        src={rowSrc}
         alt=""
         fill
         className="object-cover object-center"
         sizes="(max-width: 768px) 50vw, 25vw"
-        unoptimized
+        unoptimized={!canOptimizeRemoteImageSrc(rowSrc)}
       />
     </Link>
   );
@@ -315,7 +318,7 @@ export default function MidBanner({
                         fill
                         className="object-cover object-center"
                         sizes="(max-width: 1024px) 50vw, 25vw"
-                        unoptimized
+                        unoptimized={!canOptimizeRemoteImageSrc(img)}
                       />
                     </div>
                     <span className="mb-1 text-xs font-medium uppercase tracking-wide text-blue-950">
@@ -369,7 +372,7 @@ export default function MidBanner({
                         fill
                         className="object-cover object-center"
                         sizes="(max-width: 1024px) 50vw, 25vw"
-                        unoptimized
+                        unoptimized={!canOptimizeRemoteImageSrc(img)}
                       />
                     </div>
                     <span className="mb-1 text-xs font-medium uppercase tracking-wide text-blue-950">

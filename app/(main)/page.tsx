@@ -17,7 +17,7 @@ export default function Home() {
 
   const fetchArticles = async () => {
     try {
-      // Obtener todos los artículos del API (incluye los del JSON y los creados dinámicamente)
+      // Lista desde API: articles_db + article_portals para este portal (fallback JSON solo si falla la conexión)
       const apiArticles = await ArticleService.getAllArticles();
       
       // Filtrar y normalizar artículos válidos

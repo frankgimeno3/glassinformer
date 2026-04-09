@@ -51,10 +51,40 @@ export default class AuthenticationService {
 
     cognitoUserPoolsTokenProvider.setKeyValueStorage(new CookieStorage());
 
-    const response = await signIn({
-      username,
-      password
-    });
+    let session = await fetchAuthSession();
+    let idTokenString = session.tokens?.idToken?.toString();
+    if (idTokenString) {
+      const { payload } = decodeJWT(idTokenString);
+      if (typeof window !== "undefined" && username) {
+        localStorage.setItem("username", username);
+      }
+      return payload;
+    }
+
+    let response;
+    try {
+      response = await signIn({
+        username,
+        password
+      });
+    } catch (err) {
+      const alreadyAuthed =
+        err?.name === "UserAlreadyAuthenticatedException" ||
+        String(err?.message ?? "").includes("already a signed in user");
+      if (alreadyAuthed) {
+        session = await fetchAuthSession();
+        idTokenString = session.tokens?.idToken?.toString();
+        if (!idTokenString) {
+          throw err;
+        }
+        const { payload } = decodeJWT(idTokenString);
+        if (typeof window !== "undefined" && username) {
+          localStorage.setItem("username", username);
+        }
+        return payload;
+      }
+      throw err;
+    }
 
     if (response.nextStep?.signInStep === "CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED") {
       const newPassword = prompt("Por favor, introduzca nueva contraseña");
@@ -66,9 +96,9 @@ export default class AuthenticationService {
       });
     }
 
-    const session = await fetchAuthSession();
+    session = await fetchAuthSession();
 
-    const idTokenString = session.tokens?.idToken?.toString();
+    idTokenString = session.tokens?.idToken?.toString();
     if (!idTokenString) {
       throw new Error("Usuario no autenticado.");
     }

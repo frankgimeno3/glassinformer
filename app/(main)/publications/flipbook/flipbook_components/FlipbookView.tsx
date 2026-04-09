@@ -13,14 +13,14 @@ import type {
   ArticleContentBlock,
   FlipbookPage,
   Company,
-} from "../_types/flipbook";
-import { getUnsplashImageUrl } from "../_lib/unsplash";
+} from "../flipbook_types/flipbook";
+import { getUnsplashImageUrl } from "../flipbook_lib/unsplash";
 import {
   fetchAndCacheSpread,
   getCachedSpread,
   setCachedSpread,
   type SpreadPayload,
-} from "../_lib/spread-cache";
+} from "../flipbook_lib/spread-cache";
 import FlipbookNav from "./FlipbookNav";
 
 const ZOOM_MIN = 0.5;

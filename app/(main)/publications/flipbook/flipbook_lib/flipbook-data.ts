@@ -1,4 +1,4 @@
-import type { FlipbookPage, Company } from "../_types/flipbook";
+import type { FlipbookPage, Company } from "../flipbook_types/flipbook";
 import { getLoremParagraphs } from "./lorem";
 
 export function resolveParagraphsForPage(page: FlipbookPage): string[] {

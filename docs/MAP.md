@@ -36,7 +36,7 @@
 | **Server feature** (model, service, error type) | [app/server/BACKEND.md](../app/server/BACKEND.md) | Folder under `app/server/features/` |
 | **Client API call** (method or service) | [apiClient/API-CLIENT.md](../apiClient/API-CLIENT.md) | API route and server feature |
 | **Auth** (who can access, cookies, tokens) | [AGENTS.md](../AGENTS.md) (proxy, env) + [app/server/BACKEND.md](../app/server/BACKEND.md) (createEndpoint, authentication) | proxy.js, createEndpoint.js |
-| **Database** (model, association, migration) | [app/server/BACKEND.md](../app/server/BACKEND.md) | database/models.js, associations.js |
+| **Database** (model, association) | [app/server/BACKEND.md](../app/server/BACKEND.md) | database/models.js, associations.js. Esquema RDS: migraciones en `plynium_central_panel/server/database/migrations`. |
 | **Root config** (next, ts, env, middleware) | [AGENTS.md](../AGENTS.md) (Root config) | Corresponding root file |
 
 ---

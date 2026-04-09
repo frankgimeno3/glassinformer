@@ -1,4 +1,4 @@
-import InvalidPublicationUrl from "../../_components/InvalidPublicationUrl";
+import InvalidPublicationUrl from "../../publications_components/InvalidPublicationUrl";
 
 export default function InformerPublicationNotFound() {
   return <InvalidPublicationUrl variant="informer" />;

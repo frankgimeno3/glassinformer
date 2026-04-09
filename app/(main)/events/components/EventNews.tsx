@@ -3,6 +3,7 @@
 import React, { FC, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { canOptimizeRemoteImageSrc } from '@/app/lib/remoteImage';
 import { ArticleService } from '@/apiClient/ArticleService';
 import { EventService } from '@/apiClient/EventService';
 import type { Event } from './EventsCalendar';
@@ -104,8 +105,8 @@ const EventNews: FC = () => {
                 alt={article.articleTitle || 'Article'}
                 fill
                 className="object-cover"
-                sizes="128px"
-                unoptimized
+                sizes="(max-width: 640px) 28vw, 128px"
+                unoptimized={!canOptimizeRemoteImageSrc(imageUrl)}
               />
             </div>
             {/* Content right: article title + event info */}

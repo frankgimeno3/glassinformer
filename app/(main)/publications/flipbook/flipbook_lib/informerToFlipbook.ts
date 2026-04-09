@@ -1,17 +1,17 @@
 import type {
   Company,
   FlipbookPage,
-} from "@/app/(flipbook)/publications/flipbook/_types/flipbook";
+} from "@/app/(main)/publications/flipbook/flipbook_types/flipbook";
 import {
   mockInformerArticleSlides,
   mockInformerEditorialSlides,
   mockInformerPublicationMeta,
   mockInformerTopics,
-} from "@/app/(main)/publications/informer/_lib/mockInformerData";
+} from "@/app/(main)/publications/informer/informer_lib/mockInformerData";
 import {
   getMockArticleContentsForSlideId,
   onlyTextBlocks,
-} from "@/app/(flipbook)/publications/flipbook/_lib/mockArticleContents";
+} from "@/app/(main)/publications/flipbook/flipbook_lib/mockArticleContents";
 
 const PREF_AD_IMAGES = [
   "https://images.unsplash.com/photo-1565514020179-026b92b84bb6?w=1200&q=80",
