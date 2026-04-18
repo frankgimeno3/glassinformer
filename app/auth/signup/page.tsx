@@ -1,7 +1,7 @@
 "use client";
 
 import React, { FC, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import AuthenticationService from "@/apiClient/AuthenticationService";
 import { createProfileUser } from "@/apiClient/ProfileUserService";
 import {
@@ -21,48 +21,76 @@ import {
 
 interface SignupProps {}
 
+const AUTH_SECONDARY_BUTTON =
+    "rounded-lg border border-gray-600 px-4 py-3 text-base font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50";
+
 const SignupContent: FC<SignupProps> = ({}) => {
-    const router = useRouter();
     const searchParams = useSearchParams();
     const redirectParam = searchParams.get("redirect");
+    const [wizardStep, setWizardStep] = useState<1 | 2>(1);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [subscribeNewsletter, setSubscribeNewsletter] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const [success, setSuccess] = useState(false);
     const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSignup = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError(null);
-
+    const validateStep1 = (): boolean => {
         if (password !== confirmPassword) {
             setError("Passwords do not match.");
-            return;
+            return false;
         }
-
         if (password.length < 8) {
             setError("Password must be at least 8 characters long.");
+            return false;
+        }
+        if (!email.trim()) {
+            setError("Please enter your email.");
+            return false;
+        }
+        return true;
+    };
+
+    const goToNewsletterStep = () => {
+        setError(null);
+        if (!validateStep1()) return;
+        setWizardStep(2);
+    };
+
+    const handleFinalSignup = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null);
+        if (!validateStep1()) {
+            setWizardStep(1);
             return;
         }
 
+        setIsSubmitting(true);
         try {
             await AuthenticationService.signUp(email.trim(), password);
             try {
-                await createProfileUser(email.trim());
-            } catch (rdsErr: any) {
+                await createProfileUser(email.trim(), {
+                    subscribePortalNewsletter: subscribeNewsletter,
+                });
+            } catch (rdsErr: unknown) {
                 console.warn("Profile user creation failed (Cognito signup succeeded):", rdsErr);
             }
             setPendingEmail(email.trim());
             setSuccess(true);
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error(e);
-            const msg =
-                e?.message ||
-                e?.toString?.() ||
-                "Sign-up failed. Please check your email and password.";
+            const msg: string =
+                typeof e === "string"
+                    ? e
+                    : e && typeof e === "object" && "message" in e
+                      ? String((e as { message: unknown }).message)
+                      : "Sign-up failed. Please check your email and password.";
             setError(msg);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -94,12 +122,66 @@ const SignupContent: FC<SignupProps> = ({}) => {
         );
     }
 
+    if (wizardStep === 2) {
+        return (
+            <div className={AUTH_PAGE_SHELL}>
+                <form onSubmit={handleFinalSignup} className={`${AUTH_CARD} ${AUTH_FORM}`}>
+                    <h2 className={AUTH_TITLE}>Newsletter</h2>
+                    <p className={`${AUTH_TEXT} text-left`}>
+                        Glassinformer publishes a newsletter for this portal with the most highlighted news and updates.
+                        If you would like to receive it by email, opt in below. You can ignore this step and continue without subscribing.
+                    </p>
+                    <p className={`${AUTH_TEXT} text-left text-xs text-gray-400`}>
+                        New accounts are also linked to default newsletter lists configured for this portal. If you opt
+                        in below, you are added to every <strong className="text-gray-300">main</strong> newsletter list
+                        for this portal in the shared database (subscription rows). You can adjust subscriptions later
+                        from account settings when available.
+                    </p>
+                    <label
+                        htmlFor="newsletter-opt-in"
+                        className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-700 bg-black/40 px-4 py-3 text-left text-sm text-gray-200"
+                    >
+                        <input
+                            id="newsletter-opt-in"
+                            type="checkbox"
+                            checked={subscribeNewsletter}
+                            onChange={(e) => setSubscribeNewsletter(e.target.checked)}
+                            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-600 text-indigo-500 focus:ring-indigo-500"
+                        />
+                        <span>
+                            Yes, I want to subscribe to the portal newsletter and receive the most highlighted news by email.
+                        </span>
+                    </label>
+                    {error && (
+                        <div className={AUTH_ERROR}>
+                            <p>ERROR:</p>
+                            <p>{error}</p>
+                        </div>
+                    )}
+                    <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+                        <button
+                            type="button"
+                            className={AUTH_SECONDARY_BUTTON}
+                            disabled={isSubmitting}
+                            onClick={() => {
+                                setError(null);
+                                setWizardStep(1);
+                            }}
+                        >
+                            Back
+                        </button>
+                        <button type="submit" className={AUTH_PRIMARY_BUTTON} disabled={isSubmitting}>
+                            {isSubmitting ? "Creating account…" : "Create account"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        );
+    }
+
     return (
         <div className={AUTH_PAGE_SHELL}>
-            <form
-                onSubmit={handleSignup}
-                className={`${AUTH_CARD} ${AUTH_FORM}`}
-            >
+            <div className={`${AUTH_CARD} ${AUTH_FORM}`}>
                 <h2 className={AUTH_TITLE}>
                     Create an account
                 </h2>
@@ -163,10 +245,11 @@ const SignupContent: FC<SignupProps> = ({}) => {
                 )}
 
                 <button
-                    type="submit"
+                    type="button"
+                    onClick={goToNewsletterStep}
                     className={AUTH_PRIMARY_BUTTON}
                 >
-                    Sign up
+                    Continue
                 </button>
 
                 <p className={AUTH_AUX_TEXT}>
@@ -175,7 +258,7 @@ const SignupContent: FC<SignupProps> = ({}) => {
                         Log in
                     </a>
                 </p>
-            </form>
+            </div>
         </div>
     );
 };

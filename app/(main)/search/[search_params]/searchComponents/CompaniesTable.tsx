@@ -1,7 +1,8 @@
 'use client';
 
-import React, { FC } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { CompanyService } from '@/apiClient/CompanyService';
 
 interface CompanyItem {
   id_company: string;
@@ -11,27 +12,63 @@ interface CompanyItem {
   main_description: string;
 }
 
-const MOCK_COMPANIES: CompanyItem[] = [
-  { id_company: '1', company_name: 'Glass Corp', country: 'Germany', region: 'Europe', main_description: 'Leading glass manufacturer' },
-  { id_company: '2', company_name: 'Pane Ltd', country: 'UK', region: 'Europe', main_description: 'Architectural glass solutions' },
-  { id_company: '3', company_name: 'EcoGlass', country: 'Spain', region: 'Europe', main_description: 'Sustainable glass production' },
-];
-
 interface CompaniesTableProps {
   searchTerm: string;
 }
 
 const CompaniesTable: FC<CompaniesTableProps> = ({ searchTerm }) => {
-  const filtered = MOCK_COMPANIES.filter(
-    (item) =>
-      item.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.region.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.main_description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const [companies, setCompanies] = useState<CompanyItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      setError(null);
+      setLoading(true);
+      try {
+        const data = await CompanyService.getAllCompanies();
+        setCompanies(Array.isArray(data) ? data : []);
+      } catch (err: unknown) {
+        const message =
+          err && typeof err === 'object' && 'message' in err
+            ? String((err as { message: string }).message)
+            : 'Error loading companies';
+        setError(message);
+        setCompanies([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCompanies();
+  }, []);
+
+  const filtered = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return companies;
+    return companies.filter((item) => {
+      const name = (item.company_name ?? '').toLowerCase();
+      const country = (item.country ?? '').toLowerCase();
+      const region = (item.region ?? '').toLowerCase();
+      const desc = (item.main_description ?? '').toLowerCase();
+      return (
+        name.includes(term) ||
+        country.includes(term) ||
+        region.includes(term) ||
+        desc.includes(term)
+      );
+    });
+  }, [companies, searchTerm]);
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
+      {loading && (
+        <div className="px-6 py-4 text-sm text-gray-600">Loading companies...</div>
+      )}
+      {error && (
+        <div className="px-6 py-4 text-sm text-red-700 bg-red-50 border-b border-red-200">
+          {error}
+        </div>
+      )}
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -45,7 +82,7 @@ const CompaniesTable: FC<CompaniesTableProps> = ({ searchTerm }) => {
           {filtered.length === 0 ? (
             <tr>
               <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                No companies found for &quot;{searchTerm}&quot;
+                {loading ? '—' : `No companies found for "${searchTerm}"`}
               </td>
             </tr>
           ) : (

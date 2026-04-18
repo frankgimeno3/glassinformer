@@ -6,7 +6,10 @@ import "../../database/models.js";
 export async function getAllContents() {
     try {
         const contents = await ContentModel.findAll({
-            order: [["createdAt", "DESC"]]
+            // In this schema, Sequelize timestamp attribute names are customized to
+            // `article_created_at` / `article_updated_at` (see models.js). Ordering by
+            // `createdAt` would generate SQL for a non-existing column.
+            order: [["article_created_at", "DESC"]]
         });
         
         // Transform database format to API format

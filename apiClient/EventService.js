@@ -10,4 +10,9 @@ export class EventService {
         const response = await apiClient.get(`/api/v1/events/${encodeURIComponent(idFair)}`);
         return response.data;
     }
+
+    static async getEventNewsArticles() {
+        const response = await apiClient.get('/api/v1/events/news');
+        return response.data;
+    }
 }

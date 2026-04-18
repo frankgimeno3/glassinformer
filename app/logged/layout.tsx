@@ -39,9 +39,11 @@ export default function LoggedLayout({
                 Events
               </Link>
             </div>
-            <MidBanner />
             <div className="pt-12">
             {children}
+            </div>
+            <div className="pt-10">
+              <MidBanner />
             </div>
             <Footer />
           </div>

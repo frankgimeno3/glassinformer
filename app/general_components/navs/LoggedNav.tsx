@@ -1,10 +1,12 @@
 "use client";
-import { FC, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import BasicButton from "../buttons/BasicButton";
 import AuthenticationService from "@/apiClient/AuthenticationService";
 import { PortalName } from "@/app/GlassInformerSpecificData";
+import LoggedDesktopAccountMenu from "./LoggedDesktopAccountMenu";
+import DesktopAccountMenuTriggerIcon from "./DesktopAccountMenuTriggerIcon";
+import NotificationsNavButton from "./NotificationsNavButton";
 
 const SearchIcon = () => (
   <svg
@@ -68,13 +70,27 @@ const SECTION_LINKS = [
 const LoggedNav: FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
+  const navRootRef = useRef<HTMLElement | null>(null);
   const router = useRouter();
 
   const handleLogout = async () => {
     await AuthenticationService.logout();
     router.replace("/");
     setMobileMenuOpen(false);
+    setDesktopMenuOpen(false);
   };
+
+  useEffect(() => {
+    if (!desktopMenuOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      const el = navRootRef.current;
+      if (!el || !(e.target instanceof Node) || el.contains(e.target)) return;
+      setDesktopMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [desktopMenuOpen]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,8 +107,8 @@ const LoggedNav: FC = () => {
   };
 
   return (
-    <nav className="flex flex-col shadow-xl bg-white border-b w-full">
-      <header className="flex flex-row justify-between border-b border-gray-200 py-8 px-4 w-full px-4 sm:px-6 lg:px-12">
+    <nav ref={navRootRef} className="flex w-full flex-col border-b bg-white shadow-xl">
+      <header className="flex w-full flex-row justify-between border-b border-gray-200 px-4 py-8 sm:px-6 lg:px-12">
         <Link href="/logged" className="flex flex-col hover:opacity-80 transition-opacity">
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 tracking-tight mb-2">
             {PortalName}
@@ -126,19 +142,25 @@ const LoggedNav: FC = () => {
               <SearchIcon />
             </button>
           </form>
-          {/* Botones de navegación - visibles solo en PC (≥1024px) */}
-          <div className="hidden lg:flex flex-row items-center gap-5 text-sm text-gray-500 uppercase tracking-wider font-sans">
-            <BasicButton textContent="Mediakit" urlRedirection="/mediakit" />
-            <BasicButton textContent="Contact" urlRedirection="/contact" />
-            <BasicButton textContent="My Companies" urlRedirection="/logged/companies" />
-            <BasicButton textContent="My Profile" urlRedirection="/logged/profiles/me" />
-            <BasicButton textContent="Settings" urlRedirection="/logged/settings" />
+          {/* Desktop: notifications · log out · menú (fila secundaria debajo del header, no flotante) */}
+          <div className="hidden items-center gap-3 lg:flex">
+            <NotificationsNavButton />
             <button
               type="button"
               onClick={handleLogout}
-              className="px-3 py-1 rounded-lg shadow-lg bg-blue-950 hover:bg-blue-950/90 cursor-pointer text-white"
+              className="cursor-pointer rounded-lg bg-blue-950 px-3 py-2 text-xs font-sans font-semibold uppercase tracking-wider text-white shadow-lg transition hover:bg-blue-950/90"
             >
               Log out
+            </button>
+            <button
+              type="button"
+              onClick={() => setDesktopMenuOpen((v) => !v)}
+              aria-label={desktopMenuOpen ? "Close account menu" : "Open account menu"}
+              aria-expanded={desktopMenuOpen}
+              aria-controls={desktopMenuOpen ? "logged-desktop-account-nav" : undefined}
+              className="rounded-lg px-2 py-2 text-gray-600 transition-colors hover:bg-gray-100"
+            >
+              <DesktopAccountMenuTriggerIcon open={desktopMenuOpen} />
             </button>
           </div>
           {/* Botón menú hamburguesa - visible en móvil y tablet (<1024px) */}
@@ -152,6 +174,8 @@ const LoggedNav: FC = () => {
           </button>
         </div>
       </header>
+
+      <LoggedDesktopAccountMenu open={desktopMenuOpen} onClose={() => setDesktopMenuOpen(false)} />
 
       {/* Mobile menu modal */}
       {mobileMenuOpen && (
@@ -189,18 +213,12 @@ const LoggedNav: FC = () => {
               <section>
                 <h2 className="text-xs font-sans font-semibold text-gray-400 uppercase tracking-wider mb-4">Account</h2>
                 <nav className="flex flex-col border-t border-gray-200">
-                  <button
-                    onClick={() => handleNavClick("/mediakit")}
-                    className="py-4 text-left font-serif text-xl text-gray-900 hover:text-gray-600 transition-colors border-b border-gray-100"
+                  <div
+                    className="border-b border-gray-100 py-4"
+                    onClick={() => setMobileMenuOpen(false)}
                   >
-                    Mediakit
-                  </button>
-                  <button
-                    onClick={() => handleNavClick("/contact")}
-                    className="py-4 text-left font-serif text-xl text-gray-900 hover:text-gray-600 transition-colors border-b border-gray-100"
-                  >
-                    Contact
-                  </button>
+                    <NotificationsNavButton className="!w-full justify-center border-0 shadow-none" />
+                  </div>
                   <button
                     onClick={() => handleNavClick("/logged/companies")}
                     className="py-4 text-left font-serif text-xl text-gray-900 hover:text-gray-600 transition-colors border-b border-gray-100"

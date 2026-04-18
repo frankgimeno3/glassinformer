@@ -217,7 +217,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ idArticle }) => {
                       href={`/logged/profiles/${encodeURIComponent(c.comment_id_user)}`}
                       className="font-medium text-gray-800 hover:text-blue-950 hover:underline"
                     >
-                      {[c.user_name, c.user_surnames].filter(Boolean).join(" ") || c.comment_id_user}
+                      {[c.user_name, c.user_surnames].filter(Boolean).join(" ") || "View profile"}
                     </Link>
                     <span className="text-gray-500">
                       {formatDateTime(c.id_timestamp)}

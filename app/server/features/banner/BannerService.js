@@ -35,6 +35,7 @@ function weightToPriority(weight) {
 }
 
 function toApiFormat(row) {
+    const rawStatus = String(row.banner_status ?? "").trim().toLowerCase();
     return {
         id_banner: row.id_banner ?? row.id_banner,
         bannerType: row.banner_position_type,
@@ -44,6 +45,7 @@ function toApiFormat(row) {
         // DB: banner_appearence_weight int (0..3). UI expects 0..2 priority.
         bannerPriority: Math.max(0, Math.min(2, Number(row.banner_appearence_weight ?? 0) - 1)),
         page_type: row.banner_page_type,
+        bannerStatus: rawStatus || undefined,
     };
 }
 
@@ -60,12 +62,15 @@ export async function getAllBanners() {
                 banner_appearence_weight: { [Op.gt]: 0 },
                 banner_starting_date: { [Op.lte]: today },
                 banner_ending_date: { [Op.gte]: today },
+                ...(BannerModel.rawAttributes?.banner_status
+                    ? { banner_status: { [Op.in]: ["published", "active"] } }
+                    : {}),
             },
             order: [
                 ["banner_position_type", "ASC"],
                 ["banner_appearence_weight", "DESC"],
                 ["banner_position", "ASC"],
-                ["createdAt", "ASC"],
+                ["banner_created_at", "ASC"],
             ],
         });
 

@@ -1,7 +1,8 @@
 'use client';
 
-import React, { FC } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { ArticleService } from '@/apiClient/ArticleService';
 
 interface NewsItem {
   id_article: string;
@@ -11,26 +12,57 @@ interface NewsItem {
   company?: string;
 }
 
-const MOCK_NEWS: NewsItem[] = [
-  { id_article: '1', articleTitle: 'Industry trends 2025', articleSubtitle: 'Overview of key developments', date: '2025-01-15', company: 'Glass Corp' },
-  { id_article: '2', articleTitle: 'New manufacturing standards', articleSubtitle: 'Regulatory update', date: '2025-01-10', company: 'Pane Ltd' },
-  { id_article: '3', articleTitle: 'Sustainability in glass production', articleSubtitle: 'Green initiatives', date: '2025-01-05', company: 'EcoGlass' },
-];
-
 interface NewsTableProps {
   searchTerm: string;
 }
 
 const NewsTable: FC<NewsTableProps> = ({ searchTerm }) => {
-  const filtered = MOCK_NEWS.filter(
-    (item) =>
-      item.articleTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.articleSubtitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.company && item.company.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      setError(null);
+      setLoading(true);
+      try {
+        const data = await ArticleService.getAllArticles();
+        setNews(Array.isArray(data) ? data : []);
+      } catch (err: unknown) {
+        const message =
+          err && typeof err === 'object' && 'message' in err
+            ? String((err as { message: string }).message)
+            : 'Error loading news';
+        setError(message);
+        setNews([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNews();
+  }, []);
+
+  const filtered = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return news;
+    return news.filter((item) => {
+      const title = (item.articleTitle ?? '').toLowerCase();
+      const subtitle = (item.articleSubtitle ?? '').toLowerCase();
+      const company = (item.company ?? '').toLowerCase();
+      return title.includes(term) || subtitle.includes(term) || company.includes(term);
+    });
+  }, [news, searchTerm]);
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
+      {loading && (
+        <div className="px-6 py-4 text-sm text-gray-600">Loading news...</div>
+      )}
+      {error && (
+        <div className="px-6 py-4 text-sm text-red-700 bg-red-50 border-b border-red-200">
+          {error}
+        </div>
+      )}
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -44,7 +76,7 @@ const NewsTable: FC<NewsTableProps> = ({ searchTerm }) => {
           {filtered.length === 0 ? (
             <tr>
               <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                No news found for &quot;{searchTerm}&quot;
+                {loading ? '—' : `No news found for "${searchTerm}"`}
               </td>
             </tr>
           ) : (

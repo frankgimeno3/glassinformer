@@ -171,7 +171,8 @@ export async function createComment(idArticle, commentIdUser, commentContent) {
     return {
         id_comment: idComment,
         id_timestamp: new Date().toISOString(),
-        comment_id_user: commentIdUser,
+        // Never expose the author email; use users_db.user_id (UUID) instead.
+        comment_id_user: userUuid ? String(userUuid) : "",
         comment_content: commentContent,
         user_name: userName,
         user_surnames: userSurnames,

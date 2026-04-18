@@ -26,6 +26,7 @@ interface UserData {
   experienceArray: ExperienceItem[];
   userMainImageSrc: string;
   userDescription: string;
+  userLinkedinProfile?: string;
 }
 
 interface CompanyEntry {
@@ -78,7 +79,7 @@ const UserProfileView: FC = () => {
   useEffect(() => {
     if (!id_user) {
       setLoading(false);
-      setError("ID de usuario no válido.");
+      setError("Invalid user id.");
       return;
     }
     const fetchProfile = async () => {
@@ -90,12 +91,12 @@ const UserProfileView: FC = () => {
         });
         if (res.status === 404) {
           const data = await res.json().catch(() => ({}));
-          setError(data.message || "Usuario no encontrado.");
+          setError(data.message || "User not found.");
           setUser(null);
           return;
         }
         if (!res.ok) {
-          setError("Error al cargar el perfil.");
+          setError("Failed to load profile.");
           setUser(null);
           return;
         }
@@ -103,7 +104,7 @@ const UserProfileView: FC = () => {
         setUser(data);
       } catch (e) {
         console.error(e);
-        setError("Error al cargar el perfil.");
+        setError("Failed to load profile.");
         setUser(null);
       } finally {
         setLoading(false);
@@ -142,7 +143,7 @@ const UserProfileView: FC = () => {
   if (loading) {
     return (
       <div className="p-6 text-gray-600 text-center">
-        <p>Cargando perfil…</p>
+        <p>Loading profile…</p>
       </div>
     );
   }
@@ -150,12 +151,12 @@ const UserProfileView: FC = () => {
   if (error || !user) {
     return (
       <div className="p-6 max-w-2xl mx-auto text-gray-600">
-        <p>{error || "Usuario no encontrado."}</p>
+        <p>{error || "User not found."}</p>
         <Link href="/logged/profiles/me" className="mt-2 inline-block text-blue-950 underline">
-          Volver a mi perfil
+          Back to my profile
         </Link>
         <Link href="/logged/profiles" className="mt-2 ml-4 inline-block text-blue-950 underline">
-          Ver todos los perfiles
+          View all profiles
         </Link>
       </div>
     );
@@ -165,71 +166,118 @@ const UserProfileView: FC = () => {
     ? getCompanyNameById(user.userCurrentCompany.id_company)
     : "";
 
+  const headerActionClass =
+    "cursor-pointer inline-flex items-center justify-center px-4 py-2 rounded-lg shadow bg-blue-950 hover:bg-blue-950/90 text-white text-sm font-semibold uppercase tracking-wider transition-colors";
+
   return (
     <div className="bg-white">
-      <div className="p-6 max-w-2xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-serif font-bold text-gray-900 lowercase">
-            perfil
-          </h1>
-          <div className="flex gap-4">
+      <div className="p-6 max-w-5xl mx-auto">
+        <div className="mb-6">
+          {/* Row 1: actions, right-aligned */}
+          <div className="flex items-center justify-end gap-4">
             <Link
               href="/logged/profiles"
-              className="text-sm text-blue-950 hover:underline uppercase tracking-wider"
+              className={headerActionClass}
             >
-              Perfiles
+              Profiles
             </Link>
             <Link
               href="/logged/profiles/me"
-              className="text-sm text-blue-950 hover:underline uppercase tracking-wider"
+              className={headerActionClass}
             >
-              Mi perfil
+              My profile
             </Link>
           </div>
-        </div>
 
-        <div className="mb-6 flex justify-center">
-          <img
-            src={user.userMainImageSrc || DEFAULT_AVATAR_SRC}
-            alt={`${user.userName} ${user.userSurnames}`}
-            className="w-32 h-32 rounded-full object-cover border-2 border-gray-200"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <ReadOnlyField label="Name" value={user.userName ?? ""} />
-          <ReadOnlyField label="Surnames" value={user.userSurnames ?? ""} />
-        </div>
-
-        <ReadOnlyField
-          label="User description"
-          value={user.userDescription ?? ""}
-          multiline
-        />
-
-        <ReadOnlyField
-          label="Current company"
-          value={currentCompanyName}
-        />
-
-        <ReadOnlyField
-          label="Current position"
-          value={user.userCurrentCompany?.userPosition ?? ""}
-        />
-
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-3 uppercase tracking-wider">
-            Experience
-          </label>
-          <div className="space-y-4">
-            {(user.experienceArray ?? []).length === 0 ? (
-              <p className="text-gray-500 text-sm">—</p>
-            ) : (
-              (user.experienceArray ?? []).map((item, index) => (
-                <ExperienceCard key={index} item={item} />
-              ))
-            )}
+          {/* Row 2: title */}
+          <div className="mt-4">
+            <h1 className="text-2xl font-serif font-bold text-gray-900 text-center">
+              Profile
+            </h1>
           </div>
+        </div>
+
+        <div className="space-y-10">
+          <div className="flex justify-center">
+            <img
+              src={user.userMainImageSrc || DEFAULT_AVATAR_SRC}
+              alt={`${user.userName} ${user.userSurnames}`}
+              className="w-32 h-32 rounded-full object-cover border-2 border-gray-200"
+            />
+          </div>
+
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <ReadOnlyField label="Name" value={user.userName ?? ""} />
+              <ReadOnlyField label="Surnames" value={user.userSurnames ?? ""} />
+            </div>
+
+            <ReadOnlyField
+              label="User description"
+              value={user.userDescription ?? ""}
+              multiline
+            />
+
+            <section className="rounded-xl border border-gray-200 bg-white shadow-sm">
+              <div className="border-b border-gray-200 px-4 py-4 sm:px-6">
+                <h2 className="text-base font-semibold text-gray-900">
+                  Current position
+                </h2>
+                <p className="mt-1 text-sm text-gray-600">
+                  Current company and role shown on this user's profile.
+                </p>
+              </div>
+              <div className="px-4 py-5 sm:px-6 space-y-5">
+                <ReadOnlyField label="Current company" value={currentCompanyName} />
+                <ReadOnlyField
+                  label="Current role"
+                  value={user.userCurrentCompany?.userPosition ?? ""}
+                />
+              </div>
+            </section>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3 uppercase tracking-wider">
+              Experience
+            </label>
+            <div className="space-y-4">
+              {(user.experienceArray ?? []).length === 0 ? (
+                <p className="text-gray-500 text-sm">—</p>
+              ) : (
+                (user.experienceArray ?? []).map((item, index) => (
+                  <ExperienceCard key={index} item={item} />
+                ))
+              )}
+            </div>
+          </div>
+
+          <section className="rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div className="border-b border-gray-200 px-4 py-4 sm:px-6">
+              <h2 className="text-base font-semibold text-gray-900">LinkedIn</h2>
+              <p className="mt-1 text-sm text-gray-600">
+                Public profile link (if provided by the user).
+              </p>
+            </div>
+            <div className="px-4 py-5 sm:px-6">
+              {user.userLinkedinProfile && String(user.userLinkedinProfile).trim() ? (
+                <a
+                  href={String(user.userLinkedinProfile).trim()}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center text-blue-950 underline break-all font-medium"
+                >
+                  {String(user.userLinkedinProfile).trim()}
+                </a>
+              ) : (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                  <p className="text-sm text-gray-700">
+                    This user has not added their LinkedIn profile yet.
+                  </p>
+                </div>
+              )}
+            </div>
+          </section>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import Link from "next/link";
 
 const ContactForm: FC = () => {
@@ -10,6 +10,31 @@ const ContactForm: FC = () => {
     subject: "",
     message: "",
   });
+
+  useEffect(() => {
+    // If the user is logged in, prefill name + email from users_db via /api/v1/users/me.
+    // This is best-effort: if no session, we keep the form empty.
+    const prefillFromSession = async () => {
+      try {
+        const res = await fetch("/api/v1/users/me", { credentials: "include" });
+        if (!res.ok) return;
+        const data = (await res.json()) as any;
+        const first = String(data?.userName ?? "").trim();
+        const last = String(data?.userSurnames ?? "").trim();
+        const email = String(data?.userEmail ?? data?.id_user ?? "").trim();
+        const fullName = `${first} ${last}`.trim();
+
+        setFormData((prev) => ({
+          ...prev,
+          name: prev.name.trim() ? prev.name : fullName,
+          email: prev.email.trim() ? prev.email : email,
+        }));
+      } catch {
+        // Ignore; contact page must remain usable for unlogged visitors.
+      }
+    };
+    prefillFromSession();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

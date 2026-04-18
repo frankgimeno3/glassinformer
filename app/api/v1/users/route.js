@@ -14,11 +14,14 @@ export const GET = createEndpoint(async () => {
 // POST: crear usuario de perfil en RDS (id_user = email). Público, se usa tras el signup en Cognito.
 export const POST = createEndpoint(
     async (request, body) => {
-        const user = await createProfileUser(body.id_user);
+        const user = await createProfileUser(body.id_user, {
+            subscribe_portal_newsletter: body.subscribe_portal_newsletter === true,
+        });
         return NextResponse.json(user);
     },
     Joi.object({
         id_user: Joi.string().email().required(),
+        subscribe_portal_newsletter: Joi.boolean().optional(),
     }),
     false
 );

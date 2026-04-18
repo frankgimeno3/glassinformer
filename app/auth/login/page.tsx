@@ -2,6 +2,7 @@
 import { FC, useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AuthenticationService from "@/apiClient/AuthenticationService";
+import apiClient from "@/app/apiClient";
 import {
     AUTH_AUX_TEXT,
     AUTH_CARD,
@@ -60,10 +61,15 @@ const LoginContent: FC<LoginProps> = ({ }) => {
         setError(null);
 
         try {
-            const payload: any = await AuthenticationService.login(email, password);
+            await AuthenticationService.login(email, password);
 
             // El AuthenticationService ya guarda los tokens en cookies mediante CookieStorage
             // y el username en localStorage
+            try {
+                await apiClient.post("/api/v1/users/me/portal-feed-sync", {});
+            } catch {
+                /* best-effort: feed bootstrap should not block login */
+            }
             router.replace(redirect);
         } catch (e: any) {
             console.error(e);

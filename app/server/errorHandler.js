@@ -16,6 +16,10 @@ export function errorHandler(error){
         return NextResponse.json({ message: error.message }, { status: 501 });
     }
 
+    if (error?.message === 'Invalid preference_state' || error?.message?.includes('Invalid topic_id')) {
+        return NextResponse.json({ message: error.message }, { status: 400 });
+    }
+
     if (error?.message?.includes('not found')) {
         return NextResponse.json({message: error.message}, {status: 404});
     }

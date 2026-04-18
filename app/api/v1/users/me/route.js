@@ -1,7 +1,7 @@
 import { createEndpoint } from "../../../../server/createEndpoint.js";
 import { NextResponse } from "next/server";
 import {
-    getProfileUserById,
+    getProfileUserByEmail,
     createProfileUser,
     updateProfileUser,
 } from "../../../../server/features/userProfile/UserProfileService.js";
@@ -14,6 +14,7 @@ const updateSchema = Joi.object({
     userSurnames: Joi.string().allow("").optional(),
     userDescription: Joi.string().allow("").optional(),
     userMainImageSrc: Joi.string().allow("").max(2048).optional(),
+    userLinkedinProfile: Joi.string().allow("").max(1024).optional(),
     userCurrentCompany: Joi.object({
         id_company: Joi.string().allow("").optional(),
         userPosition: Joi.string().allow("").optional(),
@@ -31,7 +32,7 @@ export const GET = createEndpoint(
                 headers: { "Content-Type": "application/json" },
             });
         }
-        let user = await getProfileUserById(email);
+        let user = await getProfileUserByEmail(email);
         if (!user) {
             user = await createProfileUser(email);
         }

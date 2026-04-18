@@ -38,8 +38,23 @@ export function useArticlePage() {
         setError(null);
         const article = await ArticleService.getArticleById(articleId);
         setSelectedArticle(article);
-        const allContents = await ContentService.getAllContents();
-        setContents(Array.isArray(allContents) ? allContents : []);
+        const ids = Array.isArray(article?.contents_array)
+          ? (article.contents_array as string[]).filter((s) => typeof s === "string" && s.trim())
+          : [];
+        if (ids.length === 0) {
+          setContents([]);
+        } else {
+          const rows = await Promise.all(
+            ids.map(async (id) => {
+              try {
+                return await ContentService.getContentById(id);
+              } catch {
+                return null;
+              }
+            })
+          );
+          setContents(rows.filter(Boolean));
+        }
       } catch (err: any) {
         console.error("Error fetching article data:", err);
         setError(err?.message || "Error loading article");

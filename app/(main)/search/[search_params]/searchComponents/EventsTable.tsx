@@ -1,7 +1,8 @@
 'use client';
 
-import React, { FC } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { EventService } from '@/apiClient/EventService';
 
 interface EventItem {
   id_fair: string;
@@ -12,26 +13,57 @@ interface EventItem {
   region: string;
 }
 
-const MOCK_EVENTS: EventItem[] = [
-  { id_fair: '1', event_name: 'GlassBuild 2025', location: 'Las Vegas', start_date: '2025-09-15', end_date: '2025-09-17', region: 'North America' },
-  { id_fair: '2', event_name: 'Glasstec', location: 'Düsseldorf', start_date: '2025-10-21', end_date: '2025-10-24', region: 'Europe' },
-  { id_fair: '3', event_name: 'China Glass', location: 'Shanghai', start_date: '2025-04-10', end_date: '2025-04-13', region: 'Asia' },
-];
-
 interface EventsTableProps {
   searchTerm: string;
 }
 
 const EventsTable: FC<EventsTableProps> = ({ searchTerm }) => {
-  const filtered = MOCK_EVENTS.filter(
-    (item) =>
-      item.event_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.region.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setError(null);
+      setLoading(true);
+      try {
+        const data = await EventService.getAllEvents();
+        setEvents(Array.isArray(data) ? data : []);
+      } catch (err: unknown) {
+        const message =
+          err && typeof err === 'object' && 'message' in err
+            ? String((err as { message: string }).message)
+            : 'Error loading events';
+        setError(message);
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
+
+  const filtered = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return events;
+    return events.filter((item) => {
+      const name = (item.event_name ?? '').toLowerCase();
+      const location = (item.location ?? '').toLowerCase();
+      const region = (item.region ?? '').toLowerCase();
+      return name.includes(term) || location.includes(term) || region.includes(term);
+    });
+  }, [events, searchTerm]);
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
+      {loading && (
+        <div className="px-6 py-4 text-sm text-gray-600">Loading events...</div>
+      )}
+      {error && (
+        <div className="px-6 py-4 text-sm text-red-700 bg-red-50 border-b border-red-200">
+          {error}
+        </div>
+      )}
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -45,7 +77,7 @@ const EventsTable: FC<EventsTableProps> = ({ searchTerm }) => {
           {filtered.length === 0 ? (
             <tr>
               <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                No events found for &quot;{searchTerm}&quot;
+                {loading ? '—' : `No events found for "${searchTerm}"`}
               </td>
             </tr>
           ) : (

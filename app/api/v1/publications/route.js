@@ -15,11 +15,13 @@ export const POST = createEndpoint(async (request, body) => {
     const publication = await createPublication(body);
     return NextResponse.json(publication);
 }, Joi.object({
-    id_publication: Joi.string().required(),
-    redirectionLink: Joi.string().required(),
-    date: Joi.string().required(),
-    revista: Joi.string().required(),
-    número: Joi.string().required(),
-    publication_main_image_url: Joi.string().optional().allow("")
+    // Canonical RDS columns (public.publications_db)
+    publication_id: Joi.string().required(),
+    magazine_id: Joi.string().allow("").optional(),
+    publication_main_image_url: Joi.string().allow("").optional(),
+    publication_edition_name: Joi.string().allow("").optional(),
+    publication_theme: Joi.string().allow("").optional(),
+    publication_status: Joi.string().allow("").optional(),
+    publication_format: Joi.string().allow("").optional(),
 }), true);
 

@@ -1,37 +1,74 @@
 'use client';
 
-import React, { FC } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { ProductService } from '@/apiClient/ProductService';
 
 interface ProductItem {
   id_product: string;
   product_name: string;
   product_description: string;
   company_name: string;
-  tags: string[];
+  tagsArray: string[];
 }
-
-const MOCK_PRODUCTS: ProductItem[] = [
-  { id_product: '1', product_name: 'Tempered glass panel', product_description: 'Safety glass for facades', company_name: 'Glass Corp', tags: ['facade', 'safety'] },
-  { id_product: '2', product_name: 'Insulating glass unit', product_description: 'Double glazing for energy efficiency', company_name: 'Pane Ltd', tags: ['insulation', 'energy'] },
-  { id_product: '3', product_name: 'Recycled glass tile', product_description: 'Eco-friendly surface', company_name: 'EcoGlass', tags: ['recycled', 'sustainable'] },
-];
 
 interface ProductsTableProps {
   searchTerm: string;
 }
 
 const ProductsTable: FC<ProductsTableProps> = ({ searchTerm }) => {
-  const filtered = MOCK_PRODUCTS.filter(
-    (item) =>
-      item.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.product_description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.tags.some((t) => t.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const [products, setProducts] = useState<ProductItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setError(null);
+      setLoading(true);
+      try {
+        const data = await ProductService.getAllProducts();
+        setProducts(Array.isArray(data) ? data : []);
+      } catch (err: unknown) {
+        const message =
+          err && typeof err === 'object' && 'message' in err
+            ? String((err as { message: string }).message)
+            : 'Error loading products';
+        setError(message);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  const filtered = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return products;
+    return products.filter((item) => {
+      const name = (item.product_name ?? '').toLowerCase();
+      const desc = (item.product_description ?? '').toLowerCase();
+      const company = (item.company_name ?? '').toLowerCase();
+      const tags = Array.isArray(item.tagsArray) ? item.tagsArray : [];
+      return (
+        name.includes(term) ||
+        desc.includes(term) ||
+        company.includes(term) ||
+        tags.some((t) => String(t).toLowerCase().includes(term))
+      );
+    });
+  }, [products, searchTerm]);
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
+      {loading && (
+        <div className="px-6 py-4 text-sm text-gray-600">Loading products...</div>
+      )}
+      {error && (
+        <div className="px-6 py-4 text-sm text-red-700 bg-red-50 border-b border-red-200">
+          {error}
+        </div>
+      )}
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
@@ -45,7 +82,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ searchTerm }) => {
           {filtered.length === 0 ? (
             <tr>
               <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                No products found for &quot;{searchTerm}&quot;
+                {loading ? '—' : `No products found for "${searchTerm}"`}
               </td>
             </tr>
           ) : (
@@ -60,7 +97,7 @@ const ProductsTable: FC<ProductsTableProps> = ({ searchTerm }) => {
                 <td className="px-6 py-4 text-sm text-gray-900">{item.company_name}</td>
                 <td className="px-6 py-4 text-sm text-gray-900">
                   <div className="flex flex-wrap gap-1">
-                    {item.tags.map((tag, i) => (
+                    {(item.tagsArray ?? []).map((tag, i) => (
                       <span key={i} className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
                         {tag}
                       </span>

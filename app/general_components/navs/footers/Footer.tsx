@@ -63,11 +63,11 @@ const Footer: FC = () => {
               <Link href="/events" className="hover:text-gray-900 transition-colors">
               Events
             </Link>
-            <Link href="/mediakit" className="hover:text-gray-900 transition-colors">
-              Mediakit
+            <Link href="/advertise" className="hover:text-gray-900 transition-colors">
+              Advertise
             </Link>
             <Link href="/contact" className="hover:text-gray-900 transition-colors">
-              Contact
+              Contact us
             </Link>
             {isLogged === true ? (
               <button

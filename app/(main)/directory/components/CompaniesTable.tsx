@@ -17,7 +17,12 @@ const CompaniesTable: FC = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState('');
+  const [filters, setFilters] = useState({
+    name: "",
+    country: "",
+    region: "",
+    description: "",
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
@@ -40,16 +45,21 @@ const CompaniesTable: FC = () => {
   }, []);
 
   const filteredCompanies = useMemo(() => {
-    if (!filter) return companies;
-    const lowerFilter = filter.toLowerCase();
-    return companies.filter(
-      (company) =>
-        (company.company_name ?? "").toLowerCase().includes(lowerFilter) ||
-        (company.country ?? "").toLowerCase().includes(lowerFilter) ||
-        (company.region ?? "").toLowerCase().includes(lowerFilter) ||
-        (company.main_description ?? "").toLowerCase().includes(lowerFilter)
-    );
-  }, [companies, filter]);
+    const name = filters.name.trim().toLowerCase();
+    const country = filters.country.trim().toLowerCase();
+    const region = filters.region.trim().toLowerCase();
+    const description = filters.description.trim().toLowerCase();
+
+    if (!name && !country && !region && !description) return companies;
+
+    return companies.filter((c) => {
+      if (name && !(c.company_name ?? "").toLowerCase().includes(name)) return false;
+      if (country && !(c.country ?? "").toLowerCase().includes(country)) return false;
+      if (region && !(c.region ?? "").toLowerCase().includes(region)) return false;
+      if (description && !(c.main_description ?? "").toLowerCase().includes(description)) return false;
+      return true;
+    });
+  }, [companies, filters]);
 
   const totalPages = Math.ceil(filteredCompanies.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -58,7 +68,7 @@ const CompaniesTable: FC = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filter]);
+  }, [filters]);
 
   const handlePrevious = () => {
     setCurrentPage((prev) => Math.max(1, prev - 1));
@@ -72,13 +82,36 @@ const CompaniesTable: FC = () => {
     <div className='w-full'>
       {/* Filter */}
       <div className='mb-6'>
-        <input
-          type='text'
-          placeholder='Search companies by name, country, region, or description...'
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-        />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <input
+            type="text"
+            placeholder="Company name"
+            value={filters.name}
+            onChange={(e) => setFilters((p) => ({ ...p, name: e.target.value }))}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <input
+            type="text"
+            placeholder="Country"
+            value={filters.country}
+            onChange={(e) => setFilters((p) => ({ ...p, country: e.target.value }))}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <input
+            type="text"
+            placeholder="Region"
+            value={filters.region}
+            onChange={(e) => setFilters((p) => ({ ...p, region: e.target.value }))}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <input
+            type="text"
+            placeholder="Description"
+            value={filters.description}
+            onChange={(e) => setFilters((p) => ({ ...p, description: e.target.value }))}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
       </div>
 
       {/* Loading */}

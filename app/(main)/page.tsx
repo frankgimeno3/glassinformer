@@ -154,10 +154,11 @@ export default function Home() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+            {/* Lista bajo MainNews: una columna, filas imagen 40% / contenido 60%, gap compacto */}
+            <div className="flex flex-col gap-4 sm:gap-5">
               {gridItems.map((item, idx) =>
                 item.type === "banner" ? (
-                  <div key={`mid-banner-${idx}`} className="col-span-1 md:col-span-2 lg:col-span-3">
+                  <div key={`mid-banner-${idx}`} className="w-full">
                     <MidBanner
                       banner={midBanners[gridItems.slice(0, idx).filter((i) => i.type === "banner").length] ?? null}
                     />
@@ -165,6 +166,7 @@ export default function Home() {
                 ) : (
                   <ArticleMiniature
                     key={item.article.id_article || item.index}
+                    layout="row"
                     id_article={item.article.id_article || ""}
                     titulo={item.article.articleTitle || ""}
                     company={item.article.company || ""}

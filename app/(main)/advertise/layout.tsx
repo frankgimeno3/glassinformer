@@ -1,6 +1,6 @@
 import MidBanner from "@/app/general_components/banners/MidBanner";
 
-export default function MediakitLayout({
+export default function AdvertiseLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (

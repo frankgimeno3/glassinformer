@@ -1,90 +1,120 @@
 'use client';
 
-import React, { FC, useState, useCallback } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import usersData from '@/app/contents/usersData.json';
+import { ContentPreferenceService } from '@/app/service/ContentPreferenceService';
 
-export const CONTENT_TOPICS = [
-  'Architectural glass',
-  'Automotive glass',
-  'Hollow glass',
-  'Glass machinery',
-  'Glass components',
-  'Flat glass',
-  'Smart glass',
-  'Energy-efficient glazing',
-  'Glass coatings',
-  'Container glass',
-  'Solar glass',
-  'Glass recycling',
-  'Glass furnaces',
-  'Float glass',
-  'Tempered glass',
-  'Laminated glass',
-  'Glass insulation',
-  'Decorative glass',
-  'Technical glass',
-  'Glass raw materials',
-] as const;
+type PreferenceState = 'neutral' | 'not interested' | 'very interested';
 
-type Topic = (typeof CONTENT_TOPICS)[number];
+interface TopicPreferenceRow {
+  topic_id: number;
+  topic_name: string;
+  topic_description: string;
+  user_feed_preference_id: string | null;
+  preference_state: PreferenceState;
+}
 
-type UserWithPreferences = { interestedTopics?: string[]; DoNotShow?: string[] };
-const currentUser = (usersData as UserWithPreferences[])[0];
-const initialInterested = new Set<string>(currentUser?.interestedTopics ?? []);
-const initialDoNotShow = new Set<string>(currentUser?.DoNotShow ?? []);
+function normalizeRow(raw: unknown): TopicPreferenceRow | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const o = raw as Record<string, unknown>;
+  const topic_id = Number(o.topic_id);
+  if (!Number.isFinite(topic_id)) return null;
+  const ps = o.preference_state;
+  const preference_state: PreferenceState =
+    ps === 'not interested' || ps === 'very interested' || ps === 'neutral' ? ps : 'neutral';
+  return {
+    topic_id,
+    topic_name: typeof o.topic_name === 'string' ? o.topic_name : String(o.topic_name ?? ''),
+    topic_description:
+      typeof o.topic_description === 'string' ? o.topic_description : String(o.topic_description ?? ''),
+    user_feed_preference_id:
+      o.user_feed_preference_id != null ? String(o.user_feed_preference_id) : null,
+    preference_state,
+  };
+}
 
-interface ContentPreferencesProps {}
+function rank(value: PreferenceState) {
+  if (value === 'very interested') return 0;
+  if (value === 'neutral') return 1;
+  return 2;
+}
 
-const ContentPreferences: FC<ContentPreferencesProps> = () => {
-  const [interested, setInterested] = useState<Set<string>>(() => initialInterested);
-  const [doNotShow, setDoNotShow] = useState<Set<string>>(() => initialDoNotShow);
-  const [openInterested, setOpenInterested] = useState(true);
-  const [openDoNot, setOpenDoNot] = useState(true);
-  const [showSavePopup, setShowSavePopup] = useState(false);
-  const [confirmModal, setConfirmModal] = useState<{ topic: string } | null>(null);
+function buttonClass(value: PreferenceState, selected: boolean) {
+  const base =
+    'h-10 w-full rounded-lg border text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-blue-950/20 disabled:opacity-50 disabled:cursor-not-allowed';
+  if (selected) {
+    if (value === 'not interested') return `${base} border-red-600 bg-red-600 text-white`;
+    if (value === 'very interested') return `${base} border-green-600 bg-green-600 text-white`;
+    return `${base} border-blue-950 bg-blue-950 text-white`;
+  }
+  if (value === 'not interested')
+    return `${base} border-gray-200 bg-white text-gray-800 hover:border-red-300 hover:bg-red-50`;
+  if (value === 'very interested')
+    return `${base} border-gray-200 bg-white text-gray-800 hover:border-green-300 hover:bg-green-50`;
+  return `${base} border-gray-200 bg-white text-gray-800 hover:border-gray-300 hover:bg-gray-50`;
+}
 
-  const isDisabled = useCallback(
-    (topic: string) => doNotShow.has(topic),
-    [doNotShow]
-  );
+const ContentPreferences: FC = () => {
+  const [rows, setRows] = useState<TopicPreferenceRow[]>([]);
+  const [orderIds, setOrderIds] = useState<number[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [savingTopicId, setSavingTopicId] = useState<number | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  const handleInterestedToggle = useCallback(
-    (topic: string) => {
-      if (doNotShow.has(topic)) return;
-      setInterested((prev) => {
-        const next = new Set(prev);
-        if (next.has(topic)) next.delete(topic);
-        else next.add(topic);
-        return next;
+  const load = useCallback(async () => {
+    setLoadError(null);
+    setLoading(true);
+    try {
+      const list = await ContentPreferenceService.list();
+      const parsed = (Array.isArray(list) ? list : []).map(normalizeRow).filter(Boolean) as TopicPreferenceRow[];
+      setRows(parsed);
+      const sorted = [...parsed].sort((a, b) => {
+        const ra = rank(a.preference_state);
+        const rb = rank(b.preference_state);
+        if (ra !== rb) return ra - rb;
+        return a.topic_name.localeCompare(b.topic_name);
       });
-      setShowSavePopup(true);
-    },
-    [doNotShow]
-  );
-
-  const handleDoNotShowToggle = useCallback((topic: string) => {
-    if (doNotShow.has(topic)) return; // already in do-not-show, disabled
-    setConfirmModal({ topic });
-  }, [doNotShow]);
-
-  const handleConfirmDoNot = useCallback(() => {
-    if (!confirmModal) return;
-    const { topic } = confirmModal;
-    setDoNotShow((prev) => new Set(prev).add(topic));
-    setInterested((prev) => {
-      const next = new Set(prev);
-      next.delete(topic);
-      return next;
-    });
-    setConfirmModal(null);
-    setShowSavePopup(true);
-  }, [confirmModal]);
-
-  const handleSaveChanges = useCallback(() => {
-    setShowSavePopup(false);
-    window.location.reload();
+      setOrderIds(sorted.map((r) => r.topic_id));
+    } catch (e: unknown) {
+      const msg =
+        typeof e === 'object' && e !== null && 'message' in e
+          ? String((e as { message?: string }).message)
+          : 'Could not load preferences';
+      setLoadError(msg);
+      setRows([]);
+      setOrderIds([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const byId = useMemo(() => new Map(rows.map((r) => [r.topic_id, r])), [rows]);
+
+  const setTopicPreference = async (topicId: number, next: PreferenceState) => {
+    const current = byId.get(topicId)?.preference_state;
+    if (current === next) return;
+    setSaveError(null);
+    setSavingTopicId(topicId);
+    try {
+      await ContentPreferenceService.update(topicId, next);
+      setRows((prev) =>
+        prev.map((r) => (r.topic_id === topicId ? { ...r, preference_state: next } : r))
+      );
+    } catch (e: unknown) {
+      const msg =
+        typeof e === 'object' && e !== null && 'message' in e
+          ? String((e as { message?: string }).message)
+          : 'Could not save preference';
+      setSaveError(msg);
+    } finally {
+      setSavingTopicId(null);
+    }
+  };
 
   return (
     <div className="bg-white min-h-[60vh] rounded-lg shadow p-6 md:p-8">
@@ -96,138 +126,93 @@ const ContentPreferences: FC<ContentPreferencesProps> = () => {
       </Link>
       <h1 className="text-2xl font-semibold text-gray-800 mb-2">Content preferences</h1>
       <p className="text-gray-600 text-sm mb-8">
-        From here you can set the priorities for the articles you read and tailor your feed to your interests.
+        These preferences apply to the Glassinformer portal feed. Use them to prioritize what you read and tailor
+        your feed to your interests. They are stored in your account (database), not in this browser.
       </p>
 
-      {/* Content I am interested in */}
-      <section className="border border-gray-200 rounded-lg mb-4 overflow-hidden">
-        <button
-          type="button"
-          onClick={() => setOpenInterested((o) => !o)}
-          className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 text-left font-medium text-gray-800"
-        >
-          Content I am interested in
-          <span className="text-gray-500">{openInterested ? '▼' : '▶'}</span>
-        </button>
-        {openInterested && (
-          <div className="p-4 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {CONTENT_TOPICS.map((topic) => {
-              const disabled = isDisabled(topic);
-              return (
-                <label
-                  key={topic}
-                  className={`flex items-center gap-2 ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={interested.has(topic)}
-                    onChange={() => handleInterestedToggle(topic)}
-                    disabled={disabled}
-                    className="rounded border-gray-300 text-blue-950 focus:ring-blue-950 disabled:bg-gray-200 disabled:border-gray-300"
-                  />
-                  <span className={disabled ? 'text-gray-400' : 'text-gray-700'}>{topic}</span>
-                </label>
-              );
-            })}
-          </div>
-        )}
-      </section>
+      {loadError ? (
+        <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{loadError}</p>
+      ) : null}
+      {saveError ? (
+        <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          {saveError}
+        </p>
+      ) : null}
 
-      {/* Content I don&apos;t want to know about */}
-      <section className="border border-gray-200 rounded-lg overflow-hidden">
-        <button
-          type="button"
-          onClick={() => setOpenDoNot((o) => !o)}
-          className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 text-left font-medium text-gray-800"
-        >
-          Content I don&apos;t want to know about
-          <span className="text-gray-500">{openDoNot ? '▼' : '▶'}</span>
-        </button>
-        {openDoNot && (
-          <div className="p-4 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {CONTENT_TOPICS.map((topic) => {
-              const disabled = doNotShow.has(topic);
-              return (
-                <label
-                  key={topic}
-                  className={`flex items-center gap-2 ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={doNotShow.has(topic)}
-                    onChange={() => handleDoNotShowToggle(topic)}
-                    disabled={disabled}
-                    className="rounded border-gray-300 text-blue-950 focus:ring-blue-950 disabled:bg-gray-200 disabled:border-gray-300"
-                  />
-                  <span className={disabled ? 'text-gray-400' : 'text-gray-700'}>{topic}</span>
-                </label>
-              );
-            })}
+      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-4 px-4 py-3 bg-gray-50 border-b border-gray-200">
+          <div className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Content topics</div>
+          <div className="hidden md:block text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
+            Not interested
           </div>
-        )}
-      </section>
-
-      {/* Save changes popup */}
-      {showSavePopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-lg shadow-xl p-6 mx-4 max-w-sm w-full">
-            <p className="text-gray-800 font-medium mb-4">Save changes?</p>
-            <div className="flex gap-2 justify-end">
-              <button
-                type="button"
-                onClick={() => setShowSavePopup(false)}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveChanges}
-                className="px-4 py-2 rounded-lg bg-blue-950 text-white hover:bg-blue-900"
-              >
-                Save changes
-              </button>
-            </div>
+          <div className="hidden md:block text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
+            Neutral
+          </div>
+          <div className="hidden md:block text-xs font-semibold text-gray-600 uppercase tracking-wider text-center">
+            Very interested
           </div>
         </div>
-      )}
 
-      {/* Confirm add to Do Not Show modal */}
-      {confirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-lg shadow-xl p-6 mx-4 max-w-sm w-full relative">
-            <button
-              type="button"
-              onClick={() => setConfirmModal(null)}
-              className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700"
-              aria-label="Cancel"
-            >
-              ✕
-            </button>
-            <p className="text-gray-800 font-medium mb-2">Confirm change</p>
-            <p className="text-gray-600 text-sm mb-4">
-              Add &quot;{confirmModal.topic}&quot; to content you don&apos;t want to see? It will be removed from your
-              interests if selected.
-            </p>
-            <div className="flex gap-2 justify-end">
-              <button
-                type="button"
-                onClick={() => setConfirmModal(null)}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmDoNot}
-                className="px-4 py-2 rounded-lg bg-blue-950 text-white hover:bg-blue-900"
-              >
-                Confirm
-              </button>
+        <div className="divide-y divide-gray-200">
+          {loading ? (
+            <div className="px-4 py-8 text-center text-sm text-gray-500">Loading your preferences…</div>
+          ) : orderIds.length === 0 ? (
+            <div className="px-4 py-8 text-center text-sm text-gray-500">
+              No topics are configured for this portal yet.
             </div>
-          </div>
+          ) : (
+            orderIds.map((id) => {
+              const row = byId.get(id);
+              if (!row) return null;
+              const value = row.preference_state;
+              const busy = savingTopicId === row.topic_id;
+              return (
+                <div
+                  key={row.topic_id}
+                  className="grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-4 px-4 py-4 items-center"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900">{row.topic_name}</p>
+                    <p className="mt-1 text-xs text-gray-500 md:hidden">Topic interest</p>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => setTopicPreference(row.topic_id, 'not interested')}
+                    className={buttonClass('not interested', value === 'not interested')}
+                  >
+                    Not interested
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => setTopicPreference(row.topic_id, 'neutral')}
+                    className={buttonClass('neutral', value === 'neutral')}
+                  >
+                    Neutral
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => setTopicPreference(row.topic_id, 'very interested')}
+                    className={buttonClass('very interested', value === 'very interested')}
+                  >
+                    Very interested
+                  </button>
+                </div>
+              );
+            })
+          )}
         </div>
-      )}
+      </div>
+
+      <p className="mt-4 text-xs text-gray-500">
+        Changes are saved to the database when you tap an option. The list order is set when you open this page (reload
+        to re-sort by interest).
+      </p>
     </div>
   );
 };

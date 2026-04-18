@@ -27,11 +27,11 @@ export const PUT = createEndpoint(async (request, body) => {
     const publication = await updatePublication(id, body);
     return NextResponse.json(publication);
 }, Joi.object({
-    redirectionLink: Joi.string().optional(),
-    date: Joi.string().optional(),
-    revista: Joi.string().optional(),
-    número: Joi.string().optional(),
-    publication_main_image_url: Joi.string().optional().allow("")
+    publication_main_image_url: Joi.string().optional().allow(""),
+    publication_edition_name: Joi.string().optional().allow(""),
+    publication_theme: Joi.string().optional().allow(""),
+    publication_status: Joi.string().optional().allow(""),
+    publication_format: Joi.string().optional().allow(""),
 }), true);
 
 export const DELETE = createEndpoint(async (request) => {

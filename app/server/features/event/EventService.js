@@ -63,7 +63,7 @@ export async function getAllEvents() {
                     e.event_end_date AS end_date,
                     e.event_location AS location,
                     e.event_main_image_src AS event_main_image
-             FROM public.events e
+             FROM public.events_db e
              INNER JOIN public.event_portals ep ON e.event_id = ep.event_id AND ep.portal_id = :portalId
              ORDER BY e.event_start_date ASC`,
             { replacements: { portalId: portal_id }, type: QueryTypes.SELECT }
@@ -126,4 +126,55 @@ export async function getEventById(idFair) {
         console.error('Error fetching event from database:', error);
         throw error;
     }
+}
+
+/**
+ * Event News: articles linked via event_articles for events that belong to this portal.
+ * Source of truth:
+ * - event_portals: filters which events belong to portal
+ * - event_articles: links event_id -> article_id
+ * - article_portals: ensures article is published/public for this portal
+ * - articles_db: article data
+ */
+export async function getEventNewsArticles() {
+    if (!EventModel.sequelize) {
+        return [];
+    }
+    const rows = await EventModel.sequelize.query(
+        `SELECT DISTINCT
+                a.id_article,
+                a.article_title,
+                a.article_subtitle,
+                a.article_main_image_url,
+                a.article_company_names_array,
+                a.article_company_id_array,
+                a.article_date AS date,
+                a.is_article_event,
+                a.article_event_id AS event_id
+         FROM public.event_portals ep
+         INNER JOIN public.event_articles ea
+           ON ea.event_id = ep.event_id
+         INNER JOIN public.article_portals ap
+           ON ap.article_id = ea.article_id
+          AND ap.article_portal_ref_id = ep.portal_id
+          AND ap.article_status = 'published'
+          AND ap.article_visibility = 'public'
+         INNER JOIN public.articles_db a
+           ON a.id_article = ea.article_id
+         WHERE ep.portal_id = :portalId
+         ORDER BY a.article_date DESC NULLS LAST`,
+        { replacements: { portalId: portal_id }, type: QueryTypes.SELECT }
+    );
+    return (rows || []).map((r) => ({
+        id_article: r.id_article,
+        articleTitle: r.article_title ?? "",
+        articleSubtitle: r.article_subtitle ?? "",
+        article_main_image_url: rewriteDeprecatedSourceUnsplashUrl(r.article_main_image_url || ""),
+        company: Array.isArray(r.article_company_names_array)
+            ? r.article_company_names_array.join(", ")
+            : "",
+        date: r.date ? String(r.date).split("T")[0] : null,
+        is_article_event: r.is_article_event === true,
+        event_id: r.event_id ?? null,
+    }));
 }

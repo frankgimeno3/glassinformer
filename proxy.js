@@ -65,7 +65,7 @@ export async function proxy(request) {
     // Auth routes + (main) content routes; keep in sync with nav/footer links.
     const publicPathPrefixes = [
         '/auth/login', '/auth/signup', '/auth/confirm', '/auth/forgot',
-        '/publications', '/directory', '/events', '/mediakit', '/articles', '/search',
+        '/publications', '/directory', '/events', '/advertise', '/articles', '/search',
         '/contact', '/legal',
     ];
     const isPublicPath = pathname === '/' || publicPathPrefixes.some((p) => pathname === p || pathname.startsWith(p + '/'));

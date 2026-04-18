@@ -4,21 +4,11 @@ import { getProfileUserById } from "../../../../server/features/userProfile/User
 
 export const runtime = "nodejs";
 
-/** Decode id so %40 in URL becomes @ for DB lookup (id_user is email). */
-function decodeId(segment) {
-    if (!segment || typeof segment !== "string") return segment;
-    try {
-        return decodeURIComponent(segment);
-    } catch {
-        return segment;
-    }
-}
-
-/** Get id from Next.js route params, with fallback to path parsing. Always decode for DB (e.g. %40 → @). */
+/** Get id from Next.js route params, with fallback to path parsing. */
 async function getId(request, context) {
     const params = context?.params != null ? await Promise.resolve(context.params) : null;
     if (params?.id != null && typeof params.id === "string") {
-        return decodeId(params.id);
+        return params.id;
     }
     const pathname = new URL(request.url).pathname;
     const prefix = "/api/v1/users/";
@@ -29,7 +19,7 @@ async function getId(request, context) {
     if (!segment) {
         throw new Error("User ID not found in URL");
     }
-    return decodeId(segment);
+    return segment;
 }
 
 export const GET = createEndpoint(

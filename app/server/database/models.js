@@ -89,11 +89,13 @@ EventModel.init({
     region: { type: DataTypes.STRING, field: "event_region" },
     start_date: {
         type: DataTypes.DATEONLY,
-        allowNull: false
+        allowNull: false,
+        field: "event_start_date"
     },
     end_date: {
         type: DataTypes.DATEONLY,
-        allowNull: false
+        allowNull: false,
+        field: "event_end_date"
     },
     event_main_image: {
         type: DataTypes.STRING,
@@ -103,13 +105,13 @@ EventModel.init({
     sequelize,
     modelName: 'event',
     underscored: true,
-    tableName: 'events',
+    tableName: 'events_db',
     timestamps: true,
     createdAt: 'event_created_at',
     updatedAt: 'event_updated_at',
     indexes: [
         { fields: ['event_name'] },
-        { fields: ['event_start_date'] },
+        { fields: ['start_date'] },
         { fields: ['event_region'] }
     ]
 });
@@ -192,6 +194,9 @@ ProductModel.init({
     modelName: 'product',
     underscored: true,
     tableName: "products_db",
+    timestamps: true,
+    createdAt: "product_created_at",
+    updatedAt: "product_updated_at",
     indexes: [
         { fields: ['product_name'] },
         { fields: ['id_company'] }
@@ -240,87 +245,52 @@ ContentModel.init({
 });
 
 PublicationModel.init({
-    id_publication: {
-        type: DataTypes.STRING,
-        primaryKey: true,
-        unique: true
-    },
-    redirection_link: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    date: {
-        type: DataTypes.DATE,
-        allowNull: false
-    },
-    revista: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    número: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    publication_main_image_url: {
-        type: DataTypes.STRING,
-        allowNull: true
-    }
+    // Canonical RDS schema: public.publications_db (see plynium_central_panel/docs/RDS_SCHEMA.md)
+    publication_id: { type: DataTypes.STRING, primaryKey: true, unique: true, field: "publication_id" },
+    publication_main_image_url: { type: DataTypes.STRING, allowNull: true, field: "publication_main_image_url" },
+    magazine_id: { type: DataTypes.STRING, allowNull: true, field: "magazine_id" },
+    publication_year: { type: DataTypes.INTEGER, allowNull: true, field: "publication_year" },
+    publication_edition_name: { type: DataTypes.STRING, allowNull: true, field: "publication_edition_name" },
+    magazine_general_issue_number: { type: DataTypes.INTEGER, allowNull: true, field: "magazine_general_issue_number" },
+    magazine_this_year_issue: { type: DataTypes.INTEGER, allowNull: true, field: "magazine_this_year_issue" },
+    publication_expected_publication_month: { type: DataTypes.SMALLINT, allowNull: true, field: "publication_expected_publication_month" },
+    real_publication_month_date: { type: DataTypes.DATEONLY, allowNull: true, field: "real_publication_month_date" },
+    publication_materials_deadline: { type: DataTypes.DATEONLY, allowNull: true, field: "publication_materials_deadline" },
+    is_special_edition: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false, field: "is_special_edition" },
+    publication_theme: { type: DataTypes.STRING, allowNull: true, field: "publication_theme" },
+    publication_status: { type: DataTypes.STRING, allowNull: false, field: "publication_status" },
+    publication_format: { type: DataTypes.STRING, allowNull: false, field: "publication_format" },
 }, {
     sequelize,
     modelName: 'publication',
     underscored: true,
     tableName: "publications_db",
+    timestamps: false,
     indexes: [
-        {fields: ['date']},
-        {fields: ['revista']}
+        { fields: ['publication_year'] },
+        { fields: ['magazine_id'] },
+        { fields: ['real_publication_month_date'] }
     ]
 });
 
 UserProfileModel.init({
-    id_user: {
-        type: DataTypes.STRING(255),
-        primaryKey: true,
-        unique: true,
-        field: "id_user"
-    },
-    user_name: {
-        type: DataTypes.STRING(255),
-        defaultValue: "",
-        allowNull: true
-    },
-    user_surnames: {
-        type: DataTypes.STRING(255),
-        defaultValue: "",
-        allowNull: true
-    },
-    user_description: {
-        type: DataTypes.TEXT,
-        defaultValue: "",
-        allowNull: true
-    },
-    user_main_image_src: {
-        type: DataTypes.STRING(2048),
-        defaultValue: "",
-        allowNull: true
-    },
-    user_current_company: {
-        type: DataTypes.JSONB,
-        defaultValue: { id_company: "", userPosition: "" },
-        allowNull: true
-    },
-    experience_array: {
-        type: DataTypes.JSONB,
-        defaultValue: [],
-        allowNull: true
-    }
+    // Canonical RDS schema: public.users_db (see plynium_central_panel/docs/RDS_SCHEMA.md)
+    user_id: { type: DataTypes.UUID, primaryKey: true, allowNull: false, field: "user_id" },
+    user_email: { type: DataTypes.STRING(255), allowNull: false, field: "user_email" },
+    user_name: { type: DataTypes.STRING(255), allowNull: true, field: "user_name" },
+    user_surnames: { type: DataTypes.STRING(255), allowNull: true, field: "user_surnames" },
+    user_description: { type: DataTypes.TEXT, allowNull: true, field: "user_description" },
+    user_main_image_src: { type: DataTypes.STRING(2048), allowNull: true, field: "user_main_image_src" },
+    user_cognito_sub: { type: DataTypes.STRING(255), allowNull: true, field: "user_cognito_sub" },
+    user_linkedin_profile: { type: DataTypes.STRING(1024), allowNull: true, field: "user_linkedin_profile" },
 }, {
     sequelize,
     modelName: "userProfile",
-    tableName: "users",
+    tableName: "users_db",
     underscored: true,
     timestamps: false,
     indexes: [
-        { fields: ["id_user"] }
+        { fields: ["user_email"] }
     ]
 });
 
@@ -384,6 +354,31 @@ BannerModel.init({
         allowNull: false,
         defaultValue: 0,
         field: "banner_position"
+    },
+    banner_status: {
+        type: DataTypes.STRING(32),
+        allowNull: true,
+        field: "banner_status"
+    },
+    alt: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        field: "alt"
+    },
+    starts_at: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        field: "starts_at"
+    },
+    ends_at: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        field: "ends_at"
+    },
+    position: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: "position"
     }
 }, {
     sequelize,

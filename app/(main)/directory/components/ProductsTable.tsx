@@ -21,7 +21,13 @@ const ProductsTable: FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState('');
+  const [filters, setFilters] = useState({
+    name: "",
+    description: "",
+    company: "",
+    category: "",
+    price: "",
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
@@ -44,17 +50,26 @@ const ProductsTable: FC = () => {
   }, []);
 
   const filteredProducts = useMemo(() => {
-    if (!filter) return products;
-    const lowerFilter = filter.toLowerCase();
-    return products.filter(
-      (product) =>
-        (product.product_name ?? "").toLowerCase().includes(lowerFilter) ||
-        (product.product_description ?? "").toLowerCase().includes(lowerFilter) ||
-        (product.company_name ?? "").toLowerCase().includes(lowerFilter) ||
-        (product.tagsArray ?? []).some((tag) => String(tag).toLowerCase().includes(lowerFilter)) ||
-        (product.price != null && String(product.price).toLowerCase().includes(lowerFilter))
-    );
-  }, [products, filter]);
+    const name = filters.name.trim().toLowerCase();
+    const description = filters.description.trim().toLowerCase();
+    const company = filters.company.trim().toLowerCase();
+    const category = filters.category.trim().toLowerCase();
+    const price = filters.price.trim().toLowerCase();
+
+    if (!name && !description && !company && !category && !price) return products;
+
+    return products.filter((p) => {
+      if (name && !(p.product_name ?? "").toLowerCase().includes(name)) return false;
+      if (description && !(p.product_description ?? "").toLowerCase().includes(description)) return false;
+      if (company && !(p.company_name ?? "").toLowerCase().includes(company)) return false;
+      if (category) {
+        const tags = Array.isArray(p.tagsArray) ? p.tagsArray : [];
+        if (!tags.some((t) => String(t).toLowerCase().includes(category))) return false;
+      }
+      if (price && !(p.price != null && String(p.price).toLowerCase().includes(price))) return false;
+      return true;
+    });
+  }, [products, filters]);
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -63,27 +78,57 @@ const ProductsTable: FC = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [filter]);
+  }, [filters]);
 
   const handlePrevious = () => {
     setCurrentPage((prev) => Math.max(1, prev - 1));
   };
 
   const handleNext = () => {
-    setCurrentPage((prev) => Math.min(totalPages, prev + 1));
+    setCurrentPage((prev) => Math.max(1, Math.min(totalPages || 1, prev + 1)));
   };
 
   return (
     <div className='w-full'>
       {/* Filter */}
       <div className='mb-6'>
-        <input
-          type='text'
-          placeholder='Search products by name, description, company, or tags...'
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-        />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <input
+            type="text"
+            placeholder="Product name"
+            value={filters.name}
+            onChange={(e) => setFilters((p) => ({ ...p, name: e.target.value }))}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <input
+            type="text"
+            placeholder="Description"
+            value={filters.description}
+            onChange={(e) => setFilters((p) => ({ ...p, description: e.target.value }))}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <input
+            type="text"
+            placeholder="Company"
+            value={filters.company}
+            onChange={(e) => setFilters((p) => ({ ...p, company: e.target.value }))}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <input
+            type="text"
+            placeholder="Category"
+            value={filters.category}
+            onChange={(e) => setFilters((p) => ({ ...p, category: e.target.value }))}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <input
+            type="text"
+            placeholder="Price"
+            value={filters.price}
+            onChange={(e) => setFilters((p) => ({ ...p, price: e.target.value }))}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
       </div>
 
       {/* Loading */}
@@ -183,7 +228,7 @@ const ProductsTable: FC = () => {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {totalPages > 0 && (
         <div className='mt-6 flex items-center justify-between'>
           <div className='text-sm text-gray-700'>
             Showing {startIndex + 1} to {Math.min(endIndex, filteredProducts.length)} of{' '}
