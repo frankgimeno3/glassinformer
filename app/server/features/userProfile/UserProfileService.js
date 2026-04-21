@@ -342,6 +342,129 @@ export async function syncPortalFirstLoginForSessionUser(email) {
 }
 
 /**
+ * @param {object} claims - Payload decodificado del idToken de Cognito
+ * @returns {{ email: string, sub: string, user_name: string, user_surnames: string, picture: string }}
+ */
+function profileFieldsFromIdTokenClaims(claims) {
+    const emailRaw = claims?.email ?? claims?.["cognito:username"] ?? "";
+    const email = String(emailRaw).trim();
+    const sub = String(claims?.sub ?? "").trim();
+    const given = String(claims?.given_name ?? "").trim();
+    const family = String(claims?.family_name ?? "").trim();
+    const fullName = String(claims?.name ?? "").trim();
+    let user_name = given;
+    let user_surnames = family;
+    if (!user_name && fullName) {
+        const parts = fullName.split(/\s+/).filter(Boolean);
+        user_name = parts[0] || "";
+        user_surnames = parts.slice(1).join(" ") || "";
+    }
+    const picture = String(claims?.picture ?? "")
+        .trim()
+        .slice(0, 2048);
+    return { email, sub, user_name, user_surnames, picture };
+}
+
+/**
+ * Cognito suele incluir `identities` con providerName Google en sesiones federadas.
+ * @param {object} claims
+ * @returns {boolean}
+ */
+export function isGoogleFederatedIdToken(claims) {
+    const identities = claims?.identities;
+    if (!Array.isArray(identities) || identities.length === 0) return false;
+    return identities.some((i) => String(i?.providerName ?? "").toLowerCase() === "google");
+}
+
+/**
+ * Heurística si el claim `identities` no viene en el token (según mapeo del User Pool).
+ * @param {object} claims
+ * @returns {boolean}
+ */
+export function looksLikeGoogleCognitoSession(claims) {
+    if (isGoogleFederatedIdToken(claims)) return true;
+    const u = String(claims?.["cognito:username"] ?? "");
+    if (u.startsWith("Google_")) return true;
+    return false;
+}
+
+/**
+ * Crea o actualiza fila en `users_db` tras OAuth Google (misma clave de negocio: email).
+ * Actualiza `user_cognito_sub`, nombre y avatar cuando aporta valor sin pisar datos ya rellenados por el usuario salvo sub/imagen desde Google.
+ * `auth_provider` en Cognito queda reflejado en el token (`identities`); no hay columna dedicada en RDS en el esquema actual.
+ *
+ * @param {object} claims - idToken payload
+ * @param {{ subscribe_portal_newsletter?: boolean }} [options]
+ * @returns {Promise<object>}
+ */
+export async function upsertProfileFromGoogleIdToken(claims, options = {}) {
+    const { email, sub, user_name, user_surnames, picture } = profileFieldsFromIdTokenClaims(claims);
+    if (!email) {
+        throw new Error("El token no incluye email");
+    }
+    if (!sub) {
+        throw new Error("El token no incluye sub");
+    }
+    if (!UserProfileModel.sequelize) {
+        throw new Error("UserProfileModel no inicializado. Comprueba la conexión a la base de datos.");
+    }
+
+    const subscribe = options.subscribe_portal_newsletter === true;
+    const alwaysListIds = Array.isArray(signupAlwaysNewsletterListIds)
+        ? signupAlwaysNewsletterListIds.map((x) => String(x || "").trim()).filter((id) => UUID_RE.test(id))
+        : [];
+
+    const existing = await UserProfileModel.findOne({ where: { user_email: email } });
+    if (existing) {
+        const updates = {};
+        if (sub) {
+            updates.user_cognito_sub = sub;
+        }
+        if (picture && !String(existing.user_main_image_src || "").trim()) {
+            updates.user_main_image_src = picture;
+        }
+        if (user_name && !String(existing.user_name || "").trim()) {
+            updates.user_name = user_name;
+        }
+        if (user_surnames && !String(existing.user_surnames || "").trim()) {
+            updates.user_surnames = user_surnames;
+        }
+        if (Object.keys(updates).length > 0) {
+            await existing.update(updates);
+        }
+        await assignNeutralTopicsAndMarkPortalLogged(String(existing.user_id), portal_id);
+        if (alwaysListIds.length > 0) {
+            await subscribeUserToNewsletterListIds(existing.user_id, alwaysListIds);
+        }
+        if (subscribe) {
+            await subscribeUserToPortalMainNewsletterList(existing.user_id, portal_id);
+        }
+        await existing.reload();
+        return toApiFormat(existing, { includeEmail: true });
+    }
+
+    const user = await UserProfileModel.create({
+        user_id: randomUuid(),
+        user_email: email,
+        user_name: user_name || "",
+        user_surnames: user_surnames || "",
+        user_description: "",
+        user_main_image_src: picture || "",
+        user_cognito_sub: sub,
+    });
+
+    await assignNeutralTopicsAndMarkPortalLogged(String(user.user_id), portal_id);
+    if (alwaysListIds.length > 0) {
+        await subscribeUserToNewsletterListIds(user.user_id, alwaysListIds);
+    }
+    if (subscribe) {
+        await subscribeUserToPortalMainNewsletterList(user.user_id, portal_id);
+    }
+
+    return toApiFormat(user, { includeEmail: true });
+}
+
+/**
  * Crea un usuario en `users_db` (si no existe) y asegura preferencias iniciales
  * en `user_feed_preferences` para los topics del portal (neutral).
  * @param {string} email - Email del usuario

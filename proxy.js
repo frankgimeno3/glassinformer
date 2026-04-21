@@ -64,7 +64,7 @@ export async function proxy(request) {
     // Public paths that unauthenticated users are allowed to visit (no redirect to /)
     // Auth routes + (main) content routes; keep in sync with nav/footer links.
     const publicPathPrefixes = [
-        '/auth/login', '/auth/signup', '/auth/confirm', '/auth/forgot',
+        '/auth/login', '/auth/signup', '/auth/signup/oauth-finish', '/auth/oauth', '/auth/confirm', '/auth/forgot',
         '/publications', '/directory', '/events', '/advertise', '/articles', '/search',
         '/contact', '/legal',
     ];

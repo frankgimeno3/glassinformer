@@ -16,6 +16,7 @@ import {
     AUTH_SKELETON_SHELL,
     AUTH_TITLE,
 } from "../_components/authFormStyles";
+import { GoogleOAuthSection } from "../_components/GoogleOAuthSection";
 
 
 interface LoginProps {
@@ -33,6 +34,8 @@ const LoginContent: FC<LoginProps> = ({ }) => {
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
     const [sessionChecked, setSessionChecked] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
+    const [googleError, setGoogleError] = useState<string | null>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -74,6 +77,29 @@ const LoginContent: FC<LoginProps> = ({ }) => {
         } catch (e: any) {
             console.error(e);
             setError(e?.message || 'Login failed. Please verify your credentials.');
+        }
+    };
+
+    const handleGoogleLogin = async () => {
+        setGoogleError(null);
+        setGoogleLoading(true);
+        try {
+            if (!AuthenticationService.isGoogleOAuthConfigured()) {
+                setGoogleError(
+                    AuthenticationService.mapOAuthErrorToMessage(new Error("GOOGLE_OAUTH_CONFIG_MISSING"))
+                );
+                return;
+            }
+            if (typeof window !== "undefined") {
+                sessionStorage.setItem("oauth_post_login_redirect", redirect);
+                sessionStorage.removeItem("oauth_signup_newsletter");
+            }
+            await AuthenticationService.startGoogleRedirectSignIn({ intent: "login" });
+        } catch (e: unknown) {
+            console.error(e);
+            setGoogleError(AuthenticationService.mapOAuthErrorToMessage(e));
+        } finally {
+            setGoogleLoading(false);
         }
     };
 
@@ -153,6 +179,13 @@ const LoginContent: FC<LoginProps> = ({ }) => {
                     Log in
                 </button>
 
+                <GoogleOAuthSection
+                    buttonLabel="Continuar con Google"
+                    loading={googleLoading}
+                    disabled={googleLoading}
+                    error={googleError}
+                    onGoogleClick={handleGoogleLogin}
+                />
 
             <div className='flex flex-col gap-4 pt-2'>
                 <p className={AUTH_AUX_TEXT}>

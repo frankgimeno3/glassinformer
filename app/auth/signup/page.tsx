@@ -4,6 +4,7 @@ import React, { FC, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import AuthenticationService from "@/apiClient/AuthenticationService";
 import { createProfileUser } from "@/apiClient/ProfileUserService";
+import { isSignupEmailAlreadyRegistered } from "@/apiClient/SignupPrecheckService";
 import {
     AUTH_AUX_TEXT,
     AUTH_CARD,
@@ -18,15 +19,33 @@ import {
     AUTH_TEXT,
     AUTH_TITLE,
 } from "../_components/authFormStyles";
+import { GoogleOAuthSection } from "../_components/GoogleOAuthSection";
 
 interface SignupProps {}
+
+function isUsernameExistsError(e: unknown): boolean {
+    if (!e || typeof e !== "object") return false;
+    const rec = e as Record<string, unknown>;
+    if (rec.name === "UsernameExistsException") return true;
+    const msg = String(rec.message ?? "").toLowerCase();
+    if (msg.includes("usernameexists") || msg.includes("user already exists")) return true;
+    return isUsernameExistsError(rec.cause);
+}
 
 const AUTH_SECONDARY_BUTTON =
     "rounded-lg border border-gray-600 px-4 py-3 text-base font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50";
 
+const ACCOUNT_EXISTS_MESSAGE = "Ya existe una cuenta con este correo.";
+const ACCOUNT_EXISTS_LOGIN_LABEL = "Iniciar sesión";
+
 const SignupContent: FC<SignupProps> = ({}) => {
     const searchParams = useSearchParams();
     const redirectParam = searchParams.get("redirect");
+    const loginHref = redirectParam
+        ? `/auth/login?redirect=${encodeURIComponent(redirectParam)}`
+        : "/auth/login";
+    const redirectAfterOAuth =
+        redirectParam && redirectParam.startsWith("/") ? redirectParam : "/logged";
     const [wizardStep, setWizardStep] = useState<1 | 2>(1);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -37,6 +56,34 @@ const SignupContent: FC<SignupProps> = ({}) => {
     const [success, setSuccess] = useState(false);
     const [pendingEmail, setPendingEmail] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isCheckingEmail, setIsCheckingEmail] = useState(false);
+    const [accountExistsHint, setAccountExistsHint] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
+    const [googleError, setGoogleError] = useState<string | null>(null);
+
+    const clearDuplicateHint = () => setAccountExistsHint(false);
+
+    const handleGoogleSignup = async () => {
+        setGoogleError(null);
+        setGoogleLoading(true);
+        try {
+            if (!AuthenticationService.isGoogleOAuthConfigured()) {
+                setGoogleError(
+                    AuthenticationService.mapOAuthErrorToMessage(new Error("GOOGLE_OAUTH_CONFIG_MISSING"))
+                );
+                return;
+            }
+            if (typeof window !== "undefined") {
+                sessionStorage.setItem("oauth_post_login_redirect", redirectAfterOAuth);
+            }
+            await AuthenticationService.startGoogleRedirectSignIn({ intent: "signup" });
+        } catch (e: unknown) {
+            console.error(e);
+            setGoogleError(AuthenticationService.mapOAuthErrorToMessage(e));
+        } finally {
+            setGoogleLoading(false);
+        }
+    };
 
     const validateStep1 = (): boolean => {
         if (password !== confirmPassword) {
@@ -54,10 +101,23 @@ const SignupContent: FC<SignupProps> = ({}) => {
         return true;
     };
 
-    const goToNewsletterStep = () => {
+    const goToNewsletterStep = async () => {
         setError(null);
+        setAccountExistsHint(false);
         if (!validateStep1()) return;
-        setWizardStep(2);
+        setIsCheckingEmail(true);
+        try {
+            const alreadyRegistered = await isSignupEmailAlreadyRegistered(email.trim());
+            if (alreadyRegistered) {
+                setAccountExistsHint(true);
+                return;
+            }
+            setWizardStep(2);
+        } catch {
+            setError("No se ha podido comprobar el correo. Inténtalo de nuevo.");
+        } finally {
+            setIsCheckingEmail(false);
+        }
     };
 
     const handleFinalSignup = async (e: React.FormEvent) => {
@@ -82,13 +142,13 @@ const SignupContent: FC<SignupProps> = ({}) => {
             setSuccess(true);
         } catch (e: unknown) {
             console.error(e);
-            const msg: string =
-                typeof e === "string"
-                    ? e
-                    : e && typeof e === "object" && "message" in e
-                      ? String((e as { message: unknown }).message)
-                      : "Sign-up failed. Please check your email and password.";
-            setError(msg);
+            if (isUsernameExistsError(e)) {
+                setAccountExistsHint(true);
+                setError(null);
+            } else {
+                setAccountExistsHint(false);
+                setError("Sign-up could not be completed. Please try again.");
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -113,7 +173,7 @@ const SignupContent: FC<SignupProps> = ({}) => {
                     </a>
                     <p className={AUTH_AUX_TEXT}>
                         Already confirmed?{" "}
-                        <a href={redirectParam ? `/auth/login?redirect=${encodeURIComponent(redirectParam)}` : "/auth/login"} className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer">
+                        <a href={loginHref} className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer">
                             Log in
                         </a>
                     </p>
@@ -152,9 +212,16 @@ const SignupContent: FC<SignupProps> = ({}) => {
                             Yes, I want to subscribe to the portal newsletter and receive the most highlighted news by email.
                         </span>
                     </label>
+                    {accountExistsHint && (
+                        <div className="rounded-lg border border-gray-600 bg-gray-800/50 px-4 py-4 text-center">
+                            <p className={`${AUTH_TEXT} mb-3`}>{ACCOUNT_EXISTS_MESSAGE}</p>
+                            <a href={loginHref} className={`${AUTH_PRIMARY_BUTTON} inline-block w-full text-center sm:w-auto`}>
+                                {ACCOUNT_EXISTS_LOGIN_LABEL}
+                            </a>
+                        </div>
+                    )}
                     {error && (
                         <div className={AUTH_ERROR}>
-                            <p>ERROR:</p>
                             <p>{error}</p>
                         </div>
                     )}
@@ -165,6 +232,7 @@ const SignupContent: FC<SignupProps> = ({}) => {
                             disabled={isSubmitting}
                             onClick={() => {
                                 setError(null);
+                                setAccountExistsHint(false);
                                 setWizardStep(1);
                             }}
                         >
@@ -190,7 +258,10 @@ const SignupContent: FC<SignupProps> = ({}) => {
                     type="email"
                     placeholder="Enter your email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                        setEmail(e.target.value);
+                        clearDuplicateHint();
+                    }}
                     className={AUTH_INPUT}
                     required
                 />
@@ -200,7 +271,10 @@ const SignupContent: FC<SignupProps> = ({}) => {
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => {
+                            setPassword(e.target.value);
+                            clearDuplicateHint();
+                        }}
                         className={`${AUTH_INPUT} pr-12`}
                         required
                         minLength={8}
@@ -230,31 +304,50 @@ const SignupContent: FC<SignupProps> = ({}) => {
                         type={showPassword ? "text" : "password"}
                         placeholder="Confirm your password"
                         value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        onChange={(e) => {
+                            setConfirmPassword(e.target.value);
+                            clearDuplicateHint();
+                        }}
                         className={`${AUTH_INPUT} pr-12`}
                         required
                         minLength={8}
                     />
                 </div>
 
+                {accountExistsHint && (
+                    <div className="rounded-lg border border-gray-600 bg-gray-800/50 px-4 py-4 text-center">
+                        <p className={`${AUTH_TEXT} mb-3`}>{ACCOUNT_EXISTS_MESSAGE}</p>
+                        <a href={loginHref} className={`${AUTH_PRIMARY_BUTTON} inline-block w-full text-center sm:w-auto`}>
+                            {ACCOUNT_EXISTS_LOGIN_LABEL}
+                        </a>
+                    </div>
+                )}
                 {error && (
                     <div className={AUTH_ERROR}>
-                        <p>ERROR:</p>
                         <p>{error}</p>
                     </div>
                 )}
 
                 <button
                     type="button"
-                    onClick={goToNewsletterStep}
+                    onClick={() => void goToNewsletterStep()}
                     className={AUTH_PRIMARY_BUTTON}
+                    disabled={isCheckingEmail}
                 >
-                    Continue
+                    {isCheckingEmail ? "Checking…" : "Continue"}
                 </button>
+
+                <GoogleOAuthSection
+                    buttonLabel="Registrarse con Google"
+                    loading={googleLoading}
+                    disabled={googleLoading || isCheckingEmail}
+                    error={googleError}
+                    onGoogleClick={handleGoogleSignup}
+                />
 
                 <p className={AUTH_AUX_TEXT}>
                     Already have an account?{" "}
-                    <a href={redirectParam ? `/auth/login?redirect=${encodeURIComponent(redirectParam)}` : "/auth/login"} className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer ml-1">
+                    <a href={loginHref} className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer ml-1">
                         Log in
                     </a>
                 </p>

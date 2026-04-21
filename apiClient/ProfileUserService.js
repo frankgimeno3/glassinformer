@@ -14,3 +14,14 @@ export async function createProfileUser(id_user, options = {}) {
     });
     return response.data;
 }
+
+/**
+ * Tras OAuth Google: crea/actualiza fila en RDS según claims del idToken (sesión en cookies).
+ * @param {{ subscribePortalNewsletter?: boolean }} [options]
+ */
+export async function syncOAuthProfileFromSession(options = {}) {
+    const response = await apiClient.post("/api/v1/users/me/oauth-profile-sync", {
+        subscribe_portal_newsletter: options.subscribePortalNewsletter === true,
+    });
+    return response.data;
+}

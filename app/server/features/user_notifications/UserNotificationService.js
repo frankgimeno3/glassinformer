@@ -4,6 +4,44 @@ import { QueryTypes } from "sequelize";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+/** @type {boolean | undefined} */
+let cachedUserNotificationsHasPortalId;
+
+/**
+ * `portal_id` existe solo si se aplicó la migración 084; sin ella, SELECT un.portal_id rompe el listado/detalle.
+ * @param {import("sequelize").Sequelize} sequelize
+ * @returns {Promise<boolean>}
+ */
+async function userNotificationsHasPortalIdColumn(sequelize) {
+    if (cachedUserNotificationsHasPortalId !== undefined) {
+        return cachedUserNotificationsHasPortalId;
+    }
+    try {
+        const rows = await sequelize.query(
+            `SELECT 1 FROM information_schema.columns
+             WHERE table_schema = 'public' AND table_name = 'user_notifications' AND column_name = 'portal_id' LIMIT 1`,
+            { type: QueryTypes.SELECT }
+        );
+        cachedUserNotificationsHasPortalId = Array.isArray(rows) && rows.length > 0;
+    } catch {
+        cachedUserNotificationsHasPortalId = false;
+    }
+    return cachedUserNotificationsHasPortalId;
+}
+
+/**
+ * @param {boolean} includePortalId
+ */
+function notificationSelectList(includePortalId) {
+    const base = `un.user_notification_id,
+           un.notification_type,
+           un.notification_content,
+           un.notification_date,
+           un.notification_status,
+           un.notification_redirection`;
+    return includePortalId ? `${base}, un.portal_id` : base;
+}
+
 async function resolveUserIdFromEmailStrict(email) {
     const e = String(email || "").trim();
     if (!e || !UserProfileModel.sequelize) return null;
@@ -54,15 +92,9 @@ export async function listNotificationsForEmail(email) {
     const uid = await resolveUserIdFromEmailStrict(email);
     if (!uid) return [];
     const sequelize = UserProfileModel.sequelize;
+    const includePortal = await userNotificationsHasPortalIdColumn(sequelize);
     const rows = await sequelize.query(
-        `SELECT
-           un.user_notification_id,
-           un.notification_type,
-           un.notification_content,
-           un.notification_date,
-           un.notification_status,
-           un.notification_redirection,
-           un.portal_id
+        `SELECT ${notificationSelectList(includePortal)}
          FROM public.user_notifications un
          WHERE un.user_id = :uid::uuid
          ORDER BY un.notification_date DESC NULLS LAST`,
@@ -82,15 +114,9 @@ export async function getNotificationForEmail(email, notificationId) {
     const uid = await resolveUserIdFromEmailStrict(email);
     if (!uid) return null;
     const sequelize = UserProfileModel.sequelize;
+    const includePortal = await userNotificationsHasPortalIdColumn(sequelize);
     const rows = await sequelize.query(
-        `SELECT
-           un.user_notification_id,
-           un.notification_type,
-           un.notification_content,
-           un.notification_date,
-           un.notification_status,
-           un.notification_redirection,
-           un.portal_id
+        `SELECT ${notificationSelectList(includePortal)}
          FROM public.user_notifications un
          WHERE un.user_notification_id = :nid::uuid AND un.user_id = :uid::uuid
          LIMIT 1`,
@@ -114,6 +140,27 @@ export async function markNotificationReadForEmail(email, notificationId) {
     await sequelize.query(
         `UPDATE public.user_notifications
          SET notification_status = 'read'
+         WHERE user_notification_id = :nid::uuid AND user_id = :uid::uuid`,
+        { replacements: { nid, uid } }
+    );
+    return getNotificationForEmail(email, notificationId);
+}
+
+/**
+ * Vuelve a dejar la notificación como pendiente (lista «no leídas» en el portal).
+ * @param {string} email
+ * @param {string} notificationId
+ * @returns {Promise<object|null>}
+ */
+export async function markNotificationPendingForEmail(email, notificationId) {
+    const nid = String(notificationId || "").trim();
+    if (!UUID_RE.test(nid)) return null;
+    const uid = await resolveUserIdFromEmailStrict(email);
+    if (!uid) return null;
+    const sequelize = UserProfileModel.sequelize;
+    await sequelize.query(
+        `UPDATE public.user_notifications
+         SET notification_status = 'pending'
          WHERE user_notification_id = :nid::uuid AND user_id = :uid::uuid`,
         { replacements: { nid, uid } }
     );

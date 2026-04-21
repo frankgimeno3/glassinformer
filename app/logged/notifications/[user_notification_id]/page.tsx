@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import type { NotificationRow } from "../page";
 
 function formatDate(iso: string | null) {
@@ -23,12 +23,42 @@ const NotificationDetailPage: FC = () => {
     const rawId = params?.user_notification_id;
     const user_notification_id = Array.isArray(rawId) ? rawId[0] : rawId;
 
+    const detailUrl = useMemo(() => {
+        if (!user_notification_id || typeof user_notification_id !== "string") return null;
+        return `/api/v1/users/me/notifications/${encodeURIComponent(user_notification_id)}`;
+    }, [user_notification_id]);
+
     const [row, setRow] = useState<NotificationRow | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [statusBusy, setStatusBusy] = useState(false);
+
+    const setNotificationStatus = useCallback(
+        async (next: "read" | "pending") => {
+            if (!detailUrl) return;
+            setStatusBusy(true);
+            try {
+                const res = await fetch(detailUrl, {
+                    method: "PATCH",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ notification_status: next }),
+                });
+                if (!res.ok) {
+                    return;
+                }
+                const updated = (await res.json()) as NotificationRow;
+                setRow(updated);
+                window.dispatchEvent(new Event("plynium-notifications-changed"));
+            } finally {
+                setStatusBusy(false);
+            }
+        },
+        [detailUrl]
+    );
 
     const load = useCallback(async () => {
-        if (!user_notification_id || typeof user_notification_id !== "string") {
+        if (!detailUrl) {
             setError("Invalid notification.");
             setLoading(false);
             return;
@@ -36,8 +66,7 @@ const NotificationDetailPage: FC = () => {
         setLoading(true);
         setError(null);
         try {
-            const url = `/api/v1/users/me/notifications/${encodeURIComponent(user_notification_id)}`;
-            const res = await fetch(url, { credentials: "include" });
+            const res = await fetch(detailUrl, { credentials: "include" });
             if (res.status === 401) {
                 setError("You need to be logged in.");
                 setRow(null);
@@ -49,7 +78,16 @@ const NotificationDetailPage: FC = () => {
                 return;
             }
             if (!res.ok) {
-                setError("Could not load this notification.");
+                let fallback = "Could not load this notification.";
+                try {
+                    const errBody = (await res.json()) as { message?: string };
+                    if (errBody?.message && typeof errBody.message === "string") {
+                        fallback = errBody.message;
+                    }
+                } catch {
+                    /* ignore */
+                }
+                setError(fallback);
                 setRow(null);
                 return;
             }
@@ -58,12 +96,7 @@ const NotificationDetailPage: FC = () => {
 
             const status = String(data.notification_status || "").toLowerCase();
             if (status === "pending") {
-                await fetch(url, { method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" }, body: "{}" });
-                window.dispatchEvent(new Event("plynium-notifications-changed"));
-                const refreshed = await fetch(url, { credentials: "include" });
-                if (refreshed.ok) {
-                    setRow((await refreshed.json()) as NotificationRow);
-                }
+                await setNotificationStatus("read");
             }
         } catch {
             setError("Could not load this notification.");
@@ -71,7 +104,7 @@ const NotificationDetailPage: FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [user_notification_id]);
+    }, [detailUrl, setNotificationStatus]);
 
     useEffect(() => {
         void load();
@@ -98,7 +131,12 @@ const NotificationDetailPage: FC = () => {
                         </p>
                         <p className="mt-2 text-sm text-gray-400">{formatDate(row.notification_date)}</p>
                         <p className="mt-1 text-xs text-gray-400">
-                            Status: <span className="font-medium text-gray-700">{row.notification_status}</span>
+                            Status:{" "}
+                            <span className="font-medium text-gray-700">
+                                {String(row.notification_status || "").toLowerCase() === "pending"
+                                    ? "Unread (pending)"
+                                    : "Read"}
+                            </span>
                             {row.portal_id != null && (
                                 <>
                                     {" "}
@@ -106,6 +144,31 @@ const NotificationDetailPage: FC = () => {
                                 </>
                             )}
                         </p>
+                        <div className="mt-4 flex flex-wrap items-center gap-2">
+                            {String(row.notification_status || "").toLowerCase() === "pending" ? (
+                                <button
+                                    type="button"
+                                    disabled={statusBusy}
+                                    onClick={() => void setNotificationStatus("read")}
+                                    className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+                                >
+                                    {statusBusy ? "Updating…" : "Mark as read"}
+                                </button>
+                            ) : (
+                                <button
+                                    type="button"
+                                    disabled={statusBusy}
+                                    onClick={() => void setNotificationStatus("pending")}
+                                    className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-gray-800 hover:bg-gray-50 disabled:opacity-50"
+                                >
+                                    {statusBusy ? "Updating…" : "Mark as unread"}
+                                </button>
+                            )}
+                            <p className="text-xs text-gray-500">
+                                Opening this page marks pending notifications as read. Use &quot;Mark as unread&quot; to
+                                move it back to your pending list.
+                            </p>
+                        </div>
                     </header>
                     <div className="prose prose-gray mt-6 max-w-none">
                         <p className="whitespace-pre-wrap text-base leading-relaxed text-gray-900">

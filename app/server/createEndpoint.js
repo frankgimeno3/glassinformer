@@ -64,8 +64,16 @@ async function checkTokens(request, response) {
         isRefreshed = true;
     }
     const {payload} = decodeJWT(idToken);
-    const {email} = payload;
-    return [username, email, payload.sub, isRefreshed, accessToken, idToken, cookieKeys, expiresIn];
+    let email;
+    if (typeof payload.email === "string" && payload.email.trim()) {
+        email = payload.email.trim();
+    } else {
+        const cognitoUsername = payload["cognito:username"];
+        if (typeof cognitoUsername === "string" && cognitoUsername.includes("@")) {
+            email = cognitoUsername.trim();
+        }
+    }
+    return [username, email, payload.sub, isRefreshed, accessToken, idToken, cookieKeys, expiresIn, payload];
 }
 
 export function createEndpoint(callback, schema = null, isProtected = false, roles = []) {
@@ -77,12 +85,14 @@ export function createEndpoint(callback, schema = null, isProtected = false, rol
         } catch (e) {
             return new Response(e.message, {status: 400});
         }
-        let username, sub, email, isRefreshed, accessToken, idToken, cookieKeys, cookieExpiresIn;
+        let username, sub, email, isRefreshed, accessToken, idToken, cookieKeys, cookieExpiresIn, idTokenPayload;
         if (isProtected) {
             try {
-                [username, email, sub, isRefreshed, accessToken, idToken, cookieKeys, cookieExpiresIn] = await checkTokens(request, response);
+                [username, email, sub, isRefreshed, accessToken, idToken, cookieKeys, cookieExpiresIn, idTokenPayload] =
+                    await checkTokens(request, response);
                 request.email = email;
                 request.sub = sub;
+                request.idTokenPayload = idTokenPayload;
             } catch (error) {
                 console.error(error);
 

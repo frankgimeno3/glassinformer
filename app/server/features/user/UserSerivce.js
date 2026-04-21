@@ -1,15 +1,46 @@
 import {
     AdminCreateUserCommand,
     AdminDisableUserCommand,
-    AdminEnableUserCommand, AdminSetUserPasswordCommand,
+    AdminEnableUserCommand,
+    AdminGetUserCommand,
+    AdminSetUserPasswordCommand,
     AdminUpdateUserAttributesCommand,
     CognitoIdentityProviderClient,
-    paginateListUsers
+    paginateListUsers,
 } from "@aws-sdk/client-cognito-identity-provider";
 
 const cognito = new CognitoIdentityProviderClient({region: process.env.NEXT_PUBLIC_COGNITO_REGION});
 
 const USER_POOL_ID = process.env.NEXT_PUBLIC_USER_POOL_ID;
+
+/**
+ * Whether a Cognito user already exists for this username (signup uses email as username).
+ * @param {string} usernameInput
+ * @returns {Promise<boolean>}
+ */
+export async function isCognitoUsernameRegistered(usernameInput) {
+    const Username = String(usernameInput || "").trim();
+    if (!Username) {
+        return false;
+    }
+    if (!USER_POOL_ID) {
+        throw new Error("Missing NEXT_PUBLIC_USER_POOL_ID");
+    }
+    try {
+        await cognito.send(
+            new AdminGetUserCommand({
+                UserPoolId: USER_POOL_ID,
+                Username,
+            })
+        );
+        return true;
+    } catch (err) {
+        if (err?.name === "UserNotFoundException") {
+            return false;
+        }
+        throw err;
+    }
+}
 
 export async function getAllUsers() {
     const paginator = paginateListUsers(
