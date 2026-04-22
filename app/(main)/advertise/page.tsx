@@ -51,8 +51,8 @@ export default function AdvertisePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
-      <h1 className="pb-4 text-center text-4xl font-bold text-white sm:text-5xl">Advertise</h1>
+    <div className="min-h-screen bg-white px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+      <h1 className="pb-4 text-center text-4xl font-bold text-gray-900 sm:text-5xl">Advertise</h1>
 
       <MediakitIntro onCartBelowClick={() => setCartBlinkTrigger((t) => t + 1)} />
 

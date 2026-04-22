@@ -19,7 +19,7 @@ export default function AuthLayout({
   return (
     <div className="flex flex-col">
       <SiteHeader />
-      <div className="flex min-h-screen flex-row bg-gray-100 pt-4 text-gray-600">
+      <div className="flex min-h-screen flex-row bg-white pt-4 text-gray-600">
         <div className="w-full lg:w-[80%] flex-shrink-0 px-12 mt-8 lg:mt-0">
           <div className="flex flex-col">
             {/* Navegación - oculta en móvil/tablet, visible en PC (≥1024px) */}

@@ -33,7 +33,7 @@ function isUsernameExistsError(e: unknown): boolean {
 }
 
 const AUTH_SECONDARY_BUTTON =
-    "rounded-lg border border-gray-600 px-4 py-3 text-base font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50";
+    "rounded-lg border border-gray-300 bg-white px-4 py-3 text-base font-medium text-gray-900 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50";
 
 const ACCOUNT_EXISTS_MESSAGE = "Ya existe una cuenta con este correo.";
 const ACCOUNT_EXISTS_LOGIN_LABEL = "Iniciar sesión";
@@ -162,7 +162,7 @@ const SignupContent: FC<SignupProps> = ({}) => {
                         Check your inbox
                     </h2>
                     <p className={AUTH_TEXT}>
-                        We have sent a verification email to <strong className="text-white">{pendingEmail}</strong>.
+                        We have sent a verification email to <strong className="text-gray-900">{pendingEmail}</strong>.
                         Open the link or enter the code on the confirmation page to activate your account.
                     </p>
                     <a
@@ -193,27 +193,27 @@ const SignupContent: FC<SignupProps> = ({}) => {
                     </p>
                     <p className={`${AUTH_TEXT} text-left text-xs text-gray-400`}>
                         New accounts are also linked to default newsletter lists configured for this portal. If you opt
-                        in below, you are added to every <strong className="text-gray-300">main</strong> newsletter list
+                        in below, you are added to every <strong className="text-gray-700">main</strong> newsletter list
                         for this portal in the shared database (subscription rows). You can adjust subscriptions later
                         from account settings when available.
                     </p>
                     <label
                         htmlFor="newsletter-opt-in"
-                        className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-700 bg-black/40 px-4 py-3 text-left text-sm text-gray-200"
+                        className="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-left text-sm text-gray-700"
                     >
                         <input
                             id="newsletter-opt-in"
                             type="checkbox"
                             checked={subscribeNewsletter}
                             onChange={(e) => setSubscribeNewsletter(e.target.checked)}
-                            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-600 text-indigo-500 focus:ring-indigo-500"
+                            className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                         />
                         <span>
                             Yes, I want to subscribe to the portal newsletter and receive the most highlighted news by email.
                         </span>
                     </label>
                     {accountExistsHint && (
-                        <div className="rounded-lg border border-gray-600 bg-gray-800/50 px-4 py-4 text-center">
+                        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-4 text-center">
                             <p className={`${AUTH_TEXT} mb-3`}>{ACCOUNT_EXISTS_MESSAGE}</p>
                             <a href={loginHref} className={`${AUTH_PRIMARY_BUTTON} inline-block w-full text-center sm:w-auto`}>
                                 {ACCOUNT_EXISTS_LOGIN_LABEL}

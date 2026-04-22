@@ -52,7 +52,7 @@ const Forgot: FC<ForgotProps> = ({}) => {
                     </h2>
                     <p className={AUTH_TEXT}>
                         We have sent a reset code to{" "}
-                        <strong className="text-white">{pendingEmail}</strong>.
+                        <strong className="text-gray-900">{pendingEmail}</strong>.
                         Enter the code and your new password on the next page.
                     </p>
                     <a

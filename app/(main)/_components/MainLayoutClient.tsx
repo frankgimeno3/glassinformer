@@ -14,10 +14,21 @@ export default function MainLayoutClient({
     return <>{children}</>;
   }
 
+  const useWhiteBg =
+    pathname === "/contact" ||
+    pathname.startsWith("/contact/") ||
+    pathname === "/advertise" ||
+    pathname.startsWith("/advertise/");
+
   return (
     <div className="flex flex-col">
       <SiteHeader />
-      <div className="flex min-h-screen flex-row bg-gray-100 pt-4 text-gray-600">
+      <div
+        className={[
+          "flex min-h-screen flex-row pt-4 text-gray-600",
+          useWhiteBg ? "bg-white" : "bg-gray-100",
+        ].join(" ")}
+      >
         <div className="w-full lg:w-[80%] flex-shrink-0 px-12 mt-8 lg:mt-0">
           <div className="flex flex-col">
             <div className="hidden lg:flex flex-row text-sm text-gray-500 uppercase tracking-wider font-sans text-white bg-white mb-4">
