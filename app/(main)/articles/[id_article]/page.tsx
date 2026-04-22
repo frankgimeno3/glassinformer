@@ -49,7 +49,7 @@ export default function Article() {
         alt={selectedArticle.articleTitle}
       />
 
-      <div className="w-full p-6 md:p-8 bg-white shadow-sm border-y border-gray-100">
+      <div className="w-full p-6 md:p-8 bg-white shadow-sm">
         <ArticleHeader
           title={selectedArticle.articleTitle}
           subtitle={selectedArticle.articleSubtitle}
@@ -71,10 +71,16 @@ export default function Article() {
         <CommentsSection idArticle={articleId} />
       </div>
       <div className="w-full px-6 md:px-8">
+        <MidBanner />
+      </div>
+      <div className="w-full px-6 md:px-8">
         <MidBanner
           variant={articlePageRelatedMidVariant as MidBannerVariant}
           excludeArticleId={articleId}
         />
+      </div>
+      <div className="w-full px-6 md:px-8">
+        <MidBanner />
       </div>
 
       <DeleteArticleModal

@@ -33,7 +33,7 @@ const MainNews: FC<MainNewsProps> = ({ mainArticle, secondaryArticles }) => {
       {/* Main featured article */}
       {hasMain && (
         <div className="flex flex-col flex-[2]">
-          <article className="group flex flex-col overflow-hidden border border-gray-200 bg-white transition-[box-shadow,border-color] duration-1000 ease-out hover:border-gray-300 hover:shadow-xl">
+          <article className="group flex flex-col overflow-hidden bg-white transition-[box-shadow] duration-1000 ease-out hover:shadow-xl">
             <Link
               href={`/articles/${mainArticle!.id_article}`}
               className="relative w-full aspect-[16/9] min-h-[280px] overflow-hidden bg-gray-100 block"
@@ -81,7 +81,7 @@ const MainNews: FC<MainNewsProps> = ({ mainArticle, secondaryArticles }) => {
                   {mainArticle!.articleSubtitle}
                 </p>
               )}
-              <div className="pt-4 border-t border-gray-100">
+              <div className="pt-4">
                 <Link
                   href={`/articles/${mainArticle!.id_article}`}
                   className="text-xs text-gray-400 font-sans uppercase tracking-wider group-hover:text-gray-600 transition-colors inline-block"
@@ -100,7 +100,7 @@ const MainNews: FC<MainNewsProps> = ({ mainArticle, secondaryArticles }) => {
           {secondaryArticles.map((article) => (
             <article
               key={article.id_article}
-              className="group flex flex-col gap-4 border border-gray-200 bg-white p-4 transition-[box-shadow,border-color] duration-1000 ease-out hover:border-gray-300 hover:shadow-lg lg:flex-row"
+              className="group flex flex-col gap-4 bg-white p-4 transition-[box-shadow] duration-1000 ease-out hover:shadow-lg lg:flex-row"
             >
               <Link
                 href={`/articles/${article.id_article}`}

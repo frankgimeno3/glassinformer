@@ -63,7 +63,7 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
     );
 
   const readMoreBlock = (
-    <div className={layout === "row" ? "pt-1" : "pt-2 border-t border-gray-100"}>
+    <div className={layout === "row" ? "pt-1" : "pt-2"}>
       <Link
         href={`/articles/${id_article}`}
         className="text-xs text-gray-400 font-sans uppercase tracking-wider group-hover:text-gray-600 transition-colors inline-block"
@@ -99,7 +99,7 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
 
   if (layout === "row") {
     return (
-      <article className="group flex flex-col border border-gray-200 bg-white transition-all duration-300 ease-in-out hover:border-gray-300 sm:flex-row sm:items-stretch overflow-hidden">
+      <article className="group flex flex-col bg-white transition-all duration-300 ease-in-out sm:flex-row sm:items-stretch overflow-hidden">
         {imageLink}
         <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 p-4 sm:w-[60%] sm:gap-2 sm:p-5">
           {metaBlock}
@@ -112,7 +112,7 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
   }
 
   return (
-    <article className="group flex flex-col bg-white border border-gray-200 hover:border-gray-300 transition-all duration-300 ease-in-out overflow-hidden">
+    <article className="group flex flex-col bg-white transition-all duration-300 ease-in-out overflow-hidden">
       {imageLink}
       <div className="flex flex-col p-6 space-y-3">
         {metaBlock}

@@ -9,6 +9,7 @@ import CompanyModel from "../features/company/CompanyModel.js";
 import ProductModel from "../features/product/ProductModel.js";
 import BannerModel from "../features/banner/BannerModel.js";
 import UserProfileModel from "../features/userProfile/UserProfileModel.js";
+import PanelTicketModel from "../features/panel_ticket/PanelTicketModel.js";
 import {defineAssociations} from "./associations.js";
 
 const database = Database.getInstance();
@@ -294,6 +295,33 @@ UserProfileModel.init({
     ]
 });
 
+PanelTicketModel.init({
+    // Canonical RDS schema: public.panel_tickets (see plynium_central_panel/docs/RDS_SCHEMA.md)
+    panel_ticket_id: { type: DataTypes.STRING(255), primaryKey: true, allowNull: false },
+    panel_ticket_type: { type: DataTypes.STRING(255), allowNull: false },
+    panel_ticket_category: { type: DataTypes.STRING(255), allowNull: true, defaultValue: null },
+    panel_ticket_state: { type: DataTypes.STRING(255), allowNull: false, defaultValue: "pending" },
+    panel_ticket_date: { type: DataTypes.DATE, allowNull: true },
+    panel_ticket_brief_description: { type: DataTypes.TEXT, allowNull: false, defaultValue: "" },
+    panel_ticket_full_description: { type: DataTypes.TEXT, allowNull: false, defaultValue: "" },
+    panel_ticket_related_to_user_id_array: { type: DataTypes.ARRAY(DataTypes.TEXT), allowNull: false, defaultValue: [] },
+    panel_ticket_updates_array: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] }
+}, {
+    sequelize,
+    modelName: "panel_ticket",
+    underscored: true,
+    tableName: "panel_tickets",
+    timestamps: true,
+    createdAt: "panel_ticket_created_at",
+    updatedAt: "updated_at",
+    indexes: [
+        { fields: ["panel_ticket_type"] },
+        { fields: ["panel_ticket_state"] },
+        { fields: ["panel_ticket_date"] },
+        { fields: ["panel_ticket_category"] }
+    ]
+});
+
 BannerModel.init({
     id_banner: {
         type: DataTypes.STRING(255),
@@ -436,4 +464,4 @@ CommentModel.init({
 
 defineAssociations();
 
-export { ArticleModel, ContentModel, EventModel, PublicationModel, CompanyModel, ProductModel, BannerModel, UserProfileModel, CommentModel };
+export { ArticleModel, ContentModel, EventModel, PublicationModel, CompanyModel, ProductModel, BannerModel, UserProfileModel, CommentModel, PanelTicketModel };
