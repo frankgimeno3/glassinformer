@@ -52,8 +52,13 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
   );
 
   const titleBlock = (
-    <h2 className="font-serif text-lg sm:text-xl font-bold text-gray-900 leading-snug group-hover:text-gray-700 transition-colors duration-200 line-clamp-3">
-      {title}
+    <h2 className="font-serif text-lg sm:text-xl font-bold text-gray-900 leading-snug transition-colors duration-200 line-clamp-3">
+      <Link
+        href={`/articles/${id_article}`}
+        className="inline cursor-pointer hover:opacity-90 group-hover:text-gray-700 transition-all duration-200"
+      >
+        {title}
+      </Link>
     </h2>
   );
 
@@ -101,7 +106,7 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
     return (
       <article className="group flex flex-col bg-white transition-all duration-300 ease-in-out sm:flex-row sm:items-stretch overflow-hidden">
         {imageLink}
-        <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 p-4 sm:w-[60%] sm:gap-2 sm:p-5">
+        <div className="gi-text-reveal flex min-w-0 flex-1 flex-col justify-center gap-2 p-4 sm:w-[60%] sm:gap-2 sm:p-5">
           {metaBlock}
           {titleBlock}
           {subtitleBlock}
@@ -114,10 +119,15 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
   return (
     <article className="group flex flex-col bg-white transition-all duration-300 ease-in-out overflow-hidden">
       {imageLink}
-      <div className="flex flex-col p-6 space-y-3">
+      <div className="gi-text-reveal flex flex-col p-6 space-y-3">
         {metaBlock}
-        <h2 className="font-serif text-xl md:text-2xl font-bold text-gray-900 leading-tight group-hover:text-gray-700 transition-colors duration-200 line-clamp-3">
-          {title}
+        <h2 className="font-serif text-xl md:text-2xl font-bold text-gray-900 leading-tight transition-colors duration-200 line-clamp-3">
+          <Link
+            href={`/articles/${id_article}`}
+            className="inline cursor-pointer hover:opacity-90 group-hover:text-gray-700 transition-all duration-200"
+          >
+            {title}
+          </Link>
         </h2>
         {subtitleBlock}
         {readMoreBlock}

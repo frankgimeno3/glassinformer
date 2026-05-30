@@ -2,20 +2,26 @@
 
 import { FC, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import AuthenticationService from "@/apiClient/AuthenticationService";
 
 const AddCompanyContent: FC = () => {
   const [isLogged, setIsLogged] = useState<boolean | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     let cancelled = false;
     AuthenticationService.isAuthenticated().then((auth) => {
-      if (!cancelled) setIsLogged(auth);
+      if (cancelled) return;
+      setIsLogged(auth);
+      if (auth === true) {
+        router.replace("/directory/companies/create");
+      }
     });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [router]);
 
   const authLinks = (
     <div className="flex flex-wrap gap-3 mt-6">
@@ -45,16 +51,7 @@ const AddCompanyContent: FC = () => {
       </div>
       {authLinks}
       {isLogged === true && (
-        <p className="mt-8 text-sm text-gray-600">
-          You are signed in.{" "}
-          <Link
-            href="/directory/companies/create"
-            className="text-blue-600 hover:text-blue-800 font-semibold underline"
-          >
-            Continue to the create company form
-          </Link>
-          .
-        </p>
+        <p className="mt-8 text-sm text-gray-600">Redirecting…</p>
       )}
     </article>
   );

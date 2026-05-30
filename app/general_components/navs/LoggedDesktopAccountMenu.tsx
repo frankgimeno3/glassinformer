@@ -1,12 +1,18 @@
 "use client";
 
-import { FC, useEffect } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getEmployeeCompanies, prefetchEmployeeCompanies } from "@/app/logged/companies/employeeCompaniesClient";
 
-const ACCOUNT_LINKS: { textContent: string; urlRedirection: string }[] = [
-    { textContent: "My Companies", urlRedirection: "/logged/companies" },
-    { textContent: "My Profile", urlRedirection: "/logged/profiles/me" },
-    { textContent: "Settings", urlRedirection: "/logged/settings" },
+const ACCOUNT_LINKS_BASE: {
+    key: "myProfile" | "myCompanies" | "settings" | "advertise";
+    textContent: string;
+    urlRedirection: string;
+}[] = [
+    { key: "myProfile", textContent: "My Profile", urlRedirection: "/logged/profiles/me" },
+    { key: "myCompanies", textContent: "My Companies", urlRedirection: "/logged/companies" },
+    { key: "settings", textContent: "Settings", urlRedirection: "/logged/settings" },
+    { key: "advertise", textContent: "Advertise", urlRedirection: "/advertise" },
 ];
 
 type LoggedDesktopAccountMenuProps = {
@@ -19,6 +25,11 @@ const LINK =
 
 const LoggedDesktopAccountMenu: FC<LoggedDesktopAccountMenuProps> = ({ open, onClose }) => {
     const router = useRouter();
+    const [hasActiveEmployeeCompanies, setHasActiveEmployeeCompanies] = useState<boolean>(false);
+
+    useEffect(() => {
+        prefetchEmployeeCompanies();
+    }, []);
 
     useEffect(() => {
         if (!open) return;
@@ -28,6 +39,29 @@ const LoggedDesktopAccountMenu: FC<LoggedDesktopAccountMenuProps> = ({ open, onC
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
     }, [open, onClose]);
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const data = await getEmployeeCompanies();
+                const companies = Array.isArray(data?.companies) ? data.companies : [];
+                if (!cancelled) setHasActiveEmployeeCompanies(companies.length > 0);
+            } catch {
+                if (!cancelled) setHasActiveEmployeeCompanies(false);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    const accountLinks = useMemo(() => {
+        return ACCOUNT_LINKS_BASE.filter((l) => {
+            if (l.key === "myCompanies") return hasActiveEmployeeCompanies;
+            return true;
+        });
+    }, [hasActiveEmployeeCompanies]);
 
     if (!open) return null;
 
@@ -39,7 +73,7 @@ const LoggedDesktopAccountMenu: FC<LoggedDesktopAccountMenuProps> = ({ open, onC
             aria-label="Account links"
         >
             <div className="flex flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2 px-4 py-3 sm:px-6 lg:justify-end lg:px-12">
-                {ACCOUNT_LINKS.map((item) => (
+                {accountLinks.map((item) => (
                     <button
                         key={item.urlRedirection}
                         type="button"

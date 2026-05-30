@@ -1,8 +1,9 @@
 'use client';
 
-import React, { FC, useState, useEffect, useMemo } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { canOptimizeRemoteImageSrc } from '@/app/lib/remoteImage';
 import { ProductService } from '@/apiClient/ProductService';
 
@@ -18,9 +19,11 @@ interface Product {
 }
 
 const ProductsTable: FC = () => {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [rowsRevealed, setRowsRevealed] = useState(false);
   const [filters, setFilters] = useState({
     name: "",
     description: "",
@@ -33,6 +36,8 @@ const ProductsTable: FC = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
+      const startedAt = Date.now();
+      const MIN_LOADING_MS = 1200;
       setError(null);
       try {
         const data = await ProductService.getAllProducts();
@@ -43,10 +48,17 @@ const ProductsTable: FC = () => {
         setError(message);
         setProducts([]);
       } finally {
+        const elapsed = Date.now() - startedAt;
+        const remaining = Math.max(0, MIN_LOADING_MS - elapsed);
+        if (remaining) await new Promise((r) => setTimeout(r, remaining));
         setLoading(false);
       }
     };
     fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    setRowsRevealed(true);
   }, []);
 
   const filteredProducts = useMemo(() => {
@@ -79,6 +91,16 @@ const ProductsTable: FC = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [filters]);
+
+  const getRowDelayMs = (index: number) => {
+    const totalMs = 1000;
+    const transitionMs = 500;
+    const maxDelay = Math.max(0, totalMs - transitionMs);
+    const visibleCount = Math.max(1, Math.min(paginatedProducts.length, 8));
+    if (visibleCount <= 1) return 0;
+    const step = maxDelay / (visibleCount - 1);
+    return Math.round(Math.min(index, visibleCount - 1) * step);
+  };
 
   const handlePrevious = () => {
     setCurrentPage((prev) => Math.max(1, prev - 1));
@@ -133,7 +155,13 @@ const ProductsTable: FC = () => {
 
       {/* Loading */}
       {loading && (
-        <div className='mb-6 text-center text-gray-600'>Loading products...</div>
+        <div className="mb-6 flex items-center justify-center gap-3 text-gray-600">
+          <span
+            className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"
+            aria-hidden="true"
+          />
+          <span className="text-sm font-medium">Loading products...</span>
+        </div>
       )}
 
       {/* Error */}
@@ -163,17 +191,58 @@ const ProductsTable: FC = () => {
             </tr>
           </thead>
           <tbody className='bg-white divide-y divide-gray-200'>
-            {paginatedProducts.length === 0 ? (
+            {loading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <tr key={`skeleton-${i}`} className="animate-pulse">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded bg-gray-200" />
+                      <div className="h-4 w-44 rounded bg-gray-200" />
+                    </div>
+                  </td>
+                  <td className="hidden lg:table-cell px-6 py-4">
+                    <div className="h-4 w-72 rounded bg-gray-200" />
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="h-4 w-32 rounded bg-gray-200" />
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex gap-2">
+                      <div className="h-5 w-16 rounded-full bg-gray-200" />
+                      <div className="h-5 w-12 rounded-full bg-gray-200" />
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : paginatedProducts.length === 0 ? (
               <tr>
                 <td colSpan={4} className='px-6 py-4 text-center text-gray-500'>
                   No products found
                 </td>
               </tr>
             ) : (
-              paginatedProducts.map((product) => (
+              paginatedProducts.map((product, rowIdx) => (
                 <tr
                   key={product.id_product}
-                  className='hover:bg-gray-50 transition-colors'
+                  style={
+                    {
+                      ["--gi-reveal-delay" as any]: `${getRowDelayMs(rowIdx)}ms`,
+                    } as React.CSSProperties
+                  }
+                  className={[
+                    "gi-row-reveal",
+                    rowsRevealed ? "gi-row-reveal--visible" : "gi-row-reveal--hidden",
+                    "hover:bg-gray-50 transition-colors cursor-pointer",
+                  ].join(" ")}
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => router.push(`/directory/products/${product.id_product}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      router.push(`/directory/products/${product.id_product}`);
+                    }
+                  }}
                 >
                   <td className='px-6 py-4 whitespace-nowrap'>
                     <div className='flex items-center gap-3'>
@@ -193,12 +262,9 @@ const ProductsTable: FC = () => {
                           —
                         </div>
                       )}
-                      <Link
-                        href={`/directory/products/${product.id_product}`}
-                        className='text-blue-600 hover:text-blue-800 font-medium cursor-pointer'
-                      >
+                      <span className='font-medium text-gray-900'>
                         {product.product_name}
-                      </Link>
+                      </span>
                     </div>
                   </td>
                   <td className='hidden lg:table-cell px-6 py-4 text-sm text-gray-900 max-w-md truncate'>

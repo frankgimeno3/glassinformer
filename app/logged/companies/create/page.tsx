@@ -3,41 +3,71 @@
 import React, { FC, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ContentPageShell from "@/app/general_components/ContentPageShell";
 
 const CreateCompany: FC = () => {
   const router = useRouter();
   const [companyName, setCompanyName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
   const [country, setCountry] = useState("");
   const [mainDescription, setMainDescription] = useState("");
   const [region, setRegion] = useState("");
   const [productsInput, setProductsInput] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError("");
+    setIsSubmitting(true);
     const productsArray = productsInput
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-    const payload = {
-      id_company: `comp-${Date.now()}`,
-      company_name: companyName,
-      country,
-      main_description: mainDescription,
-      region,
-      productsArray,
-      userArray: [],
-    };
-    console.log("Create company payload:", payload);
-    router.push("/logged/companies");
+    const message = [
+      `Company: ${companyName}`,
+      `Country: ${country}`,
+      `Region: ${region}`,
+      `Products: ${productsArray.join(", ") || "(none)"}`,
+      "",
+      mainDescription,
+    ].join("\n");
+
+    try {
+      const res = await fetch("/api/v1/panel-tickets/public", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: companyName,
+          email: contactEmail.trim(),
+          subject: `Directory — new company: ${companyName}`,
+          message,
+          ticket_type: "other",
+          contact_phone: "",
+          interest: "company_directory_create",
+        }),
+      });
+      if (!res.ok) {
+        throw new Error(`Could not open support ticket (HTTP ${res.status})`);
+      }
+      router.push("/logged/companies");
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Request failed");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="p-6 max-w-2xl">
+    <ContentPageShell maxWidthClass="max-w-2xl">
       <h1 className="text-2xl font-serif font-bold text-gray-900 mb-6 uppercase tracking-wider">
         Create company
       </h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {submitError && (
+          <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{submitError}</p>
+        )}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1 uppercase tracking-wider">
             Company name
@@ -49,6 +79,20 @@ const CreateCompany: FC = () => {
             required
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950/30 focus:border-blue-950"
             placeholder="e.g. GlassTech Solutions"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1 uppercase tracking-wider">
+            Contact email
+          </label>
+          <input
+            type="email"
+            value={contactEmail}
+            onChange={(e) => setContactEmail(e.target.value)}
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950/30 focus:border-blue-950"
+            placeholder="you@company.com"
           />
         </div>
 
@@ -110,9 +154,10 @@ const CreateCompany: FC = () => {
         <div className="flex gap-4 pt-4">
           <button
             type="submit"
-            className="px-6 py-2 rounded-lg bg-blue-950 hover:bg-blue-950/90 text-white uppercase tracking-wider"
+            disabled={isSubmitting}
+            className="px-6 py-2 rounded-lg bg-blue-950 hover:bg-blue-950/90 text-white uppercase tracking-wider disabled:opacity-60"
           >
-            Create company
+            {isSubmitting ? "Submitting…" : "Create company"}
           </button>
           <Link
             href="/logged/companies"
@@ -122,7 +167,7 @@ const CreateCompany: FC = () => {
           </Link>
         </div>
       </form>
-    </div>
+    </ContentPageShell>
   );
 };
 

@@ -7,6 +7,8 @@ interface MediakitCartProps {
   pricedItems: CartPricedItem[];
   pendingItems: CartPendingItem[];
   onContactSales: () => void;
+  onRemovePriced?: (id: string) => void;
+  onRemovePending?: (id: string) => void;
   blinkTrigger?: number;
 }
 
@@ -16,7 +18,14 @@ const CartIcon: FC = () => (
   </svg>
 );
 
-const MediakitCart: FC<MediakitCartProps> = ({ pricedItems, pendingItems, onContactSales, blinkTrigger = 0 }) => {
+const MediakitCart: FC<MediakitCartProps> = ({
+  pricedItems,
+  pendingItems,
+  onContactSales,
+  onRemovePriced,
+  onRemovePending,
+  blinkTrigger = 0,
+}) => {
   const [pricedExpanded, setPricedExpanded] = useState(true);
   const [pendingExpanded, setPendingExpanded] = useState(true);
   const [headerBold, setHeaderBold] = useState(true);
@@ -69,13 +78,39 @@ const MediakitCart: FC<MediakitCartProps> = ({ pricedItems, pendingItems, onCont
               {pricedExpanded && pricedItems.length > 0 && (
                 <ul className="mt-2 space-y-1.5 pl-1 text-sm text-gray-600">
                   {pricedItems.map((item) => (
-                    <li key={item.id} className="flex justify-between">
+                    <li key={item.id} className="flex items-center justify-between gap-3">
                       <span>
                         {item.label}
                         {(item.quantity ?? 1) > 1 ? ` × ${item.quantity}` : ''}
                       </span>
-                      <span className="font-medium text-gray-900">
-                        {((item.priceUsd ?? 0) * (item.quantity ?? 1)).toLocaleString()} USD
+                      <span className="flex items-center gap-2">
+                        <span className="font-medium text-gray-900">
+                          {((item.priceUsd ?? 0) * (item.quantity ?? 1)).toLocaleString()} USD
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => (typeof onRemovePriced === 'function' ? onRemovePriced(item.id) : undefined)}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-red-600 hover:bg-red-50 hover:text-red-700"
+                          aria-label={`Delete ${item.label}`}
+                          title="Delete"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-5 w-5"
+                          >
+                            <path d="M3 6h18" />
+                            <path d="M8 6V4h8v2" />
+                            <path d="M6 6l1 14h10l1-14" />
+                            <path d="M10 11v6" />
+                            <path d="M14 11v6" />
+                          </svg>
+                        </button>
                       </span>
                     </li>
                   ))}
@@ -96,7 +131,33 @@ const MediakitCart: FC<MediakitCartProps> = ({ pricedItems, pendingItems, onCont
                 <ul className="mt-2 space-y-1.5 pl-1 text-sm text-gray-600">
                   {pendingItems.length > 0 ? (
                     pendingItems.map((item) => (
-                      <li key={item.id}>{item.label}</li>
+                      <li key={item.id} className="flex items-center justify-between gap-3">
+                        <span>{item.label}</span>
+                        <button
+                          type="button"
+                          onClick={() => (typeof onRemovePending === 'function' ? onRemovePending(item.id) : undefined)}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-red-600 hover:bg-red-50 hover:text-red-700"
+                          aria-label={`Delete ${item.label}`}
+                          title="Delete"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-5 w-5"
+                          >
+                            <path d="M3 6h18" />
+                            <path d="M8 6V4h8v2" />
+                            <path d="M6 6l1 14h10l1-14" />
+                            <path d="M10 11v6" />
+                            <path d="M14 11v6" />
+                          </svg>
+                        </button>
+                      </li>
                     ))
                   ) : (
                     <li className="text-gray-400">None</li>

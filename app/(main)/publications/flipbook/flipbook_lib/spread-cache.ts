@@ -1,16 +1,12 @@
-import type { FlipbookPage, Company } from "../flipbook_types/flipbook";
+import type { SpreadViewData } from "./slotTypes";
+
+export type { SpreadViewData };
 
 export interface SpreadPayload {
-  viewData: Array<{
-    page: FlipbookPage;
-    company?: Company;
-    loremParagraphs: string[];
-  }>;
-  articleIndex: Array<{ page_number: number; titulo: string }>;
+  viewData: SpreadViewData;
   prevSpreadLabel: string | null;
   nextSpreadLabel: string | null;
   spreadLabel: string;
-  currentStep: number;
   currentPosition: number;
   totalSteps: number;
 }

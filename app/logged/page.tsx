@@ -9,19 +9,27 @@ interface LoggedProps { }
 const Logged: FC<LoggedProps> = ({ }) => {
   return (
     <div className='bg-white min-h-[60vh] rounded-lg shadow p-6  md:p-8'>
-      <div className='flex flex-row justify-end pt-6'>
-        <Link
-          href="/logged/settings/content-preferences"
-          className='group relative overflow-hidden cursor-pointer text-white px-4 py-2 rounded-lg text-sm inline-block min-w-[180px] text-center'
-        >
-          {/* Base gradient */}
-          <span className="absolute inset-0 bg-gradient-to-r from-violet-700 to-blue-950 rounded-lg transition-opacity duration-500 ease-in-out group-hover:opacity-0" aria-hidden />
-          {/* Hover: solid blue-900 */}
-          <span className="absolute inset-0 bg-blue-900 rounded-lg opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100" aria-hidden />
-          <span className="relative z-10">Customize your feed</span>
-        </Link>
+      <div className='pt-6 flex justify-end'>
+        <div className='w-full max-w-xl rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 md:px-5 md:py-4'>
+          <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+            <div className='min-w-0'>
+              <div className='text-sm font-semibold text-slate-900'>
+                Want to personalize your feed?
+              </div>
+              <div className='mt-1 text-sm text-slate-600'>
+                Select your preferences for each category in the portal to receive personalized recommendations.
+              </div>
+            </div>
+            <Link
+              href="/logged/settings/content-preferences"
+              className='inline-flex shrink-0 items-center justify-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400'
+            >
+              Customize
+            </Link>
+          </div>
+        </div>
       </div>
-    <Home/>
+      <Home />
     </div>
   );
 };

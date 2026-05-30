@@ -4,6 +4,7 @@ import React, { FC, useState } from 'react';
 import Link from 'next/link';
 import EventsCalendar from './components/EventsCalendar';
 import EventNews from './components/EventNews';
+import Reveal from '@/app/general_components/motion/Reveal';
 
 interface IndustryEventsProps {}
 
@@ -12,9 +13,12 @@ const IndustryEvents: FC<IndustryEventsProps> = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white px-6 py-10">
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">Industry Events</h1>
+      <Reveal delayMs={0}>
+        <h1 className="text-4xl font-bold text-gray-900 mb-8">Industry Events</h1>
+      </Reveal>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-8 border-b border-gray-200">
+      <Reveal delayMs={120}>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-8 border-b border-gray-200">
         <div className="flex gap-4">
           <button
             type="button"
@@ -47,10 +51,13 @@ const IndustryEvents: FC<IndustryEventsProps> = () => {
             Add your event
           </Link>
         </div>
-      </div>
+        </div>
+      </Reveal>
 
-      {activeTab === 'news' && <EventNews />}
-      {activeTab === 'calendar' && <EventsCalendar />}
+      <Reveal delayMs={180}>
+        {activeTab === 'news' && <EventNews />}
+        {activeTab === 'calendar' && <EventsCalendar />}
+      </Reveal>
     </div>
   );
 };

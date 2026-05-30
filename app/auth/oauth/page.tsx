@@ -14,6 +14,7 @@ import {
     AUTH_TITLE,
 } from "../_components/authFormStyles";
 import { GoogleOAuthFallbackLink } from "../_components/GoogleOAuthSection";
+import Reveal from "@/app/general_components/motion/Reveal";
 
 function mapCognitoOAuthQueryError(code: string | null, description: string | null): string {
     const desc = (description || "").toLowerCase();
@@ -100,12 +101,18 @@ const OAuthCallbackInner: FC = () => {
         return (
             <div className={AUTH_PAGE_SHELL}>
                 <div className={`${AUTH_CARD} ${AUTH_FORM}`}>
-                    <h2 className={AUTH_TITLE}>Google</h2>
-                    <p className={`${AUTH_TEXT} text-red-400`}>{fatal}</p>
-                    <p className={AUTH_AUX_TEXT}>
-                        Si ya tienes cuenta creada solo con email, usa el formulario de acceso con contraseña.
-                    </p>
-                    <GoogleOAuthFallbackLink href="/auth/login" label="Volver a iniciar sesión" />
+                    <Reveal delayMs={0}>
+                        <h2 className={AUTH_TITLE}>Google</h2>
+                    </Reveal>
+                    <Reveal delayMs={120}>
+                        <p className={`${AUTH_TEXT} text-red-400`}>{fatal}</p>
+                        <p className={AUTH_AUX_TEXT}>
+                            Si ya tienes cuenta creada solo con email, usa el formulario de acceso con contraseña.
+                        </p>
+                    </Reveal>
+                    <Reveal delayMs={180}>
+                        <GoogleOAuthFallbackLink href="/auth/login" label="Volver a iniciar sesión" />
+                    </Reveal>
                 </div>
             </div>
         );
@@ -114,8 +121,12 @@ const OAuthCallbackInner: FC = () => {
     return (
         <div className={AUTH_PAGE_SHELL}>
             <div className={`${AUTH_CARD} ${AUTH_FORM}`}>
-                <h2 className={AUTH_TITLE}>Google</h2>
-                <p className={AUTH_TEXT}>{status}</p>
+                <Reveal delayMs={0}>
+                    <h2 className={AUTH_TITLE}>Google</h2>
+                </Reveal>
+                <Reveal delayMs={120}>
+                    <p className={AUTH_TEXT}>{status}</p>
+                </Reveal>
             </div>
         </div>
     );

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import ContentPageShell from "@/app/general_components/ContentPageShell";
+import Reveal from "@/app/general_components/motion/Reveal";
 
 const LIST_API = "/api/v1/users/me/notifications";
 
@@ -88,44 +90,60 @@ const NotificationsPage: FC = () => {
     );
 
     return (
-        <div className="mx-auto max-w-3xl pb-16">
-            <h1 className="mb-6 font-serif text-3xl font-bold tracking-tight text-gray-900">Notifications</h1>
+        <ContentPageShell maxWidthClass="max-w-3xl">
+            <Reveal delayMs={0}>
+                <h1 className="mb-6 font-serif text-3xl font-bold tracking-tight text-gray-900">Notifications</h1>
+            </Reveal>
 
-            <div className="mb-6 flex border-b border-gray-200">
-                {tabBtn("pending", "Pending")}
-                {tabBtn("read", "Read")}
-            </div>
+            <Reveal delayMs={120}>
+                <div className="mb-6 flex border-b border-gray-200">
+                    {tabBtn("pending", "Pending")}
+                    {tabBtn("read", "Read")}
+                </div>
+            </Reveal>
 
-            {loading && <p className="text-gray-500">Loading…</p>}
-            {error && <p className="text-red-700">{error}</p>}
+            {loading && (
+                <Reveal delayMs={180}>
+                    <p className="text-gray-500">Loading…</p>
+                </Reveal>
+            )}
+            {error && (
+                <Reveal delayMs={180}>
+                    <p className="text-red-700">{error}</p>
+                </Reveal>
+            )}
 
             {!loading && !error && visible.length === 0 && (
-                <p className="rounded-lg border border-dashed border-gray-200 bg-white px-4 py-8 text-center text-gray-500">
-                    {tab === "pending" ? "No pending notifications." : "No read notifications yet."}
-                </p>
+                <Reveal delayMs={180}>
+                    <p className="rounded-lg border border-dashed border-gray-200 bg-white px-4 py-8 text-center text-gray-500">
+                        {tab === "pending" ? "No pending notifications." : "No read notifications yet."}
+                    </p>
+                </Reveal>
             )}
 
             {!loading && !error && visible.length > 0 && (
                 <ul className="divide-y divide-gray-200 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-                    {visible.map((n) => (
-                        <li key={n.user_notification_id}>
-                            <Link
-                                href={`/logged/notifications/${n.user_notification_id}`}
-                                className="block cursor-pointer px-4 py-4 transition hover:bg-gray-50"
-                            >
-                                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                                    <span className="text-xs font-semibold uppercase tracking-wider text-blue-950">
-                                        {n.notification_type || "Notification"}
-                                    </span>
-                                    <span className="text-xs text-gray-400">{formatDate(n.notification_date)}</span>
-                                </div>
-                                <p className="mt-2 line-clamp-2 text-sm text-gray-800">{n.notification_content}</p>
-                            </Link>
-                        </li>
+                    {visible.map((n, idx) => (
+                        <Reveal key={n.user_notification_id} delayMs={Math.min(idx * 70, 700)}>
+                            <li>
+                                <Link
+                                    href={`/logged/notifications/${n.user_notification_id}`}
+                                    className="block cursor-pointer px-4 py-4 transition hover:bg-gray-50"
+                                >
+                                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                                        <span className="text-xs font-semibold uppercase tracking-wider text-blue-950">
+                                            {n.notification_type || "Notification"}
+                                        </span>
+                                        <span className="text-xs text-gray-400">{formatDate(n.notification_date)}</span>
+                                    </div>
+                                    <p className="mt-2 line-clamp-2 text-sm text-gray-800">{n.notification_content}</p>
+                                </Link>
+                            </li>
+                        </Reveal>
                     ))}
                 </ul>
             )}
-        </div>
+        </ContentPageShell>
     );
 };
 

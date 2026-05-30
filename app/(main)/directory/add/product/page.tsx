@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import AddProductContent from "./AddProductContent";
 
 export const metadata: Metadata = {
-  title: "Create product | Directory | GlassInformer",
+  title: "Request product creation | Directory | GlassInformer",
   description:
-    "Create a product in the GlassInformer directory — company and account required.",
+    "Request product creation in the GlassInformer directory — employee relation and portal approval required.",
 };
 
 export default function AddProductPage() {

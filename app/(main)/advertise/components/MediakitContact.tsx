@@ -1,6 +1,7 @@
 'use client';
 
-import React, { FC, useRef, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
+import type { CartPricedItem } from '../types';
 
 const phonePrefixes = [
   { code: '+34', country: 'Spain' },
@@ -16,27 +17,107 @@ const phonePrefixes = [
 ];
 
 const interestOptions = [
-  'News Portal Advertising',
+  'Portal advertising',
   'Magazine Advertising',
-  'Other services',
+  'Dem Advertising',
   'General inquiry',
 ];
 
 interface MediakitContactProps {
   contactRef: React.RefObject<HTMLDivElement | null>;
+  pricedItems?: CartPricedItem[];
 }
 
-const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
+type MeResponse = {
+  userName?: string;
+  userSurnames?: string;
+  userEmail?: string;
+  userPhoneNumber?: string;
+};
+
+type EmployeeCompaniesResponse = {
+  companies?: { country?: string }[];
+};
+
+function splitPhone(raw: string): { prefix?: string; number?: string } {
+  const s = String(raw ?? '').trim();
+  if (!s) return {};
+  const m = s.match(/^(\+\d{1,4})\s*(.*)$/);
+  if (!m) return { number: s.replace(/\s+/g, '') };
+  const prefix = m[1];
+  const rest = String(m[2] ?? '').trim().replace(/\s+/g, '');
+  return { prefix, number: rest || undefined };
+}
+
+const MediakitContact: FC<MediakitContactProps> = ({ contactRef, pricedItems = [] }) => {
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isLogged, setIsLogged] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    companyCountry: '',
     phonePrefix: '+34',
     phone: '',
     interest: '',
     message: '',
     acceptedTerms: false,
   });
+
+  const isAutoFilledLocked = useMemo(() => isLogged, [isLogged]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/v1/users/me', { credentials: 'include' });
+        if (res.status === 401) {
+          if (!cancelled) setIsLogged(false);
+          return;
+        }
+        if (!res.ok) throw new Error(`me ${res.status}`);
+        const me = (await res.json()) as MeResponse;
+
+        const fullName = `${String(me?.userName ?? '').trim()} ${String(me?.userSurnames ?? '').trim()}`
+          .replace(/\s+/g, ' ')
+          .trim();
+        const email = String(me?.userEmail ?? '').trim();
+
+        const { prefix, number } = splitPhone(String(me?.userPhoneNumber ?? '').trim());
+        const prefixAllowed = phonePrefixes.some((p) => p.code === prefix);
+
+        let country = '';
+        try {
+          const cRes = await fetch('/api/v1/users/me/employee-companies', { credentials: 'include' });
+          if (cRes.ok) {
+            const cData = (await cRes.json()) as EmployeeCompaniesResponse;
+            const companies = Array.isArray(cData?.companies) ? cData.companies : [];
+            country =
+              String(companies.find((c) => String(c?.country ?? '').trim())?.country ?? '').trim() || '';
+          }
+        } catch {
+          // best-effort
+        }
+
+        if (cancelled) return;
+        setIsLogged(true);
+        setFormData((prev) => ({
+          ...prev,
+          ...(fullName ? { name: fullName } : {}),
+          ...(email ? { email } : {}),
+          ...(country ? { companyCountry: country } : {}),
+          ...(number ? { phone: number } : {}),
+          ...(prefixAllowed && prefix ? { phonePrefix: prefix } : {}),
+        }));
+      } catch {
+        if (!cancelled) setIsLogged(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -50,25 +131,58 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
   const isFormValid = () =>
     formData.name.trim() !== '' &&
     formData.email.trim() !== '' &&
+    formData.companyCountry.trim() !== '' &&
     formData.phone.trim() !== '' &&
     formData.interest !== '' &&
     formData.message.trim() !== '' &&
     formData.acceptedTerms;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isFormValid()) {
-      console.log('Form submitted:', formData);
-      alert('Thank you for your interest! We will contact you soon.');
-      setFormData({
-        name: '',
-        email: '',
-        phonePrefix: '+34',
-        phone: '',
-        interest: '',
-        message: '',
-        acceptedTerms: false,
-      });
+      setSubmitError(null);
+      const services = pricedItems.map((p) => p.id);
+      const subject = `Advertise — ${formData.interest}`;
+      const contactPhone = `${formData.phonePrefix} ${formData.phone}`.trim();
+
+      try {
+        const res = await fetch('/api/v1/panel-tickets/public', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            company_country: formData.companyCountry.trim(),
+            subject,
+            message: formData.message,
+            phone_country_prefix: formData.phonePrefix,
+            phone_number: formData.phone.trim(),
+            contact_phone: contactPhone,
+            interest: formData.interest,
+            ticket_type: 'advertisement',
+            terms_accepted: formData.acceptedTerms,
+            services_array: services,
+          }),
+        });
+
+        if (!res.ok) {
+          throw new Error(`Ticket could not be created (HTTP ${res.status})`);
+        }
+
+        setIsSubmitted(true);
+        setFormData({
+          name: '',
+          email: '',
+          companyCountry: '',
+          phonePrefix: '+34',
+          phone: '',
+          interest: '',
+          message: '',
+          acceptedTerms: false,
+        });
+      } catch (err) {
+        setSubmitError(err instanceof Error ? err.message : 'Ticket could not be created');
+      }
     }
   };
 
@@ -76,11 +190,34 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
     <>
       <div ref={contactRef} className="mx-auto max-w-4xl mt-16 sm:mt-20">
         <h2 className="mb-8 text-center text-3xl font-bold text-gray-900 sm:mb-12 sm:text-4xl">Contact us</h2>
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 lg:p-10"
-        >
-          <div className="space-y-6">
+        {isSubmitted ? (
+          <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-sm sm:p-8 lg:p-10">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-700">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900">Thank you for your interest!</h3>
+            <p className="mt-2 text-sm text-gray-600">We will contact you soon.</p>
+            <button
+              type="button"
+              onClick={() => setIsSubmitted(false)}
+              className="mt-6 rounded-lg bg-blue-950 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-950/90"
+            >
+              Send another request
+            </button>
+          </div>
+        ) : (
+          <form
+            onSubmit={handleSubmit}
+            className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 lg:p-10"
+          >
+            <div className="space-y-6">
+            {submitError && (
+              <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                {submitError}
+              </p>
+            )}
             <div>
               <label htmlFor="name" className="mb-2 block text-sm font-semibold text-gray-900">
                 Full contact name <span className="text-red-500">*</span>
@@ -92,7 +229,11 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
                 value={formData.name}
                 onChange={handleInputChange}
                 required
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none transition-all duration-200 focus:border-gray-400"
+                readOnly={isAutoFilledLocked}
+                aria-readonly={isAutoFilledLocked}
+                className={`w-full rounded-lg border px-4 py-3 text-gray-900 outline-none transition-all duration-200 focus:border-gray-400 ${
+                  isAutoFilledLocked ? 'bg-gray-200 border-gray-400' : 'bg-white border-gray-300'
+                }`}
                 placeholder="Enter your full name"
               />
             </div>
@@ -110,6 +251,26 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
                 required
                 className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none transition-all duration-200 focus:border-gray-400"
                 placeholder="your.email@example.com"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="companyCountry" className="mb-2 block text-sm font-semibold text-gray-900">
+                Company country <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="companyCountry"
+                name="companyCountry"
+                value={formData.companyCountry}
+                onChange={handleInputChange}
+                required
+                readOnly={isAutoFilledLocked}
+                aria-readonly={isAutoFilledLocked}
+                className={`w-full rounded-lg border px-4 py-3 text-gray-900 outline-none transition-all duration-200 focus:border-gray-400 ${
+                  isAutoFilledLocked ? 'bg-gray-200 border-gray-400' : 'bg-white border-gray-300'
+                }`}
+                placeholder="e.g. Spain, United States"
               />
             </div>
 
@@ -189,6 +350,26 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
                 className="w-full resize-y rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 outline-none transition-all duration-200 focus:border-gray-400"
                 placeholder="Please describe your request..."
               />
+              <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50/60 p-4">
+                <p className="text-sm font-semibold text-gray-900">Selected services</p>
+                {pricedItems.length === 0 ? (
+                  <p className="mt-2 text-sm text-gray-500">No items selected yet.</p>
+                ) : (
+                  <ul className="mt-2 space-y-1 text-sm text-gray-700">
+                    {pricedItems.map((it) => (
+                      <li key={it.id} className="flex items-start justify-between gap-3">
+                        <span className="flex-1">
+                          {it.label}
+                          {(it.quantity ?? 1) > 1 ? ` × ${it.quantity}` : ''}
+                        </span>
+                        <span className="shrink-0 font-medium text-gray-900">
+                          {((it.priceUsd ?? 0) * (it.quantity ?? 1)).toLocaleString()} USD
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </div>
 
             <div className="flex items-start gap-3">
@@ -226,7 +407,8 @@ const MediakitContact: FC<MediakitContactProps> = ({ contactRef }) => {
               Send
             </button>
           </div>
-        </form>
+          </form>
+        )}
       </div>
 
       {showTermsModal && (

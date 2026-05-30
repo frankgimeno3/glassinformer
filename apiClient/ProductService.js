@@ -21,4 +21,10 @@ export class ProductService {
         const response = await apiClient.post("/api/v1/products", data);
         return response.data;
     }
+
+    /** Submit directory product request (panel_tickets + panel_ticket_product_data). */
+    static async submitDirectoryProductRequest(data) {
+        const response = await apiClient.post("/api/v1/products/directory-request", data);
+        return response.data;
+    }
 }

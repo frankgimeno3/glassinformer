@@ -13,6 +13,7 @@ import ArticleHeader, { ArticleTags } from "../article_components/ArticleHeader"
 import ArticleBody from "../article_components/ArticleBody";
 
 import { useArticlePage } from "./useArticlePage";
+import Reveal from "@/app/general_components/motion/Reveal";
 
 export default function Article() {
   const {
@@ -44,44 +45,50 @@ export default function Article() {
 
   return (
     <div className="flex flex-col h-full min-h-screen text-gray-600 py-10 gap-0 w-full">
-      <ArticleHero
-        imageUrl={selectedArticle.article_main_image_url}
-        alt={selectedArticle.articleTitle}
-      />
+      <Reveal delayMs={0}>
+        <ArticleHero
+          imageUrl={selectedArticle.article_main_image_url}
+          alt={selectedArticle.articleTitle}
+        />
+      </Reveal>
 
-      <div className="w-full p-6 md:p-8 bg-white shadow-sm">
-        <ArticleHeader
-          title={selectedArticle.articleTitle}
-          subtitle={selectedArticle.articleSubtitle}
-          date={selectedArticle.date}
-          isOwner={isOwner}
-          onDeleteClick={() => setDeleteModalOpen(true)}
-        />
-        <ArticleTags
-          tags={selectedArticle.article_tags_array || []}
-          onTagClick={(tag) => router.push(`/search/tags=${tag}`)}
-        />
-        <ArticleBody
-          contentIds={selectedArticle.contents_array || []}
-          contents={contents}
-        />
-      </div>
+      <Reveal delayMs={120}>
+        <div className="w-full p-6 md:p-8 bg-white shadow-sm">
+          <ArticleHeader
+            title={selectedArticle.articleTitle}
+            subtitle={selectedArticle.articleSubtitle}
+            date={selectedArticle.date}
+            isOwner={isOwner}
+            onDeleteClick={() => setDeleteModalOpen(true)}
+          />
+          <ArticleTags
+            tags={selectedArticle.article_tags_array || []}
+            onTagClick={(tag) => router.push(`/search/tags=${tag}`)}
+          />
+          <ArticleBody
+            contentIds={selectedArticle.contents_array || []}
+            contents={contents}
+          />
+        </div>
+      </Reveal>
 
-      <div className="w-full">
-        <CommentsSection idArticle={articleId} />
-      </div>
-      <div className="w-full px-6 md:px-8">
+      <Reveal delayMs={180}>
+        <div className="w-full">
+          <CommentsSection idArticle={articleId} />
+        </div>
+      </Reveal>
+      <Reveal delayMs={240} className="w-full px-6 md:px-8">
         <MidBanner />
-      </div>
-      <div className="w-full px-6 md:px-8">
+      </Reveal>
+      <Reveal delayMs={310} className="w-full px-6 md:px-8">
         <MidBanner
           variant={articlePageRelatedMidVariant as MidBannerVariant}
           excludeArticleId={articleId}
         />
-      </div>
-      <div className="w-full px-6 md:px-8">
+      </Reveal>
+      <Reveal delayMs={380} className="w-full px-6 md:px-8">
         <MidBanner />
-      </div>
+      </Reveal>
 
       <DeleteArticleModal
         open={deleteModalOpen}

@@ -84,12 +84,14 @@ Full table is in [Route table](#route-table).
 | **v1/events/[id]** | GET | createEndpoint | EventService: get. |
 | **v1/products** | GET, POST | createEndpoint | ProductService: list, create. |
 | **v1/products/[id]** | GET, PUT, DELETE | createEndpoint | ProductService: get, update, delete. |
+| **v1/products/directory-request** | POST | createEndpoint | DirectoryProductRequestService: request a product (ticket + product data). |
 | **v1/publications** | GET, POST | createEndpoint | PublicationService: list, create. |
 | **v1/publications/[id]** | GET, PUT, DELETE | createEndpoint | PublicationService: get, update, delete. |
 | **v1/banners** | GET | createEndpoint | BannerService: list. |
 | **v1/users** | POST | createEndpoint | UserProfileService: create (e.g. after signup). |
 | **v1/users/[id]** | GET, PUT | createEndpoint | UserProfileService: get, update. |
 | **v1/users/me** | GET, PUT | createEndpoint | UserProfileService: current user. |
+| **v1/users/me/employee-companies** | GET | createEndpoint | UserProfileService: active employee relations joined with companies. |
 | **v1/time-log** | POST | createEndpoint | TimeLogService: create. |
 | **v1/time-log/modification** | POST | createEndpoint | ModificationService: create. |
 | **v1/time-logs** | GET | createEndpoint | TimeLogService: getUserTimeLogs (current user, query afterTime/beforeTime). |

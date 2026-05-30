@@ -8,6 +8,7 @@ import PublicationFilter, {
 import PublicationCard from "./PublicationCard";
 import PublicationChooserModal from "./PublicationChooserModal";
 import type { Publication } from "./publicationListUtils";
+import Reveal from "@/app/general_components/motion/Reveal";
 
 const ITEMS_PER_PAGE = 24;
 const DEFAULT_FILTER: PublicationFilterState = {
@@ -164,24 +165,30 @@ const PublicationsListClient: FC<PublicationsListClientProps> = ({
         open={chosenPublication != null}
         onClose={closeChooser}
       />
-      <h1 className="text-center text-4xl sm:text-5xl font-bold text-gray-900 pb-6 sm:pb-8">
-        Publications
-      </h1>
+      <Reveal delayMs={0}>
+        <h1 className="text-center text-4xl sm:text-5xl font-bold text-gray-900 pb-6 sm:pb-8">
+          Publications
+        </h1>
+      </Reveal>
 
-      <PublicationFilter
-        filter={filter}
-        onFilterChange={(f) => {
-          setFilter(f);
-          setCurrentPage(1);
-        }}
-        availableNumbers={availableNumbers}
-        availableYears={availableYears}
-      />
+      <Reveal delayMs={120}>
+        <PublicationFilter
+          filter={filter}
+          onFilterChange={(f) => {
+            setFilter(f);
+            setCurrentPage(1);
+          }}
+          availableNumbers={availableNumbers}
+          availableYears={availableYears}
+        />
+      </Reveal>
 
       {filteredPublications.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 w-full">
-          <p className="text-gray-500 text-lg">No publications found</p>
-        </div>
+        <Reveal delayMs={180}>
+          <div className="flex flex-col items-center justify-center py-12 w-full">
+            <p className="text-gray-500 text-lg">No publications found</p>
+          </div>
+        </Reveal>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-[1600px] mx-auto justify-items-center">
@@ -190,60 +197,64 @@ const PublicationsListClient: FC<PublicationsListClientProps> = ({
                 const label =
                   item.year > 0 ? String(item.year) : "Other publications";
                 return (
-                  <div
+                  <Reveal
                     key={`separator-${item.year}-${index}`}
+                    delayMs={Math.min(index * 70, 700)}
                     className="col-span-full text-center my-6"
                   >
                     <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 border-b-2 border-gray-300 pb-4 inline-block px-8">
                       {label}
                     </h2>
-                  </div>
+                  </Reveal>
                 );
               }
               const publication = item as Publication;
               return (
-                <div
+                <Reveal
                   key={publication.id ?? `pub-${index}`}
+                  delayMs={Math.min(index * 70, 700)}
                   className="w-full flex justify-center min-w-0"
                 >
                   <PublicationCard
                     publication={publication}
                     onOpenChooser={openChooser}
                   />
-                </div>
+                </Reveal>
               );
             })}
           </div>
 
-          <div className="flex justify-center items-center gap-4 mt-8 pb-8">
-            <button
-              type="button"
-              onClick={handlePrevious}
-              disabled={currentPage === 1}
-              className={`px-4 py-2 rounded-lg font-semibold ${
-                currentPage === 1
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
-              }`}
-            >
-              Previous
-            </button>
-            <span className="text-gray-700 font-medium">
-              {currentPage} of {totalPages}
-            </span>
-            <button
-              type="button"
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
-              className={`px-4 py-2 rounded-lg font-semibold ${
-                currentPage === totalPages
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
-              }`}
-            >
-              Next
-            </button>
-          </div>
+          <Reveal delayMs={150}>
+            <div className="flex justify-center items-center gap-4 mt-8 pb-8">
+              <button
+                type="button"
+                onClick={handlePrevious}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 rounded-lg font-semibold ${
+                  currentPage === 1
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
+              >
+                Previous
+              </button>
+              <span className="text-gray-700 font-medium">
+                {currentPage} of {totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={currentPage === totalPages}
+                className={`px-4 py-2 rounded-lg font-semibold ${
+                  currentPage === totalPages
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
+              >
+                Next
+              </button>
+            </div>
+          </Reveal>
         </>
       )}
     </div>

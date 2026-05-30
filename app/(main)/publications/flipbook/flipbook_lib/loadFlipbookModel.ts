@@ -1,32 +1,53 @@
-import { createFlipbookModel } from "@/app/(main)/publications/flipbook/flipbook_lib/flipbook-data";
-import type { FlipbookModel } from "@/app/(main)/publications/flipbook/flipbook_lib/flipbook-data";
+import { cache } from "react";
 import { getPublicationForPage } from "@/app/(main)/publications/_lib/getPublicationForPage";
-import { buildFlipbookFromPublication } from "./informerToFlipbook";
+import { listPublicationSlotsForFlipbook } from "@/app/server/features/publication/PublicationSlotService.js";
+import type { PublicationSlotRow } from "./slotTypes";
+import {
+  buildMagazinePreviewSpreads,
+  createFlipbookSpreadModel,
+  type FlipbookSpreadModel,
+} from "./buildMagazinePreviewSpreads";
 
-export async function loadFlipbookModelForPublicationId(
-  id: string
-): Promise<{ model: FlipbookModel } | null> {
-  const trimmed = id?.trim();
-  if (!trimmed) return null;
-  const pub = await getPublicationForPage(trimmed);
-  if (!pub) return null;
-
-  const rawNum = pub["número"] ?? (pub as { numero?: unknown }).numero;
-  const numero =
-    rawNum != null && String(rawNum).trim() !== ""
-      ? String(rawNum).trim()
-      : null;
-  const date =
-    pub.date != null && String(pub.date).trim() !== ""
-      ? String(pub.date).trim()
-      : null;
-
-  const { pages, companies } = buildFlipbookFromPublication({
-    publicationId: trimmed,
-    revista: String(pub.revista ?? "").trim() || "Publicación",
-    numero,
-    date,
-  });
-
-  return { model: createFlipbookModel(pages, companies) };
+function normalizeSlot(raw: Record<string, unknown>): PublicationSlotRow {
+  const publication_page =
+    raw.publication_page != null && Number.isFinite(Number(raw.publication_page))
+      ? Number(raw.publication_page)
+      : 0;
+  const slot_ordinal =
+    raw.slot_ordinal != null && Number.isFinite(Number(raw.slot_ordinal))
+      ? Number(raw.slot_ordinal)
+      : publication_page + 1;
+  return { ...raw, publication_page, slot_ordinal } as PublicationSlotRow;
 }
+
+export type LoadedFlipbookModel = {
+  model: FlipbookSpreadModel;
+  slots: PublicationSlotRow[];
+};
+
+export const loadFlipbookModelForPublicationId = cache(
+  async (id: string): Promise<LoadedFlipbookModel | null> => {
+    const trimmed = id?.trim();
+    if (!trimmed) return null;
+
+    const pub = await getPublicationForPage(trimmed);
+    if (!pub) return null;
+
+    const rawSlots = await listPublicationSlotsForFlipbook(trimmed);
+    const slots = (Array.isArray(rawSlots) ? rawSlots : []).map((raw) =>
+      normalizeSlot(raw as Record<string, unknown>)
+    );
+    const spreads = buildMagazinePreviewSpreads(slots);
+    if (spreads.length === 0) return null;
+
+    const title =
+      String(pub.revista ?? "").trim() ||
+      String((pub as { edition_name?: string }).edition_name ?? "").trim() ||
+      trimmed;
+
+    return {
+      model: createFlipbookSpreadModel(spreads, title),
+      slots,
+    };
+  }
+);

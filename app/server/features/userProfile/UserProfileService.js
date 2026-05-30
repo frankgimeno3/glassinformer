@@ -566,6 +566,183 @@ export async function getProfileUserByEmail(email) {
     return user ? toApiFormat(user, { includeEmail: true }) : null;
 }
 
+async function getUserIdByEmail(email) {
+    if (!UserProfileModel.sequelize) return null;
+    const e = String(email || "").trim();
+    if (!e) return null;
+    const user = await UserProfileModel.findOne({ where: { user_email: e } });
+    const uid = user?.user_id != null ? String(user.user_id) : "";
+    return UUID_RE.test(uid) ? uid : null;
+}
+
+/**
+ * Active employee relations for the session user (joined with company data).
+ * Uses company_portals when present to restrict to current portal.
+ * @param {string} email - Session email
+ */
+export async function getActiveEmployeeCompaniesForSessionUser(email) {
+    if (!UserProfileModel.sequelize) return [];
+    const sequelize = UserProfileModel.sequelize;
+    const uid = await getUserIdByEmail(email);
+    if (!uid) return [];
+
+    const baseSelect = `
+      SELECT
+        er.employee_rel_id::text AS employee_rel_id,
+        er.employee_company_id::text AS id_company,
+        er.employee_role AS employee_role,
+        c.company_commercial_name AS company_name,
+        c.company_country AS country,
+        c.company_main_image AS company_main_image
+      FROM public.employee_relations er
+      INNER JOIN public.companies_db c ON c.company_id = er.employee_company_id
+      WHERE er.employee_user_id = :uid::uuid
+        AND er.employee_rel_status = 'active'
+      ORDER BY COALESCE(c.company_commercial_name, '') ASC
+    `;
+
+    try {
+        const rows = await sequelize.query(
+            `
+            SELECT x.*
+            FROM (${baseSelect}) x
+            INNER JOIN public.company_portals cp
+              ON cp.company_id = x.id_company AND cp.portal_id = :portalId
+            ORDER BY COALESCE(x.company_name, '') ASC
+            `,
+            { replacements: { uid, portalId: portal_id }, type: QueryTypes.SELECT }
+        );
+        return Array.isArray(rows)
+            ? rows.map((r) => ({
+                employee_rel_id: String(r.employee_rel_id || ""),
+                id_company: String(r.id_company || ""),
+                employee_role: String(r.employee_role || "employee"),
+                company_name: r.company_name != null ? String(r.company_name) : "",
+                country: r.country != null ? String(r.country) : "",
+                company_main_image: r.company_main_image != null ? String(r.company_main_image) : "",
+            }))
+            : [];
+    } catch {
+        // If company_portals doesn't exist, return active relations without portal filter.
+        const rows = await sequelize.query(baseSelect, {
+            replacements: { uid },
+            type: QueryTypes.SELECT,
+        });
+        return Array.isArray(rows)
+            ? rows.map((r) => ({
+                employee_rel_id: String(r.employee_rel_id || ""),
+                id_company: String(r.id_company || ""),
+                employee_role: String(r.employee_role || "employee"),
+                company_name: r.company_name != null ? String(r.company_name) : "",
+                country: r.country != null ? String(r.country) : "",
+                company_main_image: r.company_main_image != null ? String(r.company_main_image) : "",
+            }))
+            : [];
+    }
+}
+
+/**
+ * Companies where the session user is a company administrator (joined with company data).
+ * Uses company_portals when present to restrict to current portal.
+ * @param {string} email - Session email
+ */
+export async function getAdminCompaniesForSessionUser(email) {
+    if (!UserProfileModel.sequelize) return [];
+    const sequelize = UserProfileModel.sequelize;
+    const uid = await getUserIdByEmail(email);
+    if (!uid) return [];
+
+    const baseSelect = `
+      SELECT
+        ca.company_administrator_id::text AS company_administrator_id,
+        ca.company_id::text AS id_company,
+        ca.company_administrator_role_name AS admin_role_name,
+        ca.employee_admission_rights AS employee_admission_rights,
+        ca.employee_deletion_rights AS employee_deletion_rights,
+        ca.employee_modification_rights AS employee_modification_rights,
+        ca.base_role_modification_rights AS base_role_modification_rights,
+        ca.admin_role_modification_rights AS admin_role_modification_rights,
+        ca.product_addition_rights AS product_addition_rights,
+        ca.product_modification_rights AS product_modification_rights,
+        ca.product_deletion_rights AS product_deletion_rights,
+        ca.base_company_data_modification_rights AS base_company_data_modification_rights,
+        ca.advanced_company_data_modification_rights AS advanced_company_data_modification_rights,
+        c.company_commercial_name AS company_name,
+        c.company_country AS country,
+        c.company_main_image AS company_main_image,
+        c.company_main_description AS main_description
+      FROM public.company_administrators ca
+      INNER JOIN public.companies_db c ON c.company_id = ca.company_id
+      WHERE ca.user_id = :uid::uuid
+      ORDER BY COALESCE(c.company_commercial_name, '') ASC
+    `;
+
+    try {
+        const rows = await sequelize.query(
+            `
+            SELECT x.*
+            FROM (${baseSelect}) x
+            INNER JOIN public.company_portals cp
+              ON cp.company_id = x.id_company AND cp.portal_id = :portalId
+            ORDER BY COALESCE(x.company_name, '') ASC
+            `,
+            { replacements: { uid, portalId: portal_id }, type: QueryTypes.SELECT }
+        );
+        return Array.isArray(rows)
+            ? rows.map((r) => ({
+                company_administrator_id: String(r.company_administrator_id || ""),
+                id_company: String(r.id_company || ""),
+                admin_role_name: String(r.admin_role_name || ""),
+                rights: {
+                    employee_admission_rights: Boolean(r.employee_admission_rights),
+                    employee_deletion_rights: Boolean(r.employee_deletion_rights),
+                    employee_modification_rights: Boolean(r.employee_modification_rights),
+                    base_role_modification_rights: Boolean(r.base_role_modification_rights),
+                    admin_role_modification_rights: Boolean(r.admin_role_modification_rights),
+                    product_addition_rights: Boolean(r.product_addition_rights),
+                    product_modification_rights: Boolean(r.product_modification_rights),
+                    product_deletion_rights: Boolean(r.product_deletion_rights),
+                    base_company_data_modification_rights: Boolean(r.base_company_data_modification_rights),
+                    advanced_company_data_modification_rights: Boolean(r.advanced_company_data_modification_rights),
+                },
+                company_name: r.company_name != null ? String(r.company_name) : "",
+                country: r.country != null ? String(r.country) : "",
+                company_main_image: r.company_main_image != null ? String(r.company_main_image) : "",
+                main_description: r.main_description != null ? String(r.main_description) : "",
+            }))
+            : [];
+    } catch {
+        // If company_portals doesn't exist, return admin companies without portal filter.
+        const rows = await sequelize.query(baseSelect, {
+            replacements: { uid },
+            type: QueryTypes.SELECT,
+        });
+        return Array.isArray(rows)
+            ? rows.map((r) => ({
+                company_administrator_id: String(r.company_administrator_id || ""),
+                id_company: String(r.id_company || ""),
+                admin_role_name: String(r.admin_role_name || ""),
+                rights: {
+                    employee_admission_rights: Boolean(r.employee_admission_rights),
+                    employee_deletion_rights: Boolean(r.employee_deletion_rights),
+                    employee_modification_rights: Boolean(r.employee_modification_rights),
+                    base_role_modification_rights: Boolean(r.base_role_modification_rights),
+                    admin_role_modification_rights: Boolean(r.admin_role_modification_rights),
+                    product_addition_rights: Boolean(r.product_addition_rights),
+                    product_modification_rights: Boolean(r.product_modification_rights),
+                    product_deletion_rights: Boolean(r.product_deletion_rights),
+                    base_company_data_modification_rights: Boolean(r.base_company_data_modification_rights),
+                    advanced_company_data_modification_rights: Boolean(r.advanced_company_data_modification_rights),
+                },
+                company_name: r.company_name != null ? String(r.company_name) : "",
+                country: r.country != null ? String(r.country) : "",
+                company_main_image: r.company_main_image != null ? String(r.company_main_image) : "",
+                main_description: r.main_description != null ? String(r.main_description) : "",
+            }))
+            : [];
+    }
+}
+
 /** Public profile lookup: uses users_db.user_id (UUID). */
 export async function getProfileUserById(userId) {
     if (!UserProfileModel.sequelize) return null;

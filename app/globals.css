@@ -26,6 +26,143 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Progressive reveal for blocks/cards/banners (load + scroll) */
+@media (prefers-reduced-motion: no-preference) {
+  .gi-reveal {
+    --gi-reveal-delay: 0ms;
+    will-change: opacity, transform;
+  }
+
+  .gi-reveal--hidden {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(0.2px);
+  }
+
+  .gi-reveal--visible {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+    transition:
+      opacity 500ms cubic-bezier(0.22, 1, 0.36, 1) var(--gi-reveal-delay),
+      transform 500ms cubic-bezier(0.22, 1, 0.36, 1) var(--gi-reveal-delay),
+      filter 500ms cubic-bezier(0.22, 1, 0.36, 1) var(--gi-reveal-delay);
+  }
+}
+
+/* Table rows: staggered reveal without wrapper elements (total ~0.5s) */
+@media (prefers-reduced-motion: no-preference) {
+  .gi-row-reveal {
+    --gi-reveal-delay: 0ms;
+    will-change: opacity, transform;
+  }
+
+  .gi-row-reveal--hidden {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(0.2px);
+  }
+
+  .gi-row-reveal--visible {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+    transition:
+      opacity 500ms cubic-bezier(0.22, 1, 0.36, 1) var(--gi-reveal-delay),
+      transform 500ms cubic-bezier(0.22, 1, 0.36, 1) var(--gi-reveal-delay),
+      filter 500ms cubic-bezier(0.22, 1, 0.36, 1) var(--gi-reveal-delay);
+  }
+}
+
+/* Tabs: left-to-right staggered reveal (total ~1s) */
+@media (prefers-reduced-motion: no-preference) {
+  .gi-tab-reveal {
+    --gi-reveal-delay: 0ms;
+    will-change: opacity, transform;
+    display: inline-flex;
+  }
+
+  .gi-tab-reveal--hidden {
+    opacity: 0;
+    transform: translateX(-10px);
+    filter: blur(0.2px);
+  }
+
+  .gi-tab-reveal--visible {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+    transition:
+      opacity 500ms cubic-bezier(0.22, 1, 0.36, 1) var(--gi-reveal-delay),
+      transform 500ms cubic-bezier(0.22, 1, 0.36, 1) var(--gi-reveal-delay),
+      filter 500ms cubic-bezier(0.22, 1, 0.36, 1) var(--gi-reveal-delay);
+  }
+}
+
+/* Smooth progressive text reveal (avoid "plop!" on load) */
+@keyframes gi-text-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/**
+ * Apply to blocks that appear after loading / conditional render.
+ * Respects reduced motion.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .gi-text-reveal {
+    animation: gi-text-reveal 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    will-change: opacity, transform;
+  }
+
+  /**
+   * Global default: any text node that appears should reveal smoothly.
+   * Opt-out by adding `.gi-no-text-reveal` on an ancestor or `data-gi-no-reveal` on the element.
+   */
+  :where(body)
+    :where(
+      p,
+      span,
+      small,
+      strong,
+      em,
+      b,
+      i,
+      s,
+      u,
+      mark,
+      q,
+      cite,
+      code,
+      kbd,
+      pre,
+      blockquote,
+      figcaption,
+      label,
+      time,
+      a,
+      button,
+      li,
+      dt,
+      dd,
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6
+    ):not([data-gi-no-reveal]):not(.gi-no-text-reveal):not(:where(.gi-no-text-reveal *)) {
+    animation: gi-text-reveal 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    will-change: opacity, transform;
+  }
+}
+
 /* Cursor pointer en enlaces y botones */
 a,
 button,

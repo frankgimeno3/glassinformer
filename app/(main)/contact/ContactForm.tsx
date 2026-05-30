@@ -71,6 +71,9 @@ const ContactForm: FC = () => {
             email: formData.email,
             subject: formData.subject,
             message: formData.message,
+            contact_phone: "",
+            interest: "",
+            ticket_type: "other",
           });
         }
         setSubmitState("success");

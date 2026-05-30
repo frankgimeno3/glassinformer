@@ -36,8 +36,14 @@ export const GET = createEndpoint(
         if (!user) {
             user = await createProfileUser(email);
         }
-        return NextResponse.json(user);
-    },
+        const rawPhone =
+            request?.idTokenPayload?.phone_number ??
+            request?.idTokenPayload?.phone ??
+            request?.idTokenPayload?.["custom:phone_number"] ??
+            "";
+        const userPhoneNumber = typeof rawPhone === "string" ? rawPhone.trim() : "";
+        return NextResponse.json({ ...user, userPhoneNumber });
+        },
     null,
     true
 );

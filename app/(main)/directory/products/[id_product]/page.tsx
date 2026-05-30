@@ -10,6 +10,7 @@ import CompanyContactForm from '../../components/CompanyContactForm';
 import OtherPortalCard from '../../components/OtherPortalCard';
 import AuthenticationService from '@/apiClient/AuthenticationService';
 import apiClient from '@/app/apiClient';
+import ContentPageShell from '@/app/general_components/ContentPageShell';
 
 interface Product {
   id_product: string;
@@ -101,60 +102,58 @@ const ProductsPage: FC = () => {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8'>
-        <div className='mx-auto max-w-4xl'>
-          <p className='text-center text-gray-600 text-lg'>Loading product...</p>
-        </div>
-      </div>
+      <ContentPageShell>
+        <p className="text-center text-gray-600 text-lg">Loading product...</p>
+      </ContentPageShell>
     );
   }
 
   if (otherPortal) {
     return (
-      <div className='min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8'>
-        <div className='mx-auto max-w-4xl'>
-          <button
-            onClick={() => router.push('/directory')}
-            className='mb-6 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm'
-          >
-            ← Back to Directory
-          </button>
-          <OtherPortalCard
-            type='product'
-            item={otherPortal.product}
-            portalId={otherPortal.portalId}
-            onBack={() => router.push('/directory')}
-          />
-        </div>
-      </div>
+      <ContentPageShell>
+        <button
+          type="button"
+          onClick={() => router.push('/directory')}
+          className="mb-6 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+        >
+          ← Back to Directory
+        </button>
+        <OtherPortalCard
+          type="product"
+          item={otherPortal.product}
+          portalId={otherPortal.portalId}
+          onBack={() => router.push('/directory')}
+        />
+      </ContentPageShell>
     );
   }
 
   if (!product) {
     return (
-      <div className='min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center'>
-        <div className='mx-auto max-w-2xl text-center'>
-          <h1 className='text-3xl sm:text-4xl font-serif font-light text-gray-800 tracking-wide mb-6'>
+      <ContentPageShell maxWidthClass="max-w-2xl">
+        <div className="text-center">
+          <h1 className="text-3xl sm:text-4xl font-serif font-light text-gray-800 tracking-wide mb-6">
             No se ha encontrado un producto con ese nombre
           </h1>
-          <p className='text-gray-600 text-lg mb-10'>
+          <p className="text-gray-600 text-lg mb-10">
             El producto que buscas no existe en el directorio. Puedes volver para seguir explorando.
           </p>
           <button
+            type="button"
             onClick={() => router.push('/directory')}
-            className='px-8 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors font-medium tracking-wide'
+            className="px-8 py-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg hover:bg-gray-100 hover:border-gray-400 transition-colors font-medium tracking-wide"
           >
             ← Volver al directorio
           </button>
         </div>
-      </div>
+      </ContentPageShell>
     );
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8'>
-      <div className='mx-auto max-w-4xl'>
+    <ContentPageShell>
         <button
+          type="button"
           onClick={() => router.push('/directory')}
           className='mb-6 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm'
         >
@@ -274,8 +273,7 @@ const ProductsPage: FC = () => {
             </div>
           )}
         </div>
-      </div>
-    </div>
+    </ContentPageShell>
   );
 };
 

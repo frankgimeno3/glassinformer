@@ -51,7 +51,7 @@ const MainNews: FC<MainNewsProps> = ({ mainArticle, secondaryArticles }) => {
                 }
               />
             </Link>
-            <div className="flex flex-col p-6 md:p-8 space-y-4">
+            <div className="gi-text-reveal flex flex-col p-6 md:p-8 space-y-4">
               {(mainArticle!.article_tags_array?.length ?? 0) > 0 && (
                 <span className="text-xs font-sans uppercase tracking-wider text-blue-600 font-medium">
                   {mainArticle!.article_tags_array![0]}
@@ -119,7 +119,7 @@ const MainNews: FC<MainNewsProps> = ({ mainArticle, secondaryArticles }) => {
                   }
                 />
               </Link>
-              <div className="flex flex-col min-w-0 flex-1 justify-center">
+              <div className="gi-text-reveal flex flex-col min-w-0 flex-1 justify-center">
                 <div className="flex items-center gap-2 text-xs text-gray-500 uppercase tracking-wider font-sans mb-1">
                   {article.company && (
                     <>

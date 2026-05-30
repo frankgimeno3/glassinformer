@@ -9,9 +9,9 @@ interface MediakitTabsProps {
 }
 
 const TABS: { id: TabId; label: string }[] = [
-  { id: 'news-portal', label: 'News Portal Advertising' },
+  { id: 'portal', label: 'Portal advertising' },
   { id: 'magazine', label: 'Magazine Advertising' },
-  { id: 'other-services', label: 'Other services' },
+  { id: 'dem', label: 'Dem Advertising' },
 ];
 
 const MediakitTabs: FC<MediakitTabsProps> = ({ activeTab, onTabChange }) => {

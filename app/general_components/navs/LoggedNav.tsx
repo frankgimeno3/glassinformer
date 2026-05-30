@@ -7,6 +7,7 @@ import { PortalName } from "@/app/GlassInformerSpecificData";
 import LoggedDesktopAccountMenu from "./LoggedDesktopAccountMenu";
 import DesktopAccountMenuTriggerIcon from "./DesktopAccountMenuTriggerIcon";
 import NotificationsNavButton from "./NotificationsNavButton";
+import { getEmployeeCompanies, prefetchEmployeeCompanies } from "@/app/logged/companies/employeeCompaniesClient";
 
 const SearchIcon = () => (
   <svg
@@ -71,6 +72,7 @@ const LoggedNav: FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
+  const [hasActiveEmployeeCompanies, setHasActiveEmployeeCompanies] = useState(false);
   const navRootRef = useRef<HTMLElement | null>(null);
   const router = useRouter();
 
@@ -82,6 +84,12 @@ const LoggedNav: FC = () => {
   };
 
   useEffect(() => {
+    router.prefetch("/logged/companies");
+    prefetchEmployeeCompanies();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (!desktopMenuOpen) return;
     const onDoc = (e: MouseEvent) => {
       const el = navRootRef.current;
@@ -91,6 +99,24 @@ const LoggedNav: FC = () => {
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
   }, [desktopMenuOpen]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await getEmployeeCompanies();
+        const companies = Array.isArray(data?.companies) ? data.companies : [];
+        const adminCompanies = Array.isArray(data?.adminCompanies) ? data.adminCompanies : [];
+        if (!cancelled) setHasActiveEmployeeCompanies(companies.length > 0 || adminCompanies.length > 0);
+      } catch {
+        if (!cancelled) setHasActiveEmployeeCompanies(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [mobileMenuOpen]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -220,22 +246,30 @@ const LoggedNav: FC = () => {
                     <NotificationsNavButton className="!w-full justify-center border-0 shadow-none" />
                   </div>
                   <button
-                    onClick={() => handleNavClick("/logged/companies")}
-                    className="py-4 text-left font-serif text-xl text-gray-900 hover:text-gray-600 transition-colors border-b border-gray-100"
-                  >
-                    My Companies
-                  </button>
-                  <button
                     onClick={() => handleNavClick("/logged/profiles/me")}
                     className="py-4 text-left font-serif text-xl text-gray-900 hover:text-gray-600 transition-colors border-b border-gray-100"
                   >
                     My Profile
                   </button>
+                  {hasActiveEmployeeCompanies && (
+                    <button
+                      onClick={() => handleNavClick("/logged/companies")}
+                      className="py-4 text-left font-serif text-xl text-gray-900 hover:text-gray-600 transition-colors border-b border-gray-100"
+                    >
+                      My Companies
+                    </button>
+                  )}
                   <button
                     onClick={() => handleNavClick("/logged/settings")}
                     className="py-4 text-left font-serif text-xl text-gray-900 hover:text-gray-600 transition-colors border-b border-gray-100"
                   >
                     Settings
+                  </button>
+                  <button
+                    onClick={() => handleNavClick("/advertise")}
+                    className="py-4 text-left font-serif text-xl text-gray-900 hover:text-gray-600 transition-colors border-b border-gray-100"
+                  >
+                    Advertise
                   </button>
                   <button
                     type="button"

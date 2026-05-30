@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   useRef,
@@ -7,14 +7,8 @@ import {
   useEffect,
   useLayoutEffect,
 } from "react";
-import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type {
-  ArticleContentBlock,
-  FlipbookPage,
-  Company,
-} from "../flipbook_types/flipbook";
-import { getUnsplashImageUrl } from "../flipbook_lib/unsplash";
+import type { SpreadViewData } from "../flipbook_lib/slotTypes";
 import {
   fetchAndCacheSpread,
   getCachedSpread,
@@ -22,6 +16,7 @@ import {
   type SpreadPayload,
 } from "../flipbook_lib/spread-cache";
 import FlipbookNav from "./FlipbookNav";
+import { FlipbookSlotPageCard } from "./FlipbookSlotPageCard";
 
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2;
@@ -68,10 +63,10 @@ function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-/** Proporción 228×297 mm (como hoja revista) */
+/** ProporciÃ³n 228Ã—297 mm (como hoja revista) */
 const PAGE_ASPECT_RATIO = 228 / 297;
 
-/** Gap entre páginas (mismo que gap-4) y estilo base de cada slot del spread */
+/** Gap entre pÃ¡ginas (mismo que gap-4) y estilo base de cada slot del spread */
 const GAP_PX = 16;
 const SPREAD_SLOT_STYLE: Record<string, string | number> = {
   aspectRatio: `${PAGE_ASPECT_RATIO}`,
@@ -79,55 +74,23 @@ const SPREAD_SLOT_STYLE: Record<string, string | number> = {
   minWidth: "min(90vw, 216px)",
 };
 
-interface PageWithCompany {
-  page: FlipbookPage;
-  company?: Company;
-  loremParagraphs: string[];
-}
-
-export interface ArticleIndexEntry {
-  page_number: number;
-  titulo: string;
-}
-
 export interface FlipbookViewProps {
   publicationId: string;
   /** Ruta base sin barra final, p. ej. `/publications/flipbook/mi-id` */
   flipbookBasePath: string;
-  currentStep: number;
   spreadLabel: string;
   prevSpreadLabel: string | null;
   nextSpreadLabel: string | null;
   firstSpreadLabel?: string | null;
   lastSpreadLabel?: string | null;
-  viewData: PageWithCompany[];
-  articleIndex: ArticleIndexEntry[];
-  nextStep: number | null;
-  prevStep: number | null;
+  viewData: SpreadViewData;
   currentPosition: number;
   totalSteps: number;
   prefetchSpreadLabels: string[];
 }
 
-type EffectiveSide = "left" | "right";
-
-function effectiveSide(page: FlipbookPage): EffectiveSide {
-  if (page.page_type === "cover" || page.page_side === "cover") return "right";
-  if (page.page_side === "end" || page.page_type === "backCover") return "left";
-  return page.page_side === "left" ? "left" : "right";
-}
-
-/** Reparte viewData en left/right según effectiveSide. */
-function splitSpread(
-  data: PageWithCompany[]
-): { left?: PageWithCompany; right?: PageWithCompany } {
-  const out: { left?: PageWithCompany; right?: PageWithCompany } = {};
-  for (const item of data) {
-    const side = effectiveSide(item.page);
-    if (side === "left") out.left = item;
-    else out.right = item;
-  }
-  return out;
+function spreadSlots(data: SpreadViewData) {
+  return { left: data.leftSlot, right: data.rightSlot };
 }
 
 /** Zonas: tercio exterior (33%) + (top 5% | bottom 5% | borde exterior 10%). Click: borde 10% o buffer 100px. */
@@ -135,7 +98,7 @@ function hitTestZones(
   pageRect: DOMRect,
   clientX: number,
   clientY: number,
-  side: EffectiveSide
+  side: "left" | "right"
 ): { pointer: boolean; click: boolean } {
   const { left, top, width, height } = pageRect;
   const x = clientX - left;
@@ -155,423 +118,6 @@ function hitTestZones(
       : clientX > pageRect.right && clientX <= pageRect.right + 100;
   const click = inOuterEdge || inBuffer100;
   return { pointer, click };
-}
-
-function getTypeLabel(page: FlipbookPage): string {
-  switch (page.page_type) {
-    case "advertiserIndex":
-      return "Índice de anunciantes";
-    case "Summary":
-      return "Sumario de contenidos";
-    case "cover":
-      return "Portada";
-    case "advert":
-      return "Publicidad";
-    case "backCover":
-      return "Contraportada";
-    default:
-      return "Artículo";
-  }
-}
-
-function ArticleContentBlocks({ blocks }: { blocks: ArticleContentBlock[] }) {
-  const bodyText =
-    "text-justify text-[11px] leading-[1.42] text-stone-900 [hyphens:auto]";
-  const rowSplit =
-    "col-span-2 grid grid-cols-1 items-start gap-y-2 sm:grid-cols-2 sm:gap-x-3 sm:gap-y-0";
-  const imgCell =
-    "relative aspect-[5/3] min-h-[76px] w-full overflow-hidden rounded-sm bg-stone-200 sm:aspect-[4/3] sm:min-h-[104px]";
-
-  return (
-    <div
-      lang="es"
-      className="mt-2 grid min-h-0 flex-1 auto-rows-min grid-cols-2 gap-x-3 gap-y-2.5 overflow-y-auto pr-0.5"
-    >
-      {blocks.map((block, i) => {
-        const key = `${i}-${block.kind}`;
-        switch (block.kind) {
-          case "onlytext": {
-            if (!block.text) return null;
-            const flow = block.textFlow ?? "newspaper";
-            if (flow === "half") {
-              return (
-                <div key={key} className="col-span-1 min-w-0">
-                  <p className={bodyText}>{block.text}</p>
-                </div>
-              );
-            }
-            if (flow === "block") {
-              return (
-                <div key={key} className="col-span-2 min-w-0">
-                  <p className={bodyText}>{block.text}</p>
-                </div>
-              );
-            }
-            return (
-              <div key={key} className="col-span-2 min-w-0">
-                <p className={`${bodyText} columns-2 gap-x-4`}>{block.text}</p>
-              </div>
-            );
-          }
-          case "onlyimage":
-            return block.src ? (
-              <div key={key} className="col-span-2 min-w-0">
-                <div className="relative aspect-[16/7] max-h-[9.5rem] w-full overflow-hidden rounded-sm bg-stone-200 sm:max-h-40">
-                  <Image
-                    src={block.src}
-                    alt=""
-                    fill
-                    draggable={false}
-                    className="pointer-events-none object-cover select-none"
-                    sizes="(max-width: 1200px) 90vw, 400px"
-                  />
-                </div>
-              </div>
-            ) : null;
-          case "imagetext":
-            return (
-              <div key={key} className={rowSplit}>
-                {block.src ? (
-                  <div className={imgCell}>
-                    <Image
-                      src={block.src}
-                      alt=""
-                      fill
-                      draggable={false}
-                      className="pointer-events-none object-cover select-none"
-                      sizes="200px"
-                    />
-                  </div>
-                ) : (
-                  <div className="min-h-0 min-w-0" />
-                )}
-                {block.text ? (
-                  <p className={`min-w-0 ${bodyText}`}>{block.text}</p>
-                ) : (
-                  <div className="min-h-0 min-w-0" />
-                )}
-              </div>
-            );
-          case "textimage":
-            return (
-              <div key={key} className={rowSplit}>
-                {block.text ? (
-                  <p className={`min-w-0 ${bodyText}`}>{block.text}</p>
-                ) : (
-                  <div className="min-h-0 min-w-0" />
-                )}
-                {block.src ? (
-                  <div className={imgCell}>
-                    <Image
-                      src={block.src}
-                      alt=""
-                      fill
-                      draggable={false}
-                      className="pointer-events-none object-cover select-none"
-                      sizes="200px"
-                    />
-                  </div>
-                ) : (
-                  <div className="min-h-0 min-w-0" />
-                )}
-              </div>
-            );
-          default:
-            return null;
-        }
-      })}
-    </div>
-  );
-}
-
-/** Logo tipo cabecera de revista para la portada */
-function MagazineLogo() {
-  return (
-    <div className="flex flex-col items-center justify-center py-6 text-center">
-      <div
-        className="mb-1 text-[10px] font-medium tracking-[0.35em] text-amber-300/90 uppercase"
-        style={{ textShadow: "0 2px 12px rgba(0, 0, 0, 0.72)" }}
-      >
-        La revista del sector del vidrio
-      </div>
-      <div
-        className="font-serif text-4xl font-bold tracking-tight text-white md:text-5xl"
-        style={{ textShadow: "0 3px 18px rgba(0, 0, 0, 0.78)" }}
-      >
-        Glass
-      </div>
-      <div
-        className="-mt-1 font-serif text-3xl font-bold tracking-[0.2em] text-amber-400 md:text-4xl"
-        style={{ textShadow: "0 3px 18px rgba(0, 0, 0, 0.78)" }}
-      >
-        INFORMER
-      </div>
-      <div className="mt-2 h-px w-24 bg-amber-500/70 shadow-[0_0_16px_rgba(251,191,36,0.45)]" />
-    </div>
-  );
-}
-
-function PageCard({
-  data,
-  articleIndex,
-  disableBackdropDuringTurn = false,
-}: {
-  data: PageWithCompany;
-  articleIndex: ArticleIndexEntry[];
-  disableBackdropDuringTurn?: boolean;
-}) {
-  const { page, company, loremParagraphs } = data;
-  const imageUrl = page.imageUrl ?? getUnsplashImageUrl(page.page_id);
-  const articleHeroSrc =
-    page.mainImage ?? page.imageUrl ?? getUnsplashImageUrl(page.page_id);
-  const typeLabel = page.sectionLabel ?? getTypeLabel(page);
-  const hasBgImage =
-    page.page_type === "cover" ||
-    page.page_type === "advert" ||
-    page.page_type === "backCover";
-  const isArticle = page.page_type === "article";
-  const showLorem =
-    page.page_type === "article" ||
-    page.page_type === "advert" ||
-    page.page_type === "backCover";
-  const isSummary = page.page_type === "Summary";
-
-  return (
-    <div
-      className="relative flex flex-col overflow-hidden rounded-lg border border-stone-400/50 shadow-2xl"
-      style={{
-        aspectRatio: `${PAGE_ASPECT_RATIO}`,
-        width: "min(35vw, 739px)",
-        minWidth: "min(90vw, 216px)",
-      }}
-    >
-      {/* Base blanca siempre presente: evita transparencia durante el giro 3D */}
-      <div className="absolute inset-0 rounded-lg bg-white" aria-hidden />
-      {/* Fondo imagen: solo cover, advert, backCover */}
-      {hasBgImage && (
-        <div className="absolute inset-0">
-          <Image
-            src={imageUrl}
-            alt=""
-            fill
-            draggable={false}
-            className={`pointer-events-none select-none ${page.page_type === "cover" ? "scale-105 object-cover saturate-[1.08] brightness-[0.92]" : "object-cover"}`}
-            sizes="(max-width: 1200px) 90vw, 739px"
-          />
-          <div
-            className={`absolute inset-0 ${page.page_type === "cover" ? "bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.18),transparent_34%),linear-gradient(to_bottom,rgba(12,10,9,0.28),rgba(12,10,9,0.62))]" : "bg-stone-900/50"}`}
-            aria-hidden
-          />
-        </div>
-      )}
-
-      {/* Fondo claro para article, Summary, advertiserIndex */}
-      {!hasBgImage && (
-        <div className="absolute inset-0 bg-stone-100" aria-hidden />
-      )}
-
-      <div
-        className={`relative z-10 flex flex-1 flex-col ${hasBgImage ? "text-white" : "text-stone-800"}`}
-      >
-        {/* Cover: logo centrado; temario y datos del número fijados en la base */}
-        {page.page_type === "cover" && (
-          <>
-            {(page.coverTemarioLines?.length || page.coverIssueLines?.length) ? (
-              <div className="pointer-events-none absolute bottom-4 left-4 right-4 z-20 max-h-[42%] overflow-y-auto rounded-xl border border-white/12 bg-black/48 px-3.5 py-3.5 shadow-[0_14px_40px_rgba(0,0,0,0.42)] backdrop-blur-[4px] sm:bottom-5 sm:left-5 sm:right-5 sm:px-4 sm:py-4">
-                {page.coverTemarioLines && page.coverTemarioLines.length > 0 ? (
-                  <div className={page.coverIssueLines && page.coverIssueLines.length > 0 ? "mb-3 border-b border-white/15 pb-2.5" : ""}>
-                    <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-200/95">
-                      Temario
-                    </p>
-                    <ul className="space-y-1 text-left text-[11px] leading-[1.3] text-white/95">
-                      {page.coverTemarioLines.map((line, i) => (
-                        <li key={i}>{line}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-                {page.coverIssueLines && page.coverIssueLines.length > 0 ? (
-                  <div className="text-left">
-                    <p className="mb-1.5 text-[8px] font-semibold uppercase tracking-[0.22em] text-amber-200/95">
-                      Datos del número
-                    </p>
-                    {page.coverIssueThematic ? (
-                      <p className="mb-2 text-[11px] font-semibold leading-tight text-amber-100">
-                        {page.coverIssueThematic}
-                      </p>
-                    ) : null}
-                    <ul className="space-y-1 text-[10px] leading-snug text-stone-100/95">
-                      {page.coverIssueLines.map((line, i) => (
-                        <li key={i}>{line}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-            <div className="relative z-10 flex shrink-0 flex-col items-center pt-4">
-              <MagazineLogo />
-              {page.coverRevista ? (
-                <p
-                  className="mt-2 max-w-[90%] px-3 text-center text-base font-semibold leading-tight text-white sm:text-lg"
-                  style={{ textShadow: "0 3px 18px rgba(0, 0, 0, 0.76)" }}
-                >
-                  {page.coverRevista}
-                </p>
-              ) : null}
-            </div>
-            <div
-              className="relative z-10 mt-auto px-5 pb-5 text-center text-[11px] text-stone-300"
-              style={{ textShadow: "0 2px 10px rgba(0, 0, 0, 0.72)" }}
-            >
-              {!page.coverIssueLines?.length && page.coverTagline ? (
-                <span className="mb-1.5 block text-stone-200/85">
-                  {page.coverTagline}
-                </span>
-              ) : null}
-              Portada
-            </div>
-          </>
-        )}
-
-        {/* Article: imagen arriba → título → subtítulo → 3 columnas */}
-        {isArticle && (
-          <>
-            <div className="relative h-[24%] min-h-[100px] w-full shrink-0 overflow-hidden">
-              <Image
-                src={articleHeroSrc}
-                alt=""
-                fill
-                draggable={false}
-                className="pointer-events-none object-cover select-none"
-                sizes="(max-width: 1200px) 90vw, 739px"
-              />
-            </div>
-            <div className="flex min-h-0 flex-1 flex-col px-4 pb-4 pt-3">
-              <div className="mb-0.5 text-[9px] font-medium uppercase tracking-wider text-amber-800">
-                {typeLabel}
-              </div>
-              <h2 className="text-lg font-bold leading-tight text-stone-900 sm:text-xl">
-                {page.titulo}
-              </h2>
-              {page.subtitulo && (
-                <p className="mt-0.5 text-xs leading-snug text-stone-600">
-                  {page.subtitulo}
-                </p>
-              )}
-              {page.articleContents && page.articleContents.length > 0 ? (
-                <ArticleContentBlocks blocks={page.articleContents} />
-              ) : (
-                <div className="mt-2 flex-1 text-justify text-[11px] leading-[1.42] text-stone-800 columns-2 gap-x-4">
-                  {loremParagraphs.map((para, i) => (
-                    <p key={i} className="mb-2 break-inside-avoid">
-                      {para}
-                    </p>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
-        {/* Advert, backCover: contenido sobre imagen de fondo */}
-        {(page.page_type === "advert" || page.page_type === "backCover") && (
-          <div className="flex flex-1 flex-col p-6">
-            <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-amber-200">
-              {typeLabel}
-            </div>
-            <div className="text-sm text-stone-300">
-              Página {page.page_number + 1}
-            </div>
-            {page.titulo && (
-              <h2 className="mt-2 text-lg font-bold text-white">
-                {page.titulo}
-              </h2>
-            )}
-            {showLorem && loremParagraphs.length > 0 && (
-              <div className="mt-3 flex-1 text-justify text-[12px] leading-relaxed text-stone-200 columns-3 gap-3">
-                {loremParagraphs.map((para, i) => (
-                  <p key={i} className="mb-2 break-inside-avoid">
-                    {para}
-                  </p>
-                ))}
-              </div>
-            )}
-            {page.page_type === "backCover" && (
-              <div className="mt-4 text-sm text-stone-400">
-                © Revista Glass Informer. Todos los derechos reservados.
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Summary, advertiserIndex: sin imagen de fondo */}
-        {(isSummary || page.page_type === "advertiserIndex") && (
-          <div className="flex flex-1 flex-col p-6">
-            <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-amber-700">
-              {typeLabel}
-            </div>
-            <div className="text-sm text-stone-500">
-              Página {page.page_number + 1}
-            </div>
-            {isSummary && (
-              <div className="mt-4 flex-1">
-                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-stone-600">
-                  Índice de contenidos
-                </h3>
-                <ul className="space-y-2 text-sm text-stone-700">
-                  {articleIndex.map((entry) => (
-                    <li key={entry.page_number} className="flex gap-2">
-                      <span className="shrink-0 font-medium text-amber-700">
-                        {entry.page_number + 1}.
-                      </span>
-                      <span>{entry.titulo}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {page.page_type === "advertiserIndex" && (
-              <div className="mt-4 text-sm italic text-stone-600">
-                Índice de anunciantes de este número.
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Topo: empresa, abajo a la derecha (sin backdrop-blur durante giro para evitar mezcla) */}
-      {company && (
-        <div
-          className={`absolute bottom-4 right-4 z-10 max-w-[220px] rounded-lg p-3 shadow-xl ${disableBackdropDuringTurn ? (hasBgImage ? "border border-amber-400/60 bg-stone-900" : "border border-stone-300 bg-white") : `backdrop-blur-sm ${hasBgImage ? "border border-amber-400/60 bg-stone-900/90" : "border border-stone-300 bg-white/95"}`}`}
-        >
-          <div className={`mb-0.5 text-[10px] font-medium uppercase tracking-wider ${hasBgImage ? "text-amber-300" : "text-amber-600"}`}>
-            Anunciante
-          </div>
-          <div className={`text-sm font-semibold ${hasBgImage ? "text-white" : "text-stone-800"}`}>
-            {company.company_name}
-          </div>
-          <a
-            href={`mailto:${company.company_email}`}
-            className={`mt-0.5 block truncate text-xs hover:underline ${hasBgImage ? "text-amber-200" : "text-amber-700"}`}
-          >
-            {company.company_email}
-          </a>
-          <div className={`text-[10px] ${hasBgImage ? "text-stone-400" : "text-stone-500"}`}>
-            {company.company_phone}
-          </div>
-          <a
-            href={company.company_web}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`mt-0.5 block truncate text-[10px] hover:underline ${hasBgImage ? "text-amber-200" : "text-amber-600"}`}
-          >
-            {company.company_web}
-          </a>
-        </div>
-      )}
-    </div>
-  );
 }
 
 function clampPan(
@@ -596,28 +142,26 @@ function clampPan(
   };
 }
 
-/** Escena de giro: underlay z0, estático z10, hoja z50. Una sola cara opaca; swap en t=0.5 + scaleX(-1). Micro shrink al final. */
+/** Escena de giro: underlay z0, estÃ¡tico z10, hoja z50. Una sola cara opaca; swap en t=0.5 + scaleX(-1). Micro shrink al final. */
 function TurnScene({
   fromSpread,
   toSpread,
   turnDir,
   turnProgress,
-  articleIndex,
   stageSize,
   turningCardSize,
   turnGapPx,
 }: {
-  fromSpread: PageWithCompany[];
-  toSpread: PageWithCompany[];
+  fromSpread: SpreadViewData;
+  toSpread: SpreadViewData;
   turnDir: "prev" | "next";
   turnProgress: number;
-  articleIndex: ArticleIndexEntry[];
   stageSize: { w: number; h: number };
   turningCardSize?: { w: number; h: number } | null;
   turnGapPx?: number;
 }) {
-  const fromLR = splitSpread(fromSpread);
-  const toLR = splitSpread(toSpread);
+  const fromLR = spreadSlots(fromSpread);
+  const toLR = spreadSlots(toSpread);
   const gap = turnGapPx ?? 0;
 
   const firstHalf = turnProgress < 0.5;
@@ -673,18 +217,18 @@ function TurnScene({
         willChange: "transform",
       }}
     >
-      {/* Underlay: spread destino — z0; ocultar slot que estaba vacío en FROM hasta el final (cover/end) */}
+      {/* Underlay: spread destino â€” z0; ocultar slot que estaba vacÃ­o en FROM hasta el final (cover/end) */}
       <div className={layoutClass} style={{ position: "absolute", inset: 0, zIndex: 0, ...layoutStyle }}>
         <div className={slotClass} style={showUnderlayLeft && toLR.left ? cardStyle : placeholderSlotStyle} aria-hidden={!(showUnderlayLeft && toLR.left)}>
           {showUnderlayLeft && toLR.left ? (
-            <PageCard data={toLR.left} articleIndex={articleIndex} disableBackdropDuringTurn />
+            <FlipbookSlotPageCard slot={toLR.left} isLeftPage />
           ) : (
             <div className="w-full h-full" style={{ visibility: "hidden", pointerEvents: "none" }} aria-hidden />
           )}
         </div>
         <div className={slotClass} style={showUnderlayRight && toLR.right ? cardStyle : placeholderSlotStyle} aria-hidden={!(showUnderlayRight && toLR.right)}>
           {showUnderlayRight && toLR.right ? (
-            <PageCard data={toLR.right} articleIndex={articleIndex} disableBackdropDuringTurn />
+            <FlipbookSlotPageCard slot={toLR.right} isLeftPage={false} />
           ) : (
             <div className="w-full h-full" style={{ visibility: "hidden", pointerEvents: "none" }} aria-hidden />
           )}
@@ -702,28 +246,28 @@ function TurnScene({
         }}
       />
 
-      {/* Lado estático (from): solo el lado que NO gira; el que gira va en placeholder para no dejar copia */}
+      {/* Lado estÃ¡tico (from): solo el lado que NO gira; el que gira va en placeholder para no dejar copia */}
       <div
         className={layoutClass}
         style={{ position: "absolute", inset: 0, zIndex: 10, perspective: "2400px", ...layoutStyle }}
       >
         <div className={slotClass} style={turnDir === "next" && fromLR.left ? cardStyle : placeholderSlotStyle} aria-hidden={!(turnDir === "next" && fromLR.left)}>
           {turnDir === "next" && fromLR.left ? (
-            <PageCard data={fromLR.left} articleIndex={articleIndex} disableBackdropDuringTurn />
+            <FlipbookSlotPageCard slot={fromLR.left} isLeftPage />
           ) : (
             <div className="w-full h-full" style={{ visibility: "hidden", pointerEvents: "none" }} aria-hidden />
           )}
         </div>
         <div className={slotClass} style={turnDir === "prev" && fromLR.right ? cardStyle : placeholderSlotStyle} aria-hidden={!(turnDir === "prev" && fromLR.right)}>
           {turnDir === "prev" && fromLR.right ? (
-            <PageCard data={fromLR.right} articleIndex={articleIndex} disableBackdropDuringTurn />
+            <FlipbookSlotPageCard slot={fromLR.right} isLeftPage={false} />
           ) : (
             <div className="w-full h-full" style={{ visibility: "hidden", pointerEvents: "none" }} aria-hidden />
           )}
         </div>
       </div>
 
-      {/* Hoja que gira — z50, dos slots fijos; sheet en el slot que gira */}
+      {/* Hoja que gira â€” z50, dos slots fijos; sheet en el slot que gira */}
       <div
         className={layoutClass}
         style={{
@@ -763,9 +307,9 @@ function TurnScene({
                       }}
                     >
                       {showFrom && fromPage ? (
-                        <PageCard data={fromPage} articleIndex={articleIndex} disableBackdropDuringTurn />
+                        <FlipbookSlotPageCard slot={fromPage} isLeftPage={false} />
                       ) : toFacingPage ? (
-                        <PageCard data={toFacingPage} articleIndex={articleIndex} disableBackdropDuringTurn />
+                        <FlipbookSlotPageCard slot={toFacingPage} isLeftPage />
                       ) : (
                         <div className="h-full w-full rounded-lg bg-white" aria-hidden />
                       )}
@@ -806,9 +350,9 @@ function TurnScene({
                       }}
                     >
                       {showFrom && fromPage ? (
-                        <PageCard data={fromPage} articleIndex={articleIndex} disableBackdropDuringTurn />
+                        <FlipbookSlotPageCard slot={fromPage} isLeftPage />
                       ) : toFacingPage ? (
-                        <PageCard data={toFacingPage} articleIndex={articleIndex} disableBackdropDuringTurn />
+                        <FlipbookSlotPageCard slot={toFacingPage} isLeftPage={false} />
                       ) : (
                         <div className="h-full w-full rounded-lg bg-white" aria-hidden />
                       )}
@@ -866,16 +410,12 @@ function exitFullscreenIfActive(el: HTMLElement | null): Promise<void> {
 export default function FlipbookView({
   publicationId,
   flipbookBasePath,
-  currentStep,
   spreadLabel,
   prevSpreadLabel,
   nextSpreadLabel,
   firstSpreadLabel,
   lastSpreadLabel,
   viewData,
-  articleIndex,
-  nextStep,
-  prevStep,
   currentPosition,
   totalSteps,
   prefetchSpreadLabels,
@@ -886,8 +426,8 @@ export default function FlipbookView({
   const [pointerCursor, setPointerCursor] = useState(false);
   const [isTurning, setIsTurning] = useState(false);
   const [turnDir, setTurnDir] = useState<"prev" | "next" | null>(null);
-  const [fromSpread, setFromSpread] = useState<PageWithCompany[] | null>(null);
-  const [toSpread, setToSpread] = useState<PageWithCompany[] | null>(null);
+  const [fromSpread, setFromSpread] = useState<SpreadViewData | null>(null);
+  const [toSpread, setToSpread] = useState<SpreadViewData | null>(null);
   const [turnProgress, setTurnProgress] = useState(0);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [stageSize, setStageSize] = useState<{ w: number; h: number } | null>(null);
@@ -965,18 +505,14 @@ export default function FlipbookView({
   useEffect(() => {
     setCachedSpread(publicationId, spreadLabel, {
       viewData,
-      articleIndex,
       prevSpreadLabel,
       nextSpreadLabel,
       spreadLabel,
-      currentStep,
       currentPosition,
       totalSteps,
     });
   }, [
-    articleIndex,
     currentPosition,
-    currentStep,
     nextSpreadLabel,
     prevSpreadLabel,
     publicationId,
@@ -1089,7 +625,7 @@ export default function FlipbookView({
     (e: React.MouseEvent) => {
       if (isDragging) return;
       if (zoom <= 1) {
-        const { left: leftPage, right: rightPage } = splitSpread(viewData);
+        const { left: leftPage, right: rightPage } = spreadSlots(viewData);
         let inPointer = false;
         if (leftPage && leftSlotRef.current) {
           const rect = leftSlotRef.current.getBoundingClientRect();
@@ -1207,7 +743,7 @@ export default function FlipbookView({
       gapPx = Math.max(0, gapPx);
       gapRef.current = gapPx;
       setTurnGapPx(gapPx);
-      setFromSpread([...viewData]);
+      setFromSpread({ ...viewData });
       setIsTurning(true);
       setTurnDir(direction);
       setTurnProgress(0);
@@ -1309,7 +845,7 @@ export default function FlipbookView({
     exitImmersive,
   ]);
 
-  const spreadLR = splitSpread(viewData);
+  const spreadLR = spreadSlots(viewData);
 
   return (
     <div
@@ -1372,7 +908,6 @@ export default function FlipbookView({
                 toSpread={toSpread}
                 turnDir={turnDir}
                 turnProgress={turnProgress}
-                articleIndex={articleIndex}
                 stageSize={stageSize}
                 turningCardSize={turningCardSize}
                 turnGapPx={turnGapPx}
@@ -1409,7 +944,7 @@ export default function FlipbookView({
             >
               {spreadLR.left ? (
                 <>
-                  <PageCard data={spreadLR.left} articleIndex={articleIndex} />
+                  <FlipbookSlotPageCard slot={spreadLR.left} isLeftPage />
                   {prevSpreadLabel && (
                     <div
                       className="absolute top-0 h-full cursor-pointer"
@@ -1424,7 +959,7 @@ export default function FlipbookView({
                         e.stopPropagation();
                         requestNavigate("prev");
                       }}
-                      aria-label="Página anterior"
+                      aria-label="PÃ¡gina anterior"
                     />
                   )}
                 </>
@@ -1443,7 +978,7 @@ export default function FlipbookView({
             >
               {spreadLR.right ? (
                 <>
-                  <PageCard data={spreadLR.right} articleIndex={articleIndex} />
+                  <FlipbookSlotPageCard slot={spreadLR.right} isLeftPage={false} />
                   {nextSpreadLabel && (
                     <div
                       className="absolute top-0 h-full cursor-pointer"
@@ -1458,7 +993,7 @@ export default function FlipbookView({
                         e.stopPropagation();
                         requestNavigate("next");
                       }}
-                      aria-label="Página siguiente"
+                      aria-label="PÃ¡gina siguiente"
                     />
                   )}
                 </>

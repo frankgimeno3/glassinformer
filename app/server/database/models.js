@@ -10,7 +10,15 @@ import ProductModel from "../features/product/ProductModel.js";
 import BannerModel from "../features/banner/BannerModel.js";
 import UserProfileModel from "../features/userProfile/UserProfileModel.js";
 import PanelTicketModel from "../features/panel_ticket/PanelTicketModel.js";
+import PanelTicketAdvertisementModel from "../features/panel_ticket/PanelTicketAdvertisementModel.js";
+import PanelTicketCompanyDataModel from "../features/panel_ticket/PanelTicketCompanyDataModel.js";
+import PanelTicketProductDataModel from "../features/panel_ticket/PanelTicketProductDataModel.js";
 import {defineAssociations} from "./associations.js";
+import ServiceGroupDbModel from "../features/service_catalog/ServiceGroupDbModel.js";
+import ServiceDbModel from "../features/service_catalog/ServiceDbModel.js";
+import PublicationSlotDbModel from "../features/publication_workflow/PublicationSlotDbModel.js";
+import PublicationArticleDbModel from "../features/publication_workflow/PublicationArticleDbModel.js";
+import PublicationArticleChunkDbModel from "../features/publication_workflow/PublicationArticleChunkDbModel.js";
 
 const database = Database.getInstance();
 const sequelize = database.getSequelize();
@@ -139,17 +147,31 @@ CompanyModel.init({
         allowNull: true,
         field: "company_main_description"
     },
-    category: {
+    region: {
         type: DataTypes.STRING,
         allowNull: true,
-        field: "company_category"
+        field: "company_region"
+    },
+    main_image: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: "",
+        field: "company_main_image"
+    },
+    employee_relations_array: {
+        type: DataTypes.ARRAY(DataTypes.TEXT),
+        allowNull: false,
+        defaultValue: [],
+        field: "company_employee_relations_array"
     }
 }, {
     sequelize,
     modelName: 'company',
     underscored: true,
     tableName: "companies_db",
-    timestamps: false,
+    timestamps: true,
+    createdAt: "company_created_at",
+    updatedAt: "company_updated_at",
     indexes: [
         { fields: ['country'] }
     ]
@@ -299,11 +321,14 @@ PanelTicketModel.init({
     // Canonical RDS schema: public.panel_tickets (see plynium_central_panel/docs/RDS_SCHEMA.md)
     panel_ticket_id: { type: DataTypes.STRING(255), primaryKey: true, allowNull: false },
     panel_ticket_type: { type: DataTypes.STRING(255), allowNull: false },
-    panel_ticket_category: { type: DataTypes.STRING(255), allowNull: true, defaultValue: null },
     panel_ticket_state: { type: DataTypes.STRING(255), allowNull: false, defaultValue: "pending" },
     panel_ticket_date: { type: DataTypes.DATE, allowNull: true },
     panel_ticket_brief_description: { type: DataTypes.TEXT, allowNull: false, defaultValue: "" },
     panel_ticket_full_description: { type: DataTypes.TEXT, allowNull: false, defaultValue: "" },
+    panel_ticket_contact_name: { type: DataTypes.TEXT, allowNull: false, defaultValue: "" },
+    panel_ticket_contact_email: { type: DataTypes.TEXT, allowNull: false, defaultValue: "" },
+    panel_ticket_contact_phone: { type: DataTypes.TEXT, allowNull: false, defaultValue: "" },
+    panel_ticket_interest: { type: DataTypes.TEXT, allowNull: false, defaultValue: "" },
     panel_ticket_related_to_user_id_array: { type: DataTypes.ARRAY(DataTypes.TEXT), allowNull: false, defaultValue: [] },
     panel_ticket_updates_array: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] }
 }, {
@@ -317,10 +342,85 @@ PanelTicketModel.init({
     indexes: [
         { fields: ["panel_ticket_type"] },
         { fields: ["panel_ticket_state"] },
-        { fields: ["panel_ticket_date"] },
-        { fields: ["panel_ticket_category"] }
+        { fields: ["panel_ticket_date"] }
     ]
 });
+
+PanelTicketAdvertisementModel.init({
+    panel_ticket_advertisement_id: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV4 },
+    ticket_id: { type: DataTypes.STRING(255), allowNull: false, unique: true, references: { model: "panel_tickets", key: "panel_ticket_id" } },
+    contact_full_name: { type: DataTypes.TEXT, allowNull: false, defaultValue: "" },
+    contact_email: { type: DataTypes.TEXT, allowNull: false, defaultValue: "" },
+    company_country: { type: DataTypes.STRING(255), allowNull: false, defaultValue: "" },
+    phone_country_prefix: { type: DataTypes.STRING(32), allowNull: false, defaultValue: "" },
+    phone_number: { type: DataTypes.STRING(64), allowNull: false, defaultValue: "" },
+    interest: { type: DataTypes.TEXT, allowNull: false, defaultValue: "" },
+    message: { type: DataTypes.TEXT, allowNull: false, defaultValue: "" },
+    terms_accepted: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    services_array: { type: DataTypes.ARRAY(DataTypes.TEXT), allowNull: false, defaultValue: [] }
+}, {
+    sequelize,
+    modelName: "panel_ticket_advertisement",
+    underscored: true,
+    tableName: "panel_ticket_advertisement",
+    timestamps: false,
+    indexes: [{ fields: ["ticket_id"] }]
+});
+
+PanelTicketCompanyDataModel.init(
+    {
+        ticket_company_data_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+        ticket_id: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+            unique: true,
+            references: { model: "panel_tickets", key: "panel_ticket_id" },
+        },
+        ticket_company_name: { type: DataTypes.STRING(255), allowNull: false, defaultValue: "" },
+        ticket_company_tax_name: { type: DataTypes.STRING(255), allowNull: false, defaultValue: "" },
+        ticket_company_tax_id: { type: DataTypes.STRING(255), allowNull: false, defaultValue: "" },
+        ticket_company_creator_role: { type: DataTypes.STRING(255), allowNull: false, defaultValue: "" },
+        ticket_company_website: { type: DataTypes.STRING(255), allowNull: true, defaultValue: "" },
+        ticket_company_country: { type: DataTypes.STRING(255), allowNull: true, defaultValue: "" },
+        ticket_company_description: { type: DataTypes.TEXT, allowNull: true, defaultValue: "" },
+        ticket_company_list_as_employee: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    },
+    {
+        sequelize,
+        modelName: "panel_ticket_company_data",
+        underscored: true,
+        tableName: "panel_ticket_company_data",
+        timestamps: false,
+        indexes: [{ fields: ["ticket_id"] }],
+    }
+);
+
+PanelTicketProductDataModel.init(
+    {
+        ticket_product_data_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+        ticket_id: {
+            type: DataTypes.STRING(255),
+            allowNull: false,
+            unique: true,
+            references: { model: "panel_tickets", key: "panel_ticket_id" },
+        },
+        ticket_product_name: { type: DataTypes.STRING(255), allowNull: false, defaultValue: "" },
+        ticket_product_description: { type: DataTypes.TEXT, allowNull: true, defaultValue: "" },
+        ticket_product_price: { type: DataTypes.DECIMAL(12, 2), allowNull: false, defaultValue: 0 },
+        ticket_product_company_id: { type: DataTypes.STRING(255), allowNull: false, defaultValue: "" },
+        ticket_product_main_image_src: { type: DataTypes.STRING(2048), allowNull: true, defaultValue: "" },
+        ticket_product_categories_array: { type: DataTypes.ARRAY(DataTypes.STRING(255)), allowNull: true, defaultValue: [] },
+        updated_at: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
+    },
+    {
+        sequelize,
+        modelName: "panel_ticket_product_data",
+        underscored: true,
+        tableName: "panel_ticket_product_data",
+        timestamps: false,
+        indexes: [{ fields: ["ticket_id"] }, { fields: ["ticket_product_company_id"] }],
+    }
+);
 
 BannerModel.init({
     id_banner: {
@@ -423,6 +523,41 @@ BannerModel.init({
     ]
 });
 
+ServiceGroupDbModel.init({
+    service_group_id: { type: DataTypes.UUID, primaryKey: true },
+    service_group_name: { type: DataTypes.STRING(255), allowNull: false },
+    service_group_channel: { type: DataTypes.STRING(255), allowNull: false, defaultValue: "" }
+}, {
+    sequelize,
+    modelName: "service_group",
+    underscored: true,
+    tableName: "service_groups",
+    timestamps: false
+});
+
+ServiceDbModel.init({
+    service_id: { type: DataTypes.STRING(64), primaryKey: true, unique: true },
+    service_full_name: { type: DataTypes.STRING(512), allowNull: false, defaultValue: "" },
+    service_group_id: { type: DataTypes.UUID, allowNull: false },
+    service_portal: { type: DataTypes.INTEGER, allowNull: false },
+    service_format: { type: DataTypes.STRING(512), allowNull: false, defaultValue: "" },
+    service_description: { type: DataTypes.TEXT, allowNull: false, defaultValue: "" },
+    service_unit: { type: DataTypes.STRING(128), allowNull: false, defaultValue: "" },
+    service_unit_price: { type: DataTypes.DECIMAL(14, 2), allowNull: false, defaultValue: 0 },
+    service_unit_specifications: { type: DataTypes.TEXT, allowNull: false, defaultValue: "" }
+}, {
+    sequelize,
+    modelName: "service_db",
+    underscored: true,
+    tableName: "services_db",
+    timestamps: false,
+    indexes: [
+        { fields: ["service_full_name"] },
+        { fields: ["service_group_id"] },
+        { fields: ["service_portal"] }
+    ]
+});
+
 CommentModel.init({
     article_comment_id: {
         type: DataTypes.STRING(255),
@@ -462,6 +597,127 @@ CommentModel.init({
     ]
 });
 
+PublicationSlotDbModel.init({
+    publication_slot_id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    publication_id: { type: DataTypes.STRING(255), allowNull: true },
+    publication_format: { type: DataTypes.STRING(32), allowNull: false, defaultValue: "flipbook" },
+    slot_key: { type: DataTypes.STRING(32), allowNull: false },
+    slot_content_type: { type: DataTypes.STRING(32), allowNull: false },
+    slot_state: { type: DataTypes.STRING(32), allowNull: false, defaultValue: "pending" },
+    customer_id: { type: DataTypes.STRING(64), allowNull: true },
+    project_id: { type: DataTypes.STRING(64), allowNull: true },
+    slot_media_url: { type: DataTypes.STRING(512), allowNull: true },
+    slot_flatplan_image_url: { type: DataTypes.STRING(512), allowNull: true },
+    slot_article_id: { type: DataTypes.STRING(64), allowNull: true },
+    magazine_page_layout: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        defaultValue: "2_col_article",
+    },
+    publication_page: { type: DataTypes.FLOAT, allowNull: false },
+    slot_ordinal: { type: DataTypes.FLOAT, allowNull: false },
+}, {
+    sequelize,
+    modelName: "publication_slot",
+    underscored: true,
+    tableName: "publication_slots_db",
+    timestamps: true,
+    createdAt: "slot_created_at",
+    updatedAt: "slot_updated_at",
+    indexes: [
+        { fields: ["publication_id"] },
+        { fields: ["publication_id", "slot_ordinal"] },
+    ],
+});
+
+PublicationArticleDbModel.init({
+    publication_article_id: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        defaultValue: DataTypes.UUIDV4,
+    },
+    publication_id: { type: DataTypes.STRING(255), allowNull: false },
+    article_id: { type: DataTypes.TEXT, allowNull: false },
+    publication_slots_id_array: {
+        type: DataTypes.ARRAY(DataTypes.INTEGER),
+        allowNull: false,
+        defaultValue: [],
+    },
+    desired_page_count: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 1,
+    },
+    publication_article_state: {
+        type: DataTypes.STRING(64),
+        allowNull: false,
+        defaultValue: "unfinished",
+    },
+    publication_art_name: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+    },
+}, {
+    sequelize,
+    modelName: "publication_article",
+    underscored: true,
+    tableName: "publication_articles",
+    timestamps: true,
+    createdAt: "publication_article_created_at",
+    updatedAt: "publication_article_updated_at",
+    indexes: [
+        { fields: ["publication_id"] },
+        { fields: ["article_id"] },
+    ],
+});
+
+PublicationArticleChunkDbModel.init({
+    publication_article_chunk_id: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        defaultValue: DataTypes.UUIDV4,
+    },
+    publication_article_id: { type: DataTypes.UUID, allowNull: false },
+    publication_id: { type: DataTypes.STRING(255), allowNull: false },
+    publication_slot_id: { type: DataTypes.INTEGER, allowNull: true },
+    publication_article_chunk_format: {
+        type: DataTypes.STRING(64),
+        allowNull: false,
+        defaultValue: "only_text",
+    },
+    chunk_html: { type: DataTypes.TEXT, allowNull: false, defaultValue: "" },
+    chunk_position: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+}, {
+    sequelize,
+    modelName: "publication_article_chunk",
+    underscored: true,
+    tableName: "publication_article_chunks",
+    timestamps: false,
+    indexes: [
+        { fields: ["publication_id"] },
+        { fields: ["publication_slot_id"] },
+    ],
+});
+
 defineAssociations();
 
-export { ArticleModel, ContentModel, EventModel, PublicationModel, CompanyModel, ProductModel, BannerModel, UserProfileModel, CommentModel, PanelTicketModel };
+export {
+    ArticleModel,
+    ContentModel,
+    EventModel,
+    PublicationModel,
+    PublicationSlotDbModel,
+    PublicationArticleDbModel,
+    PublicationArticleChunkDbModel,
+    CompanyModel,
+    ProductModel,
+    BannerModel,
+    UserProfileModel,
+    CommentModel,
+    PanelTicketModel,
+    PanelTicketAdvertisementModel,
+    PanelTicketCompanyDataModel,
+    PanelTicketProductDataModel,
+    ServiceGroupDbModel,
+    ServiceDbModel
+};

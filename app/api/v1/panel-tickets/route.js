@@ -38,14 +38,20 @@ export const POST = createEndpoint(
     const userId = user?.user_id ? String(user.user_id).trim() : "";
     if (userId) related.push(userId);
 
+    const displayName =
+      `${user?.user_name ?? ""} ${user?.user_surnames ?? ""}`.trim() || String(email);
+
     const row = await PanelTicketModel.create({
       panel_ticket_id: createTicketId(),
       panel_ticket_type: "other",
-      panel_ticket_category: null,
       panel_ticket_state: "pending",
       panel_ticket_date: new Date(),
       panel_ticket_brief_description: body.subject,
       panel_ticket_full_description: body.message,
+      panel_ticket_contact_name: displayName,
+      panel_ticket_contact_email: String(email),
+      panel_ticket_contact_phone: "",
+      panel_ticket_interest: "",
       panel_ticket_related_to_user_id_array: related,
       panel_ticket_updates_array: [],
     });

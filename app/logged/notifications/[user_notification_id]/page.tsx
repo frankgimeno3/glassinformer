@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import ContentPageShell from "@/app/general_components/ContentPageShell";
 import type { NotificationRow } from "../page";
 
 function formatDate(iso: string | null) {
@@ -111,7 +112,7 @@ const NotificationDetailPage: FC = () => {
     }, [load]);
 
     return (
-        <div className="mx-auto max-w-2xl pb-16">
+        <ContentPageShell maxWidthClass="max-w-2xl">
             <button
                 type="button"
                 onClick={() => router.push("/logged/notifications")}
@@ -124,8 +125,8 @@ const NotificationDetailPage: FC = () => {
             {error && <p className="text-red-700">{error}</p>}
 
             {!loading && !error && row && (
-                <article className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-                    <header className="border-b border-gray-100 pb-4">
+                <article>
+                    <header className="border-b border-gray-200 pb-4">
                         <p className="text-xs font-semibold uppercase tracking-wider text-blue-950">
                             {row.notification_type || "Notification"}
                         </p>
@@ -187,7 +188,7 @@ const NotificationDetailPage: FC = () => {
                     ) : null}
                 </article>
             )}
-        </div>
+        </ContentPageShell>
     );
 };
 

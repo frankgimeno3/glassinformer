@@ -15,7 +15,8 @@ function mapCompanyToApiFormat(company, products = [], options = { includeProduc
         country: plain.country || "",
         main_description: plain.main_description || "",
         region: plain.region || plain.category || "",
-        category: plain.category || "",
+        category: plain.region || plain.category || "",
+        company_main_image: plain.main_image || "",
         productsArray: products.map((p) => (typeof p === "object" && p.id_product ? p.id_product : p)),
         userArray: workers,
     };
@@ -28,6 +29,105 @@ function mapCompanyToApiFormat(company, products = [], options = { includeProduc
     return base;
 }
 
+export async function isCompanyAdministrator(companyId, userId) {
+    if (!CompanyModel.sequelize) return false;
+    const cid = String(companyId || "").trim();
+    const uid = String(userId || "").trim();
+    if (!cid || !uid) return false;
+    const rows = await CompanyModel.sequelize.query(
+        `SELECT 1
+         FROM public.company_administrators
+         WHERE company_id = :cid AND user_id = :uid::uuid
+         LIMIT 1`,
+        { replacements: { cid, uid }, type: QueryTypes.SELECT }
+    );
+    return Array.isArray(rows) && rows.length > 0;
+}
+
+export async function getActiveCompanyTeam(companyId) {
+    if (!CompanyModel.sequelize) return [];
+    const cid = String(companyId || "").trim();
+    if (!cid) return [];
+    const rows = await CompanyModel.sequelize.query(
+        `SELECT
+            er.employee_rel_id::text AS employee_rel_id,
+            er.employee_user_id::text AS user_id,
+            er.employee_role AS employee_role,
+            er.employee_rel_status AS employee_rel_status,
+            ud.user_name AS user_name,
+            ud.user_surnames AS user_surnames,
+            ud.user_main_image_src AS user_main_image_src
+         FROM public.employee_relations er
+         LEFT JOIN public.users_db ud ON ud.user_id = er.employee_user_id
+         WHERE er.employee_company_id = :cid
+           AND er.employee_rel_status = 'active'
+         ORDER BY COALESCE(ud.user_name, '') ASC`,
+        { replacements: { cid }, type: QueryTypes.SELECT }
+    );
+    return Array.isArray(rows) ? rows.map((r) => ({
+        employee_rel_id: String(r.employee_rel_id || ""),
+        user_id: String(r.user_id || ""),
+        employee_role: String(r.employee_role || "employee"),
+        user_name: r.user_name != null ? String(r.user_name) : "",
+        user_surnames: r.user_surnames != null ? String(r.user_surnames) : "",
+        user_main_image_src: r.user_main_image_src != null ? String(r.user_main_image_src) : "",
+    })) : [];
+}
+
+export async function hasEmployeeRelation(companyId, userId) {
+    if (!CompanyModel.sequelize) return false;
+    const cid = String(companyId || "").trim();
+    const uid = String(userId || "").trim();
+    if (!cid || !uid) return false;
+    const rows = await CompanyModel.sequelize.query(
+        `SELECT 1
+         FROM public.employee_relations
+         WHERE employee_company_id = :cid
+           AND employee_user_id = :uid::uuid
+         LIMIT 1`,
+        { replacements: { cid, uid }, type: QueryTypes.SELECT }
+    );
+    return Array.isArray(rows) && rows.length > 0;
+}
+
+export async function hasActiveEmployeeRelation(companyId, userId) {
+    if (!CompanyModel.sequelize) return false;
+    const cid = String(companyId || "").trim();
+    const uid = String(userId || "").trim();
+    if (!cid || !uid) return false;
+    const rows = await CompanyModel.sequelize.query(
+        `SELECT 1
+         FROM public.employee_relations
+         WHERE employee_company_id = :cid
+           AND employee_user_id = :uid::uuid
+           AND employee_rel_status = 'active'
+         LIMIT 1`,
+        { replacements: { cid, uid }, type: QueryTypes.SELECT }
+    );
+    return Array.isArray(rows) && rows.length > 0;
+}
+
+export async function updateCompanyByAdministrator(companyId, userId, updates = {}) {
+    if (!CompanyModel.sequelize) throw new Error("Database not configured");
+    const cid = String(companyId || "").trim();
+    const uid = String(userId || "").trim();
+    if (!cid || !uid) throw new Error("Invalid company/user");
+    const ok = await isCompanyAdministrator(cid, uid);
+    if (!ok) throw new Error("Forbidden");
+
+    const patch = {};
+    if (updates.company_name !== undefined) patch.company_name = String(updates.company_name ?? "");
+    if (updates.country !== undefined) patch.country = String(updates.country ?? "");
+    if (updates.main_description !== undefined) patch.main_description = String(updates.main_description ?? "");
+    if (updates.region !== undefined) patch.region = String(updates.region ?? "");
+    else if (updates.category !== undefined) patch.region = String(updates.category ?? "");
+    if (updates.company_main_image !== undefined) patch.main_image = String(updates.company_main_image ?? "");
+
+    if (Object.keys(patch).length === 0) return await getCompanyById(cid);
+    await CompanyModel.update(patch, { where: { id_company: cid } });
+    return await getCompanyById(cid);
+}
+
 export async function getAllCompanies() {
     try {
         if (!CompanyModel.sequelize) {
@@ -38,7 +138,7 @@ export async function getAllCompanies() {
         let rows;
         try {
             rows = await CompanyModel.sequelize.query(
-                `SELECT c.company_id AS id_company, c.company_commercial_name AS company_name, c.company_country AS country, c.company_main_description AS main_description, c.company_category AS region
+                `SELECT c.company_id AS id_company, c.company_commercial_name AS company_name, c.company_country AS country, c.company_main_description AS main_description, c.company_region AS region
                  FROM public.companies_db c
                  INNER JOIN public.company_portals cp ON c.company_id = cp.company_id AND cp.portal_id = :portalId
                  ORDER BY c.company_commercial_name ASC`,
@@ -122,6 +222,34 @@ export async function getCompanyById(idCompany) {
  * @param {object} data - { id_company, company_name, country, main_description, region (stored as category), productsArray }
  * @returns {Promise<object>} Created company in API format
  */
+async function ensureCompanyPortalRow(sequelize, companyId, commercialName) {
+    const baseSlug =
+        (commercialName || companyId)
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9-]/g, "") || String(companyId).replace(/_/g, "-");
+    let finalSlug = baseSlug || "company";
+    let suffix = 0;
+    for (;;) {
+        const collision = await sequelize.query(
+            `SELECT 1 AS one FROM public.company_portals WHERE portal_id = :portalId AND company_portal_slug = :slug LIMIT 1`,
+            { replacements: { portalId: portal_id, slug: finalSlug }, type: QueryTypes.SELECT }
+        );
+        if (!collision || collision.length === 0) break;
+        finalSlug = `${baseSlug}-${++suffix}`;
+    }
+    await sequelize.query(
+        `INSERT INTO public.company_portals (company_id, portal_id, company_portal_slug)
+         SELECT :companyId, :portalId, :slug
+         WHERE NOT EXISTS (
+           SELECT 1 FROM public.company_portals
+           WHERE company_id = :companyId AND portal_id = :portalId
+         )`,
+        { replacements: { companyId, portalId: portal_id, slug: finalSlug } }
+    );
+}
+
 export async function createCompany(data) {
     if (!CompanyModel.sequelize) {
         throw new Error("CompanyModel not initialized");
@@ -136,7 +264,12 @@ export async function createCompany(data) {
         company_name: data.company_name || "",
         country: data.country || null,
         main_description: data.main_description || null,
-        category: data.region ?? data.category ?? null,
+        region: data.region ?? data.category ?? "",
     });
+    try {
+        await ensureCompanyPortalRow(CompanyModel.sequelize, id_company, data.company_name || "");
+    } catch (portalErr) {
+        console.warn("createCompany: company_portals insert skipped or failed:", portalErr?.message || portalErr);
+    }
     return mapCompanyToApiFormat(company, []);
 }

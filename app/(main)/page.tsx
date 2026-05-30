@@ -7,6 +7,7 @@ import { pickNBannersByPriority, type BannerItem } from "../general_components/b
 import { ArticleService } from "@/apiClient/ArticleService";
 import MainNews from "./main_components/MainNews";
 import ShowMoreContent from "./main_components/ShowMoreContent";
+import Reveal from "../general_components/motion/Reveal";
 
 const BANNERS_API = "/api/v1/banners";
 
@@ -139,7 +140,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      <MainNews mainArticle={mainArticle} secondaryArticles={secondaryArticles} />
+      <Reveal delayMs={0}>
+        <MainNews mainArticle={mainArticle} secondaryArticles={secondaryArticles} />
+      </Reveal>
       {/* Contenido principal */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {loading ? (
@@ -150,34 +153,46 @@ export default function Home() {
           </div>
         ) : validArticles.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <p className="text-gray-400 text-xl font-serif">No hay artículos disponibles</p>
+            <p className="gi-text-reveal text-gray-400 text-xl font-serif">
+              No hay artículos disponibles
+            </p>
           </div>
         ) : (
-          <>
+          <div className="gi-text-reveal">
             {/* Lista bajo MainNews: una columna, filas imagen 40% / contenido 60%, gap compacto */}
             <div className="flex flex-col gap-4 sm:gap-5">
-              {gridItems.map((item, idx) =>
-                item.type === "banner" ? (
-                  <div key={`mid-banner-${idx}`} className="w-full">
-                    <MidBanner
-                      banner={midBanners[gridItems.slice(0, idx).filter((i) => i.type === "banner").length] ?? null}
+              {gridItems.map((item, idx) => {
+                // Progressive stagger: 0.5s duration handled in CSS, delay staggers items softly.
+                // Cap delay so very long lists don't feel sluggish.
+                const delayMs = Math.min(idx * 70, 700);
+
+                if (item.type === "banner") {
+                  const bannerIndex = gridItems.slice(0, idx).filter((i) => i.type === "banner").length;
+                  return (
+                    <Reveal key={`mid-banner-${idx}`} delayMs={delayMs} className="w-full">
+                      <MidBanner banner={midBanners[bannerIndex] ?? null} />
+                    </Reveal>
+                  );
+                }
+
+                return (
+                  <Reveal key={item.article.id_article || item.index} delayMs={delayMs}>
+                    <ArticleMiniature
+                      layout="row"
+                      id_article={item.article.id_article || ""}
+                      titulo={item.article.articleTitle || ""}
+                      company={item.article.company || ""}
+                      date={item.article.date || ""}
+                      imageUrl={item.article.article_main_image_url || ""}
                     />
-                  </div>
-                ) : (
-                  <ArticleMiniature
-                    key={item.article.id_article || item.index}
-                    layout="row"
-                    id_article={item.article.id_article || ""}
-                    titulo={item.article.articleTitle || ""}
-                    company={item.article.company || ""}
-                    date={item.article.date || ""}
-                    imageUrl={item.article.article_main_image_url || ""}
-                  />
-                )
-              )}
+                  </Reveal>
+                );
+              })}
             </div>
-            <ShowMoreContent hasMore={hasMoreContent} onShowMore={handleShowMore} />
-          </>
+            <Reveal delayMs={150}>
+              <ShowMoreContent hasMore={hasMoreContent} onShowMore={handleShowMore} />
+            </Reveal>
+          </div>
         )}
       </main>
     </div>

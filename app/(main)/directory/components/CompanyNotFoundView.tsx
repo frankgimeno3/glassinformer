@@ -4,6 +4,7 @@ import React, { FC, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CompanyService } from "@/apiClient/CompanyService";
+import ContentPageShell from "@/app/general_components/ContentPageShell";
 
 interface CompanyNotFoundViewProps {
   idCompany: string;
@@ -53,8 +54,8 @@ const CompanyNotFoundView: FC<CompanyNotFoundViewProps> = ({ idCompany, isLogged
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
-      <div className="mx-auto max-w-2xl text-center">
+    <ContentPageShell maxWidthClass="max-w-2xl">
+      <div className="text-center">
         <h1 className="text-3xl sm:text-4xl font-serif font-light text-gray-800 tracking-wide mb-6">
           Esta empresa aún no ha sido creada en la plataforma
         </h1>
@@ -63,8 +64,9 @@ const CompanyNotFoundView: FC<CompanyNotFoundViewProps> = ({ idCompany, isLogged
         </p>
 
         <button
+          type="button"
           onClick={() => router.push("/directory")}
-          className="px-8 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors font-medium tracking-wide"
+          className="px-8 py-3 text-gray-700 bg-gray-50 border border-gray-300 rounded-lg hover:bg-gray-100 hover:border-gray-400 transition-colors font-medium tracking-wide"
         >
           ← Volver al directorio
         </button>
@@ -73,7 +75,7 @@ const CompanyNotFoundView: FC<CompanyNotFoundViewProps> = ({ idCompany, isLogged
           <button
             type="button"
             onClick={() => setExpanded(!expanded)}
-            className="w-full flex items-center justify-between px-5 py-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors text-left"
+            className="w-full flex items-center justify-between px-5 py-4 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 hover:border-gray-300 transition-colors text-left"
           >
             <span className="text-gray-700 font-medium">
               ¿Quieres crear el perfil de esta empresa?
@@ -89,7 +91,7 @@ const CompanyNotFoundView: FC<CompanyNotFoundViewProps> = ({ idCompany, isLogged
           </button>
 
           {expanded && (
-            <div className="mt-4 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <div className="mt-4 p-6 bg-gray-50 border border-gray-200 rounded-lg">
               {!isLogged ? (
                 <div className="text-gray-700 space-y-4">
                   <p className="text-center">
@@ -220,7 +222,7 @@ const CompanyNotFoundView: FC<CompanyNotFoundViewProps> = ({ idCompany, isLogged
           )}
         </div>
       </div>
-    </div>
+    </ContentPageShell>
   );
 };
 

@@ -1,6 +1,7 @@
 import { createEndpoint } from "../../../../server/createEndpoint.js";
 import { NextResponse } from "next/server";
-import { getCompanyById } from "../../../../server/features/company/CompanyService.js";
+import { getCompanyById, updateCompanyByAdministrator } from "../../../../server/features/company/CompanyService.js";
+import Joi from "joi";
 
 function getIdFromRequest(request) {
     const url = new URL(request.url);
@@ -18,3 +19,18 @@ export const GET = createEndpoint(async (request) => {
     const company = await getCompanyById(id);
     return NextResponse.json(company);
 }, null, false);
+
+const putSchema = Joi.object({
+    company_name: Joi.string().allow("").optional(),
+    country: Joi.string().allow("").optional(),
+    main_description: Joi.string().allow("").optional(),
+    category: Joi.string().allow("").optional(),
+    company_main_image: Joi.string().allow("").max(2048).optional(),
+}).min(1);
+
+export const PUT = createEndpoint(async (request, body) => {
+    const id = getIdFromRequest(request);
+    const userId = request?.sub;
+    const updated = await updateCompanyByAdministrator(id, userId, body);
+    return NextResponse.json(updated);
+}, putSchema, true);

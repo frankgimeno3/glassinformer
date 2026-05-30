@@ -1,4 +1,12 @@
-export type TabId = 'news-portal' | 'magazine' | 'other-services';
+export type TabId = 'portal' | 'magazine' | 'dem';
+
+export interface MediakitCatalogRow {
+  service_id: string;
+  service_full_name: string;
+  service_unit_price: number;
+  service_group_channel: string;
+  service_group_name: string | null;
+}
 
 export interface CartPricedItem {
   id: string;

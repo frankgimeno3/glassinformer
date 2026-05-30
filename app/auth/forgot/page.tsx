@@ -13,6 +13,7 @@ import {
     AUTH_TEXT,
     AUTH_TITLE,
 } from "../_components/authFormStyles";
+import Reveal from "@/app/general_components/motion/Reveal";
 
 interface ForgotProps {}
 
@@ -47,29 +48,37 @@ const Forgot: FC<ForgotProps> = ({}) => {
         return (
             <div className={AUTH_PAGE_SHELL}>
                 <div className={`${AUTH_CARD} ${AUTH_FORM}`}>
-                    <h2 className={AUTH_TITLE}>
-                        Check your inbox
-                    </h2>
-                    <p className={AUTH_TEXT}>
-                        We have sent a reset code to{" "}
-                        <strong className="text-gray-900">{pendingEmail}</strong>.
-                        Enter the code and your new password on the next page.
-                    </p>
-                    <a
-                        href={`/auth/forgot/confirm?email=${encodeURIComponent(pendingEmail)}`}
-                        className={`${AUTH_PRIMARY_BUTTON} text-center`}
-                    >
-                        Enter code and new password
-                    </a>
-                    <p className={AUTH_AUX_TEXT}>
-                        Remembered your password?{" "}
+                    <Reveal delayMs={0}>
+                        <h2 className={AUTH_TITLE}>
+                            Check your inbox
+                        </h2>
+                    </Reveal>
+                    <Reveal delayMs={120}>
+                        <p className={AUTH_TEXT}>
+                            We have sent a reset code to{" "}
+                            <strong className="text-gray-900">{pendingEmail}</strong>.
+                            Enter the code and your new password on the next page.
+                        </p>
+                    </Reveal>
+                    <Reveal delayMs={180}>
                         <a
-                            href="/auth/login"
-                            className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer"
+                            href={`/auth/forgot/confirm?email=${encodeURIComponent(pendingEmail)}`}
+                            className={`${AUTH_PRIMARY_BUTTON} text-center`}
                         >
-                            Log in
+                            Enter code and new password
                         </a>
-                    </p>
+                    </Reveal>
+                    <Reveal delayMs={240}>
+                        <p className={AUTH_AUX_TEXT}>
+                            Remembered your password?{" "}
+                            <a
+                                href="/auth/login"
+                                className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer"
+                            >
+                                Log in
+                            </a>
+                        </p>
+                    </Reveal>
                 </div>
             </div>
         );
@@ -81,46 +90,58 @@ const Forgot: FC<ForgotProps> = ({}) => {
                 onSubmit={handleForgot}
                 className={`${AUTH_CARD} ${AUTH_FORM}`}
             >
-                <h2 className={AUTH_TITLE}>
-                    I forgot my password
-                </h2>
+                <Reveal delayMs={0}>
+                    <h2 className={AUTH_TITLE}>
+                        I forgot my password
+                    </h2>
+                </Reveal>
 
-                <p className={AUTH_TEXT}>
-                    Enter your email and we will send you a code to reset your password.
-                </p>
+                <Reveal delayMs={120}>
+                    <p className={AUTH_TEXT}>
+                        Enter your email and we will send you a code to reset your password.
+                    </p>
+                </Reveal>
 
-                <input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={AUTH_INPUT}
-                    required
-                />
+                <Reveal delayMs={180}>
+                    <input
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className={AUTH_INPUT}
+                        required
+                    />
+                </Reveal>
 
                 {error && (
-                    <div className={AUTH_ERROR}>
-                        <p>{error}</p>
-                    </div>
+                    <Reveal delayMs={220}>
+                        <div className={AUTH_ERROR}>
+                            <p>{error}</p>
+                        </div>
+                    </Reveal>
                 )}
 
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className={AUTH_PRIMARY_BUTTON}
-                >
-                    {loading ? "Sending…" : "Send code"}
-                </button>
-
-                <p className={AUTH_AUX_TEXT}>
-                    Remembered your password?{" "}
-                    <a
-                        href="/auth/login"
-                        className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer ml-1"
+                <Reveal delayMs={260}>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className={AUTH_PRIMARY_BUTTON}
                     >
-                        Log in
-                    </a>
-                </p>
+                        {loading ? "Sending…" : "Send code"}
+                    </button>
+                </Reveal>
+
+                <Reveal delayMs={320}>
+                    <p className={AUTH_AUX_TEXT}>
+                        Remembered your password?{" "}
+                        <a
+                            href="/auth/login"
+                            className="font-bold text-indigo-400 hover:text-indigo-300 cursor-pointer ml-1"
+                        >
+                            Log in
+                        </a>
+                    </p>
+                </Reveal>
             </form>
         </div>
     );

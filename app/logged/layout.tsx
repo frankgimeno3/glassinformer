@@ -25,17 +25,17 @@ export default function LoggedLayout({
         <div className="w-full lg:w-[80%] flex-shrink-0 px-12 mt-8 lg:mt-0">
           <div className="flex flex-col">
             {/* Navegación - oculta en móvil/tablet, visible en PC (≥1024px) */}
-            <div className='hidden lg:flex flex-row text-sm text-gray-500 uppercase tracking-wider font-sans text-white bg-white mb-4'>
-              <Link href='/logged/' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
+            <div className='hidden lg:flex flex-row text-sm uppercase tracking-wider font-sans text-white bg-blue-950 mb-4'>
+              <Link href='/logged/' className='flex-1 bg-transparent hover:bg-blue-900 cursor-pointer p-2 text-sm text-center'>
                 Home
               </Link>
-              <Link href='/publications' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
+              <Link href='/publications' className='flex-1 bg-transparent hover:bg-blue-900 cursor-pointer p-2 text-sm text-center'>
                 Publications
               </Link>
-              <Link href='/directory' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
+              <Link href='/directory' className='flex-1 bg-transparent hover:bg-blue-900 cursor-pointer p-2 text-sm text-center'>
                 Directory
               </Link>
-              <Link href='/events' className='flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center'>
+              <Link href='/events' className='flex-1 bg-transparent hover:bg-blue-900 cursor-pointer p-2 text-sm text-center'>
                 Events
               </Link>
             </div>
