@@ -1,0 +1,24 @@
+# Amplify Console env vars are available at build time only.
+# Next.js SSR Lambdas read server secrets from .env.production baked into the bundle.
+# See: https://docs.aws.amazon.com/amplify/latest/userguide/ssr-environment-variables.html
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+    build:
+      commands:
+        - rm -f .env.production
+        - env | grep -E '^DATABASE_' >> .env.production || true
+        - env | grep -E '^(IAM_|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY)=' >> .env.production || true
+        - env | grep -E '^NEXT_PUBLIC_' >> .env.production || true
+        - npm run build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - "**/*"
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*
