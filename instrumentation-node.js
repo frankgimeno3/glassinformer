@@ -7,21 +7,19 @@ const database = Database.getInstance();
 // Try to connect to database, but don't crash the app if it fails
 // This allows the app to start in development even if the database is unavailable
 try {
-    console.debug('Connecting to database');
+    console.debug("Connecting to database");
     await database.connect();
-    console.debug('Connected');
+    console.debug("Connected");
 
-    console.debug('Synchronizing models with database');
-    await database.sync();
-    console.debug('Synchronized');
-} catch (error) {
-    console.warn('Warning: Could not connect to database during startup');
-    console.warn('The application will continue, but database operations may fail');
-    console.warn('Error details:', error.message);
-    
-    // Only exit in production to ensure database is available
-    if (process.env.NODE_ENV === 'production') {
-        console.error('Database connection is required in production. Exiting...');
-        process.exit(1);
+    // Schema is managed by RDS migrations (plynium_central_panel). Do not sync in production.
+    if (process.env.NODE_ENV !== "production") {
+        console.debug("Synchronizing models with database");
+        await database.sync();
+        console.debug("Synchronized");
     }
+} catch (error) {
+    console.error("[Database] Startup initialization failed:", error.message);
+    console.error(
+        "[Database] The site will still load, but API routes need DATABASE_* env vars and RDS network access."
+    );
 }

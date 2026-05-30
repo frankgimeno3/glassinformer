@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [{ source: "/mediakit", destination: "/advertise", permanent: true }];
   },
-  output: "standalone",
+  // Standalone breaks Amplify WEB_COMPUTE (symlink errors on Lambda). Vercel does not need it.
   serverExternalPackages: ["sequelize"],
   outputFileTracingIncludes: {
     "*": ["./certs/**/*"],

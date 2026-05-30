@@ -80,7 +80,7 @@ ArticleModel.init({
     updatedAt: 'article_updated_at',
     indexes: [
         {fields: ['article_title']},
-        {fields: ['date']},
+        {fields: ['article_date']},
         {fields: ['is_article_event']},
         {fields: ['event_id']}
     ]
@@ -120,7 +120,7 @@ EventModel.init({
     updatedAt: 'event_updated_at',
     indexes: [
         { fields: ['event_name'] },
-        { fields: ['start_date'] },
+        { fields: ['event_start_date'] },
         { fields: ['event_region'] }
     ]
 });

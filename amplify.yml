@@ -1,6 +1,5 @@
-# Amplify Console env vars are available at build time only.
-# Next.js SSR Lambdas read server secrets from .env.production baked into the bundle.
-# See: https://docs.aws.amazon.com/amplify/latest/userguide/ssr-environment-variables.html
+# Amplify Console env vars exist only during build. Next.js SSR Lambdas need them in
+# .env.production before `next build`. See AWS SSR env vars guide.
 version: 1
 frontend:
   phases:
@@ -9,10 +8,24 @@ frontend:
         - npm ci
     build:
       commands:
+        - |
+          if [ -z "$DATABASE_HOST" ]; then
+            echo "ERROR: DATABASE_HOST is not set in Amplify Environment variables."
+            exit 1
+          fi
         - rm -f .env.production
-        - env | grep -E '^DATABASE_' >> .env.production || true
-        - env | grep -E '^(IAM_|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY)=' >> .env.production || true
+        - |
+          cat >> .env.production <<EOF
+          DATABASE_HOST=$DATABASE_HOST
+          DATABASE_NAME=$DATABASE_NAME
+          DATABASE_USER=$DATABASE_USER
+          DATABASE_PASSWORD=$DATABASE_PASSWORD
+          DATABASE_PORT=$DATABASE_PORT
+          IAM_ACCESS_KEY_ID=$IAM_ACCESS_KEY_ID
+          IAM_SECRET_ACCESS_KEY=$IAM_SECRET_ACCESS_KEY
+          EOF
         - env | grep -E '^NEXT_PUBLIC_' >> .env.production || true
+        - echo "Wrote .env.production ($(wc -l < .env.production) lines, DATABASE_HOST=$DATABASE_HOST)"
         - npm run build
   artifacts:
     baseDirectory: .next
