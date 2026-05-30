@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FC, useEffect, useMemo, useState } from "react";
+import React, { FC, Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CompanyService } from "@/apiClient/CompanyService";
@@ -17,7 +17,13 @@ interface UserRow {
   userCurrentCompany?: { id_company: string; userPosition: string };
 }
 
-const ProfilesList: FC = () => {
+const ProfilesListFallback = () => (
+  <div className="px-6 py-10 text-gray-600 text-center">
+    <p>Loading profiles…</p>
+  </div>
+);
+
+const ProfilesListContent: FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [users, setUsers] = useState<UserRow[]>([]);
@@ -356,4 +362,11 @@ const ProfilesList: FC = () => {
   );
 };
 
-export default ProfilesList;
+export default function ProfilesListPage() {
+  return (
+    <Suspense fallback={<ProfilesListFallback />}>
+      <ProfilesListContent />
+    </Suspense>  
+    
+  );
+}
