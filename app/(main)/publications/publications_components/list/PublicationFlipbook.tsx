@@ -1,8 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import Image from "next/image";
-import { canOptimizeRemoteImageSrc } from "@/app/lib/remoteImage";
+import { FlipbookMediaThumbnail } from "@/app/(main)/publications/flipbook/flipbook_components/FlipbookMediaThumbnail";
 
 interface PublicationFlipbookProps {
   title: string;
@@ -10,6 +9,8 @@ interface PublicationFlipbookProps {
 }
 
 const PublicationFlipbook = memo<PublicationFlipbookProps>(({ title, imageUrl }) => {
+  const src = (imageUrl ?? "").trim();
+
   return (
     <div
       className="mx-auto w-full relative aspect-[3/4] overflow-visible group/flipbook"
@@ -33,17 +34,13 @@ const PublicationFlipbook = memo<PublicationFlipbookProps>(({ title, imageUrl })
             boxShadow: "2px 2px 12px rgba(0,0,0,0.2)",
           }}
         >
-          {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt=""
-              fill
-              className="object-cover object-center"
-              sizes="(max-width: 1280px) 30vw, 200px"
-              unoptimized={!canOptimizeRemoteImageSrc(imageUrl)}
+          {src ? (
+            <FlipbookMediaThumbnail
+              url={src}
+              className="h-full w-full object-cover object-center"
             />
           ) : (
-            <span className="text-white">{title}</span>
+            <span className="text-white text-center">{title}</span>
           )}
         </div>
       </div>

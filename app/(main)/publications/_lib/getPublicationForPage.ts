@@ -6,7 +6,7 @@ export type PublicationPageRow = Awaited<ReturnType<typeof getPublicationById>>;
 export const getPublicationForPage = cache(async (idPublication: string) => {
   if (!idPublication?.trim()) return null;
   try {
-    return await getPublicationById(idPublication.trim());
+    return await getPublicationById(idPublication.trim(), { publicOnly: true });
   } catch {
     return null;
   }

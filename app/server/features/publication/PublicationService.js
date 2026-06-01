@@ -1,33 +1,31 @@
 import PublicationModel from "./PublicationModel.js";
 import "../../database/models.js";
 import { QueryTypes } from "sequelize";
-import {
-    portal_id,
-    publicationCoverUrlTemplate,
-} from "../../../GlassInformerSpecificData.js";
+import { portal_id } from "../../../GlassInformerSpecificData.js";
+import { resolvePublicationCoverUrl } from "./publicationCoverUrl.js";
 
-function buildPublicationCoverFromTemplate(row) {
-    const t = (publicationCoverUrlTemplate || '').trim();
-    if (!t) return '';
-    if (t.includes('{id_magazine}')) {
-        const mid = row.id_magazine == null ? '' : String(row.id_magazine).trim();
-        if (!mid) return '';
-    }
-    const n = row.pub_numero ?? row.número ?? row.numero ?? row.pub_issue_number ?? '';
-    const safe = (v) => encodeURIComponent(v == null ? '' : String(v));
-    return t
-        .replace(/\{id_magazine\}/g, safe(row.id_magazine))
-        .replace(/\{id_publication\}/g, safe(row.id_publication))
-        .replace(/\{número\}/g, safe(n))
-        .replace(/\{issue_number\}/g, safe(row.pub_issue_number))
-        .replace(/\{edition_name\}/g, safe(row.edition_name));
-}
+const PUBLICATION_COVER_SELECT = `
+                p.publication_main_image_url,
+                p.publication_cover_flatplan_image_url,
+                cover_slot.slot_media_url AS cover_slot_media_url`;
+
+const PUBLICATION_COVER_JOIN = `
+             LEFT JOIN LATERAL (
+               SELECT ps.slot_media_url
+               FROM public.publication_slots_db ps
+               WHERE ps.publication_id = p.publication_id
+                 AND LOWER(TRIM(ps.slot_key)) = 'cover'
+               ORDER BY ps.publication_slot_id
+               LIMIT 1
+             ) cover_slot ON TRUE`;
+
+/** Public portal: only published issues; never expose mock/test rows. */
+const PUBLIC_PUBLICATION_WHERE = `
+             WHERE LOWER(TRIM(p.publication_status)) = 'published'
+               AND p.publication_id NOT ILIKE '%mock%'`;
 
 function mapPublicationToApi(row) {
-    let publication_main_image_url = (row.publication_main_image_url || '').trim();
-    if (!publication_main_image_url) {
-        publication_main_image_url = buildPublicationCoverFromTemplate(row);
-    }
+    const publication_main_image_url = resolvePublicationCoverUrl(row);
     const edition = row.edition_name == null ? '' : String(row.edition_name).trim();
     return {
         id_publication: row.id_publication,
@@ -53,7 +51,7 @@ export async function getAllPublications() {
         // - publications_db + magazines_db: issue rows and titles.
         const baseSelect = `SELECT
                 p.publication_id AS id_publication,
-                p.publication_main_image_url,
+                ${PUBLICATION_COVER_SELECT},
                 p.magazine_id AS id_magazine,
                 p.publication_edition_name AS edition_name,
                 COALESCE(p.magazine_general_issue_number, p.magazine_this_year_issue)::text AS pub_numero,
@@ -61,7 +59,9 @@ export async function getAllPublications() {
                 COALESCE(m.magazine_name, '') AS revista
              FROM public.publications_db p
              LEFT JOIN public.magazines_db m
-               ON m.magazine_id = p.magazine_id`;
+               ON m.magazine_id = p.magazine_id
+             ${PUBLICATION_COVER_JOIN}
+             ${PUBLIC_PUBLICATION_WHERE}`;
 
         const orderBy = `ORDER BY sub.date DESC NULLS LAST`;
 
@@ -169,18 +169,25 @@ export async function getAllPublications() {
     }
 }
 
-export async function getPublicationById(idPublication) {
+export async function getPublicationById(idPublication, opts = {}) {
+    const { publicOnly = false } = opts;
     try {
         if (!PublicationModel.sequelize) {
             throw new Error('PublicationModel not initialized');
         }
+
+        const publicFilter = publicOnly
+            ? `
+               AND LOWER(TRIM(p.publication_status)) = 'published'
+               AND p.publication_id NOT ILIKE '%mock%'`
+            : '';
 
         // For detail view, do not depend on portals_db.magazine_id_array being populated.
         // We still show the publication if it exists.
         const rows = await PublicationModel.sequelize.query(
             `SELECT
                 p.publication_id AS id_publication,
-                p.publication_main_image_url,
+                ${PUBLICATION_COVER_SELECT},
                 p.magazine_id AS id_magazine,
                 p.publication_edition_name AS edition_name,
                 COALESCE(p.magazine_general_issue_number, p.magazine_this_year_issue)::text AS pub_numero,
@@ -189,7 +196,8 @@ export async function getPublicationById(idPublication) {
              FROM public.publications_db p
              LEFT JOIN public.magazines_db m
                ON m.magazine_id = p.magazine_id
-             WHERE p.publication_id = :id
+             ${PUBLICATION_COVER_JOIN}
+             WHERE p.publication_id = :id${publicFilter}
              LIMIT 1`,
             { replacements: { id: idPublication }, type: QueryTypes.SELECT }
         );
