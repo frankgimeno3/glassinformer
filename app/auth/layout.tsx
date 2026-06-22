@@ -23,17 +23,17 @@ export default function AuthLayout({
         <div className="w-full lg:w-[80%] flex-shrink-0 px-12 mt-8 lg:mt-0">
           <div className="flex flex-col">
             {/* Navegación - oculta en móvil/tablet, visible en PC (≥1024px) */}
-            <div className="hidden lg:flex flex-row text-sm text-gray-500 uppercase tracking-wider font-sans text-white bg-white mb-4">
-              <Link href="/" className="flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center">
+            <div className="mb-4 hidden flex-row bg-blue-950 text-sm font-sans uppercase tracking-wider text-white lg:flex">
+              <Link href="/" className="flex-1 cursor-pointer bg-transparent p-2 text-center text-sm hover:bg-blue-900">
                 Home
               </Link>
-              <Link href="/publications" className="flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center">
+              <Link href="/publications" className="flex-1 cursor-pointer bg-transparent p-2 text-center text-sm hover:bg-blue-900">
                 Publications
               </Link>
-              <Link href="/directory" className="flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center">
+              <Link href="/directory" className="flex-1 cursor-pointer bg-transparent p-2 text-center text-sm hover:bg-blue-900">
                 Directory
               </Link>
-              <Link href="/events" className="flex-1 bg-blue-950 hover:bg-blue-950/80 cursor-pointer p-2 text-sm text-center">
+              <Link href="/events" className="flex-1 cursor-pointer bg-transparent p-2 text-center text-sm hover:bg-blue-900">
                 Events
               </Link>
             </div>
