@@ -1,12 +1,28 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-/** Fixed layout width on phones — same effect as Chrome “Desktop site”. */
-export const viewport: Viewport = {
-  width: 980,
-  initialScale: 1,
-};
+/** Layout width emulated on phones (Chrome “Desktop site” ≈ 980px). */
+const MOBILE_DESKTOP_LAYOUT_WIDTH = 980;
+
+const mobileDesktopViewportScript = `
+(function () {
+  var lw = ${MOBILE_DESKTOP_LAYOUT_WIDTH};
+  var sw = window.screen.width;
+  if (sw >= lw) return;
+  var scale = sw / lw;
+  var meta = document.querySelector('meta[name="viewport"]');
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.setAttribute("name", "viewport");
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute(
+    "content",
+    "width=" + lw + ", initial-scale=" + scale + ", user-scalable=yes"
+  );
+})();
+`.trim();
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,6 +46,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script dangerouslySetInnerHTML={{ __html: mobileDesktopViewportScript }} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
