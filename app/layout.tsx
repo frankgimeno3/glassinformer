@@ -1,7 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
- 
+
+/** Fixed layout width on phones — same effect as Chrome “Desktop site”. */
+export const viewport: Viewport = {
+  width: 980,
+  initialScale: 1,
+};
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
