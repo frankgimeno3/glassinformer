@@ -152,3 +152,8 @@
 ## News and directory integration
 
 News cards use ArticleCompanyLinks to link each named company to its stored directory ID; names without an ID remain plain text. Company profiles display verified address, telephone and website when present. Article thumbnail dates use English month names through formatArticleDate while retaining the ISO dateTime value.
+
+
+## Right banner rail scrolling
+
+StickyBannerRail uses the document scroll only. Its sticky top is the smaller of 112px and viewport height minus measured rail height minus 24px. Tall rails scroll normally until their bottom reaches the viewport bottom margin, then remain sticky within the layout. ResizeObserver recomputes the offset after image loading, content changes and viewport resizing; there is no independent overflow scrolling area.

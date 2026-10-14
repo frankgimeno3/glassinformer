@@ -12,6 +12,7 @@ import {
   type BannerItem,
 } from "./pickBannerByPriority";
 import { BannerImageFitWidth } from "./BannerImageFitWidth";
+import StickyBannerRail from "./StickyBannerRail";
 import PublicationFlipbook from "@/app/(main)/publications/publications_components/list/PublicationFlipbook";
 
 const BANNERS_API = "/api/v1/banners";
@@ -383,16 +384,13 @@ export default function RightBanner() {
 
   if (slots.length === 0) {
     return (
-      <div
-        className="sticky top-28 min-h-[100px] w-full rounded-lg bg-gray-100"
-        aria-hidden
-      />
+      <StickyBannerRail className="min-h-[100px] w-full rounded-lg bg-gray-100" />
     );
   }
 
   return (
-    <div className="sticky top-28 mb-6 flex w-full flex-col gap-4 pr-2 pb-6 pt-5">
+    <StickyBannerRail className="mb-6 flex w-full flex-col gap-4 pr-2 pb-6 pt-5">
       {slots}
-    </div>
+    </StickyBannerRail>
   );
 }
