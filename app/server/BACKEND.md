@@ -133,3 +133,10 @@
 ## Directory contact data and shared companies
 
 Company list and detail responses include the stored image, address, telephone and website. Detail lookup prioritises membership of the selected portal when a company belongs to multiple portals. Article responses retain aligned company-name and company-ID arrays so public news links use the actual directory records.
+
+
+## Vercel database connection lifecycle
+
+Database instances are shared through a process-wide symbol, including across separately bundled routes and instrumentation. On Vercel the pool permits two concurrent connections, uses a one-second idle timeout and evicts every second. createEndpoint schedules a 2.5-second Next.js after() window so idle eviction runs before Fluid Compute suspends the instance. Active operations keep their connections; the pool is not closed or drained per request. Connection acquisition errors may retry up to three times; SQL execution errors are not added to the retry list. Outside Vercel the existing five-connection pool remains available.
+
+Validation: check concurrent queries, reuse across module instances, idle eviction and reconnection; then verify public article and company APIs under concurrent requests. [Vercel connection pooling guidance](https://vercel.com/kb/guide/connection-pooling-with-functions) explains suspension and idle-connection management.

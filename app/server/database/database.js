@@ -5,6 +5,7 @@ import path from "node:path";
 import pg from "pg";
 
 const caPath = path.resolve(process.cwd(), 'certs', 'rds-ca.pem');
+const databaseKey = Symbol.for("plynium.portal.database");
 let sslCA = null;
 
 // Try to load the certificate file if it exists
@@ -17,7 +18,6 @@ try {
 }
 
 class Database {
-    static #instance;
     #sequelize;
 
 
@@ -96,11 +96,18 @@ class Database {
                 dialect: 'postgres',
                 dialectModule: pg,
                 dialectOptions,
+                retry: {
+                    max: 3,
+                    match: [Sequelize.ConnectionError],
+                    backoffBase: 150,
+                    backoffExponent: 2,
+                },
                 pool: {
-                    max: isBuildPhase ? 1 : 5, // Minimal pool during build
+                    max: isBuildPhase ? 1 : process.env.VERCEL === "1" ? 2 : 5,
                     min: 0,
                     acquire: 30000,
-                    idle: 10000
+                    idle: process.env.VERCEL === "1" ? 1000 : 10000,
+                    evict: 1000,
                 }
             }
         )
@@ -112,10 +119,10 @@ class Database {
 
 
     static getInstance() {
-        if (!this.#instance) {
-            this.#instance = new this();
+        if (!globalThis[databaseKey]) {
+            globalThis[databaseKey] = new this();
         }
-        return this.#instance;
+        return globalThis[databaseKey];
     }
 
     getSequelize() {

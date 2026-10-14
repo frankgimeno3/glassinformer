@@ -1,6 +1,6 @@
 import {COGNITO} from "../../env.js";
 import {fetchNewTokens, verifyAccessToken, verifyIdToken} from "./features/authentication/AuthenticationService.js";
-import {NextResponse} from "next/server.js";
+import {NextResponse, after} from "next/server.js";
 import {getUserRoles} from "./features/authorization/AuthorizationService.js";
 import {errorHandler} from "./errorHandler.js";
 import {decodeJWT} from "@aws-amplify/core";
@@ -78,6 +78,11 @@ async function checkTokens(request, response) {
 
 export function createEndpoint(callback, schema = null, isProtected = false, roles = []) {
     return async (request, context) => {
+        // Keep Vercel's event loop alive until Sequelize's idle eviction has run.
+        // Active requests retain their connections and schedule their own cleanup window.
+        if (process.env.VERCEL === "1") {
+            after(() => new Promise((resolve) => setTimeout(resolve, 2500)));
+        }
         const response = NextResponse.next();
         let body;
         try {
