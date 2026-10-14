@@ -182,6 +182,8 @@ export default function Home() {
                       id_article={item.article.id_article || ""}
                       titulo={item.article.articleTitle || ""}
                       company={item.article.company || ""}
+                      companyNames={item.article.article_company_names_array}
+                      companyIds={item.article.article_company_id_array}
                       date={item.article.date || ""}
                       imageUrl={item.article.article_main_image_url || ""}
                     />

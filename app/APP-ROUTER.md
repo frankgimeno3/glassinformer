@@ -147,3 +147,8 @@
 - **not-found**: Always redirects to `/`; no custom 404 page.
 - **apiClient.js** and server **createEndpoint** / **errorHandler**: Some user- or server-facing strings still in Spanish; move to English when editing.
 - **GlassInformerSpecificData**: Single source for portal branding; server ArticleService uses `portal_id` for fallback articles.
+
+
+## News and directory integration
+
+News cards use ArticleCompanyLinks to link each named company to its stored directory ID; names without an ID remain plain text. Company profiles display verified address, telephone and website when present. Article thumbnail dates use English month names through formatArticleDate while retaining the ISO dateTime value.

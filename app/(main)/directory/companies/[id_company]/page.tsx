@@ -68,6 +68,9 @@ interface CompanyItem {
   main_description: string;
   region: string;
   company_main_image?: string;
+  full_address?: string;
+  telephone?: string;
+  website?: string;
   productsArray: string[];
   userArray: UserInCompany[];
   products?: Product[];
@@ -442,9 +445,20 @@ const CompanyProfile: FC = () => {
               onChange={(e) => setDraft({ ...draft, main_description: e.target.value })}
             />
           ) : (
-            <p className="text-gray-700 leading-relaxed">{company.main_description}</p>
+            <p className="text-gray-700 leading-relaxed whitespace-pre-line">{company.main_description}</p>
           )}
         </div>
+
+        {(company.full_address || company.telephone || /^https?:\/\//i.test(company.website ?? "")) && (
+          <section className="mb-8 rounded-xl border border-gray-200 p-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Company details</h2>
+            <dl className="grid gap-4 sm:grid-cols-2">
+              {company.full_address && <div><dt className="font-semibold text-gray-900">Address</dt><dd className="text-gray-700">{company.full_address}</dd></div>}
+              {company.telephone && <div><dt className="font-semibold text-gray-900">Telephone</dt><dd><a className="text-blue-950 underline" href={`tel:${company.telephone.replace(/[^+0-9]/g, "")}`}>{company.telephone}</a></dd></div>}
+              {/^https?:\/\//i.test(company.website ?? "") && <div><dt className="font-semibold text-gray-900">Website</dt><dd><a className="text-blue-950 underline break-all" href={company.website} target="_blank" rel="noopener noreferrer">{company.website}</a></dd></div>}
+            </dl>
+          </section>
+        )}
 
         {/* Team */}
         <div className="mb-8">

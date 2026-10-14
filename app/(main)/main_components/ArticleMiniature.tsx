@@ -2,12 +2,16 @@ import { FC } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { canOptimizeRemoteImageSrc } from "@/app/lib/remoteImage";
+import { formatArticleDate } from "@/app/lib/formatArticleDate";
+import ArticleCompanyLinks from "./ArticleCompanyLinks";
 
 interface ArticleMiniatureProps {
   id_article: string;
   titulo: string;
   company?: string;
   id_company?: string;
+  companyNames?: string[];
+  companyIds?: string[];
   date?: string;
   imageUrl?: string;
   /** Default vertical card; `row` = image left ~40%, content right (home list). */
@@ -22,6 +26,8 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
   titulo,
   company,
   id_company,
+  companyNames,
+  companyIds,
   date,
   imageUrl,
   layout = "stack",
@@ -32,22 +38,18 @@ const ArticleMiniature: FC<ArticleMiniatureProps> = ({
   const subtitle = contenidoSubtitulo || "";
   const image = imageUrl || "/file.svg";
 
-  const companyId =
-    id_company || (company ? encodeURIComponent(company.toLowerCase().replace(/\s+/g, "-")) : "");
-
   const metaBlock = (company || date) && (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500 uppercase tracking-wider font-sans">
       {company && (
-        <Link
-          href={`/directory/companies/${companyId}`}
+        <ArticleCompanyLinks
+          company={company}
+          names={companyNames}
+          ids={companyIds ?? (id_company ? [id_company] : [])}
           className="font-medium hover:text-blue-600 transition-colors cursor-pointer"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {company}
-        </Link>
+        />
       )}
       {company && date && <span className="text-gray-300">•</span>}
-      {date && <time>{date}</time>}
+      {date && <time dateTime={date}>{formatArticleDate(date)}</time>}
     </div>
   );
 

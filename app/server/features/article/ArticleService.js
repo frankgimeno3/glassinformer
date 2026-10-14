@@ -71,6 +71,8 @@ function transformArticleToApiFormat(row) {
         articleSubtitle: plain.article_subtitle ?? plain.articleSubtitle ?? null,
         article_main_image_url: apiArticleMainImageUrl(plain.article_main_image_url ?? null),
         company: companyDisplayFromRow(plain),
+        article_company_names_array: plain.article_company_names_array || [],
+        article_company_id_array: plain.article_company_id_array || [],
         date: dateVal ? new Date(dateVal).toISOString().split("T")[0] : null,
         portal_id: portal_id,
         article_tags_array: [],

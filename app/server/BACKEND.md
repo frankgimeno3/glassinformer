@@ -128,3 +128,8 @@
 - **TimeLogTypeEnum**: The key for "salida" is `salid` in code; fix when touching.
 - **Spanish strings**: createEndpoint and errorHandler still have Spanish messages ("Solicitud incorrecta", "Falta cookie", "Error interno del servidor"). Move to English when editing.
 - **Ownership**: This module owns DB, features and API plumbing. It does not own route handlers (they live under app/api/ and call createEndpoint + services).
+
+
+## Directory contact data and shared companies
+
+Company list and detail responses include the stored image, address, telephone and website. Detail lookup prioritises membership of the selected portal when a company belongs to multiple portals. Article responses retain aligned company-name and company-ID arrays so public news links use the actual directory records.

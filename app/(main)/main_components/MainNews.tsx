@@ -2,17 +2,16 @@ import React, { FC } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { canOptimizeRemoteImageSrc } from "@/app/lib/remoteImage";
-
-function companyToId(company: string | undefined): string {
-  if (!company) return "";
-  return encodeURIComponent(company.toLowerCase().replace(/\s+/g, "-"));
-}
+import { formatArticleDate } from "@/app/lib/formatArticleDate";
+import ArticleCompanyLinks from "./ArticleCompanyLinks";
 
 interface ArticleItem {
   id_article: string;
   articleTitle: string;
   articleSubtitle?: string;
   company?: string;
+  article_company_names_array?: string[];
+  article_company_id_array?: string[];
   date?: string;
   article_main_image_url?: string;
   article_tags_array?: string[];
@@ -60,16 +59,16 @@ const MainNews: FC<MainNewsProps> = ({ mainArticle, secondaryArticles }) => {
               <div className="flex items-center gap-3 text-xs text-gray-500 uppercase tracking-wider font-sans">
                 {mainArticle!.company && (
                   <>
-                    <Link
-                      href={`/directory/companies/${companyToId(mainArticle!.company)}`}
+                    <ArticleCompanyLinks
+                      company={mainArticle!.company}
+                      names={mainArticle!.article_company_names_array}
+                      ids={mainArticle!.article_company_id_array}
                       className="font-medium hover:text-blue-600 transition-colors"
-                    >
-                      {mainArticle!.company}
-                    </Link>
+                    />
                     <span className="text-gray-300">•</span>
                   </>
                 )}
-                <time>{mainArticle!.date ?? ""}</time>
+                <time dateTime={mainArticle!.date}>{formatArticleDate(mainArticle!.date)}</time>
               </div>
               <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight group-hover:text-gray-700 transition-colors line-clamp-3">
                 <Link href={`/articles/${mainArticle!.id_article}`}>
@@ -123,16 +122,16 @@ const MainNews: FC<MainNewsProps> = ({ mainArticle, secondaryArticles }) => {
                 <div className="flex items-center gap-2 text-xs text-gray-500 uppercase tracking-wider font-sans mb-1">
                   {article.company && (
                     <>
-                      <Link
-                        href={`/directory/companies/${companyToId(article.company)}`}
+                      <ArticleCompanyLinks
+                        company={article.company}
+                        names={article.article_company_names_array}
+                        ids={article.article_company_id_array}
                         className="font-medium hover:text-blue-600 transition-colors truncate"
-                      >
-                        {article.company}
-                      </Link>
+                      />
                       <span className="text-gray-300 shrink-0">•</span>
                     </>
                   )}
-                  <time className="shrink-0">{article.date ?? ""}</time>
+                  <time className="shrink-0" dateTime={article.date}>{formatArticleDate(article.date)}</time>
                 </div>
                 <h2 className="font-serif text-sm md:text-base font-bold text-gray-900 leading-tight line-clamp-2 group-hover:text-gray-700">
                   <Link href={`/articles/${article.id_article}`}>

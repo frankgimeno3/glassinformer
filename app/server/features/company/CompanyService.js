@@ -17,6 +17,9 @@ function mapCompanyToApiFormat(company, products = [], options = { includeProduc
         region: plain.region || plain.category || "",
         category: plain.region || plain.category || "",
         company_main_image: plain.main_image || "",
+        full_address: plain.full_address || "",
+        telephone: plain.telephone || "",
+        website: plain.website || "",
         productsArray: products.map((p) => (typeof p === "object" && p.id_product ? p.id_product : p)),
         userArray: workers,
     };
@@ -138,7 +141,9 @@ export async function getAllCompanies() {
         let rows;
         try {
             rows = await CompanyModel.sequelize.query(
-                `SELECT c.company_id AS id_company, c.company_commercial_name AS company_name, c.company_country AS country, c.company_main_description AS main_description, c.company_region AS region
+                `SELECT c.company_id AS id_company, c.company_commercial_name AS company_name, c.company_country AS country, c.company_main_description AS main_description, c.company_region AS region,
+                        c.company_main_image AS main_image, c.company_full_address AS full_address,
+                        c.company_main_telephone AS telephone, c.company_web_link AS website
                  FROM public.companies_db c
                  INNER JOIN public.company_portals cp ON c.company_id = cp.company_id AND cp.portal_id = :portalId
                  ORDER BY c.company_commercial_name ASC`,
@@ -194,8 +199,9 @@ export async function getCompanyById(idCompany) {
         let portalRow;
         try {
             [portalRow] = await CompanyModel.sequelize.query(
-                `SELECT portal_id FROM public.company_portals WHERE company_id = :companyId`,
-                { replacements: { companyId: idCompany }, type: QueryTypes.SELECT }
+                `SELECT portal_id FROM public.company_portals WHERE company_id = :companyId
+                 ORDER BY (portal_id = :portalId) DESC, portal_id ASC`,
+                { replacements: { companyId: idCompany, portalId: portal_id }, type: QueryTypes.SELECT }
             );
         } catch {
             portalRow = { portal_id };
@@ -203,6 +209,17 @@ export async function getCompanyById(idCompany) {
 
         const products = company.products || [];
         const mapped = mapCompanyToApiFormat(company, products, { includeProducts: true });
+        const [contact] = await CompanyModel.sequelize.query(
+            `SELECT company_full_address AS full_address, company_main_telephone AS telephone,
+                    company_web_link AS website
+             FROM public.companies_db WHERE company_id = :companyId`,
+            { replacements: { companyId: idCompany }, type: QueryTypes.SELECT }
+        );
+        Object.assign(mapped, {
+            full_address: contact?.full_address || "",
+            telephone: contact?.telephone || "",
+            website: contact?.website || "",
+        });
 
         if (!portalRow) {
             return { inCurrentPortal: false, portalId: null, company: mapped };
